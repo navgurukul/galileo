@@ -1,0 +1,58 @@
+{
+  "name": "typescript-node",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/Talento90/typescript-node.git"
+  },
+  "author": "Talento90",
+  "keywords": [
+    "typescript",
+    "project structure",
+    "gulp",
+    "nodejs"
+  ],
+  "scripts": {
+    "tsc": "tsc",
+    "tsc-watch": "tsc -w",
+    "build": "gulp build",
+    "start": "node build/src/index.js",
+    "setup": "npm install & typings install",
+    "test": "gulp test",
+    "watch": "nodemon --watch build/src build/src/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.3.0",
+    "boom": "^3.2.2",
+    "fs": "0.0.2",
+    "good": "^6.6.3",
+    "good-console": "^5.3.2",
+    "hapi": "^13.5.0",
+    "hapi-auth-jwt2": "^7.0.1",
+    "hapi-swagger": "^4.3.1",
+    "inert": "^3.2.1",
+    "joi": "^8.4.2",
+    "jsonwebtoken": "^7.1.7",
+    "mongoose": "^4.6.1",
+    "nconf": "^0.8.4",
+    "path": "^0.12.7",
+    "vision": "^4.1.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.1",
+    "gulp-env": "^0.4.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-rimraf": "^0.2.0",
+    "gulp-shell": "^0.5.2",
+    "gulp-tslint": "^4.3.4",
+    "mocha": "^3.0.0",
+    "nodemon": "^1.10.2",
+    "tslint": "^3.13.0",
+    "typescript": "^2.0.3"
+  },
+  "engines": {
+    "node": ">=4.1.1"
+  }
+}
