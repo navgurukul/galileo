@@ -7,4 +7,3 @@
 /// <reference path="globals/mocha/index.d.ts" />
 /// <reference path="globals/nconf/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />
-/// <reference path="modules/hapi/index.d.ts" />

@@ -35,7 +35,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     });
 
     server.route({
-        method: '*',
+        method:'*',
         path: '/bell/door',
         config: {
             auth: {
