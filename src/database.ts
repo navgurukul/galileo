@@ -1,8 +1,8 @@
 //import * as Mongoose from "mongoose";
 // import * as Mysql from 'mysql';
 import { IDataConfiguration } from "./configurations";
-import { IUser, UserModel } from "./users/user";
-import { ITask, TaskModel } from "./tasks/task";
+// import { IUser, UserModel } from "./users/user";
+// import { ITask, TaskModel } from "./tasks/task";
 
 // export interface KnexDB {
 //     userModel: Mongoose.Model<IUser>;
@@ -14,6 +14,6 @@ import { ITask, TaskModel } from "./tasks/task";
 // }
 
 export function init(config: IDataConfiguration): any {
-    var database: any = require('knex')(config.connectionString);
+    let database: any = require('knex')(config);
     return database;
 }

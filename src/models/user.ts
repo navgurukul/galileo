@@ -12,10 +12,15 @@ export interface IUser {
   validatePassword(requestPassword): boolean;
 };
 
-export default class User extends DBTable {
+export class User extends DBTable {
   constructor() {
     super(database, "users");
-  }
+}
+    // table name, reference of db
+   public getFirstElement() {
+      return this.database.select().from('random');
+       //return first row 
+   }
 }
 
 // export const User = ;

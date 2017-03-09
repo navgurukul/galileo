@@ -3,10 +3,10 @@ import { IPlugin } from "./plugins/interfaces";
 import { IServerConfigurations } from "./configurations";
 import * as Tasks from "./tasks";
 import * as Users from "./users";
-import { KnexDB } from "./database";
+// import { KnexDB } from "./database";
 
 
-export function init(configs: IServerConfigurations, database: KnexDB) {
+export function init(configs: IServerConfigurations, database: any) {
     const port = process.env.port || configs.port;
     const server = new Hapi.Server();
 

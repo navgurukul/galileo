@@ -3,10 +3,10 @@ import * as Joi from "joi";
 import TaskController from "./task-controller";
 import * as TaskValidator from "./task-validator";
 import { jwtValidator } from "../users/user-validator";
-import { KnexDB } from "../database";
+// import { KnexDB } from "../database";
 import { IServerConfigurations } from "../configurations";
 
-export default function (server: Hapi.Server, configs: IServerConfigurations, database: KnexDB) {
+export default function (server: Hapi.Server, configs: IServerConfigurations, database: any) {
 
     const taskController = new TaskController(configs, database);
     server.bind(taskController);

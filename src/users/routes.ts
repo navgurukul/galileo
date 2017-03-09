@@ -1,12 +1,11 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import UserController from "./user-controller";
-import { UserModel } from "./user";
 import * as UserValidator from "./user-validator";
-import { KnexDB } from "../database";
+// import { KnexDB } from "../database";
 import { IServerConfigurations } from "../configurations";
 
-export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: KnexDB) {
+export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
     const userController = new UserController(serverConfigs, database);
     server.bind(userController);
@@ -16,11 +15,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users/info',
         config: {
             handler: userController.infoUser,
-            auth: "jwt",
             tags: ['api', 'users'],
             description: 'Get user info.',
             validate: {
-                headers: UserValidator.jwtValidator,
             },
             plugins: {
                 'hapi-swagger': {
