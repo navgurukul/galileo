@@ -14,7 +14,7 @@ export function init(configs: IServerConfigurations, database: any) {
         port: port,
         routes: {
             cors: true,
-            log: true
+//            log: true
         }
     });
 

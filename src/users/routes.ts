@@ -38,6 +38,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: '*',
         path: '/bell/door',
         config: {
+            auth: {
+                strategy: 'google',
+                mode: 'try'
+            },
             handler: function (request, reply) {
                 if (!request.auth.isAuthenticated) {
                     reply('Authentication failed due to: ' + JSON.stringify(request.auth));
