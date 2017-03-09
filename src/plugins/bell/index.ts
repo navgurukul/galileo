@@ -14,7 +14,8 @@ export default (): IPlugin => {
                 server.register({
                     register: bell
                 }, (error) => {
-                        console.log('auth strategy google');
+                    if (error) {
+                    } else {
                         server.auth.strategy('google', 'bell', {
                             provider: 'google',
                             password: 'cookie_encryption_password_secure',
@@ -23,9 +24,6 @@ export default (): IPlugin => {
                             clientSecret: 'x5UGIUszCFBvRTGW41xpA5-g',
                             location: "http://localhost:" + server.info.port + "/bell"
                         });
-
-                    if (error) {
-                    } else {
                     }
                     resolve();
                 });
