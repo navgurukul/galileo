@@ -5,7 +5,5 @@
 /// <reference path="globals/joi/index.d.ts" />
 /// <reference path="globals/jsonwebtoken/index.d.ts" />
 /// <reference path="globals/mocha/index.d.ts" />
-/// <reference path="globals/mongodb/index.d.ts" />
-/// <reference path="globals/mongoose/index.d.ts" />
 /// <reference path="globals/nconf/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />

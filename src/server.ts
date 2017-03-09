@@ -13,7 +13,8 @@ export function init(configs: IServerConfigurations, database: any) {
     server.connection({
         port: port,
         routes: {
-            cors: true
+            cors: true,
+            log: true
         }
     });
 

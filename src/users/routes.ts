@@ -35,11 +35,40 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     });
 
     server.route({
+        method: '*',
+        path: '/bell/door',
+        config: {
+            handler: function (request, reply) {
+                if (!request.auth.isAuthenticated) {
+                    reply('Authentication failed due to: ' + JSON.stringify(request.auth));
+                }
+                // reply('<pre>' + JSON.stringify(request.auth.credentials, null, 4) + '</pre>');
+            },
+            tags: ['api', 'users'],
+            description: 'Get user info.',
+            validate: {
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '200': {
+                            'description': 'User founded.'
+                        },
+                        '401': {
+                            'description': 'Please login.'
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    server.route({
         method: 'DELETE',
         path: '/users',
         config: {
             handler: userController.deleteUser,
-            auth: "jwt",
+            // auth: "jwt",
             tags: ['api', 'users'],
             description: 'Delete current user.',
             validate: {
@@ -65,7 +94,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users',
         config: {
             handler: userController.updateUser,
-            auth: "jwt",
+            // auth: "jwt",
             tags: ['api', 'users'],
             description: 'Update current user info.',
             validate: {

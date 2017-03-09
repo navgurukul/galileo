@@ -15,7 +15,7 @@ export default class UserController {
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
-        this.user= new User();
+        this.user = new User();
     }
 
     private generateToken(user: IUser) {
@@ -96,7 +96,7 @@ export default class UserController {
             reply(rows);
         })
         .catch(error => {
-            reply(Boom.badImplementation(error))
+            reply(Boom.badImplementation(error));
         });
     //     const id = request.auth.credentials.id;
 

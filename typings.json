@@ -8,10 +8,13 @@
     "mongodb": "registry:dt/mongodb#2.1.0+20160602142941",
     "mongoose": "registry:dt/mongoose#4.5.9+20160922172925",
     "nconf": "registry:dt/nconf#0.0.0+20160724073144",
-    "node": "registry:dt/node#6.0.0+20160923124626"
+    "node": "registry:dt/node#7.0.0+20170308233040"
   },
   "globalDevDependencies": {
     "chai": "registry:dt/chai#3.4.0+20160601211834",
     "mocha": "registry:dt/mocha#2.2.5+20160720003353"
+  },
+  "dependencies": {
+    "hapi": "registry:dt/hapi#16.0.0+20170125175540"
   }
 }

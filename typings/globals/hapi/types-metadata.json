@@ -1,0 +1,33 @@
+{
+    "name": "hapi",
+    "libraryName": "hapi",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "data": {
+        "authors": "Jason Swearingen <http://github.com/jasonswearingen>",
+        "dependencies": {
+            "http": "*",
+            "stream": "*",
+            "events": "*",
+            "url": "*",
+            "node": "*"
+        },
+        "pathMappings": {},
+        "libraryMajorVersion": 16,
+        "libraryMinorVersion": 0,
+        "typeScriptVersion": "2.0",
+        "libraryName": "hapi",
+        "typingsPackageName": "hapi",
+        "projectName": "http://github.com/spumko/hapi",
+        "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+        "globals": [],
+        "declaredModules": [
+            "hapi/."
+        ],
+        "files": [
+            "index.d.ts"
+        ],
+        "hasPackageJson": false,
+        "contentHash": "172931c6533e0b0c10d2867501772628443dd9939fbbc10a7091630067ace120"
+    },
+    "isLatest": true
+}
