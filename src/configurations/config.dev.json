@@ -22,9 +22,9 @@
         "jwtExpiration": "1h",
         "plugins": [
             "logger",
-            "swagger",
+            "bell",
             "jwt-auth",
-            "bell"
+            "swagger"
         ]
     }
 }

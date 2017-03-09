@@ -34,6 +34,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    console.log('strategy');
     server.route({
         method: '*',
         path: '/bell/door',
