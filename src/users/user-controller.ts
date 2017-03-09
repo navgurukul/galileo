@@ -2,16 +2,16 @@ import * as Hapi from "hapi";
 import * as Boom from "boom";
 import * as Jwt from "jsonwebtoken";
 import { IUser } from "./user";
-import { IDatabase } from "../database";
+import { KnexDB } from "../database";
 import { IServerConfigurations } from "../configurations";
 
 
 export default class UserController {
 
-    private database: IDatabase;
+    private database: KnexDB;
     private configs: IServerConfigurations;
 
-    constructor(configs: IServerConfigurations, database: IDatabase) {
+    constructor(configs: IServerConfigurations, database: KnexDB) {
         this.database = database;
         this.configs = configs;
     }

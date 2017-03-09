@@ -1,15 +1,15 @@
 import * as Hapi from "hapi";
 import * as Boom from "boom";
 import { ITask } from "./task";
-import { IDatabase } from "../database";
+import { KnexDB } from "../database";
 import { IServerConfigurations } from "../configurations";
 
 export default class TaskController {
 
-    private database: IDatabase;
+    private database: KnexDB;
     private configs: IServerConfigurations;
 
-    constructor(configs: IServerConfigurations, database: IDatabase) {
+    constructor(configs: IServerConfigurations, database: KnexDB) {
         this.configs = configs;
         this.database = database;
     }
