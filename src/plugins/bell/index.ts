@@ -21,7 +21,7 @@ export default (): IPlugin => {
                         isSecure: false,
                         clientId: '330505979484-sgfkanh7p0nsqvua8susd9q60i94dnbh.apps.googleusercontent.com',
                         clientSecret: 'x5UGIUszCFBvRTGW41xpA5-g',
-                        location: server.info.uri
+                        location: "http://localhost:5000"
                     });
                 }
             });

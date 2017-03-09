@@ -46,7 +46,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 if (!request.auth.isAuthenticated) {
                     reply('Authentication failed due to: ' + JSON.stringify(request.auth));
                 }
-                // reply('<pre>' + JSON.stringify(request.auth.credentials, null, 4) + '</pre>');
+                reply('<pre>' + JSON.stringify(request.auth.credentials, null, 4) + '</pre>');
             },
             tags: ['api', 'users'],
             description: 'Get user info.',
