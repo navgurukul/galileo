@@ -1,4 +1,5 @@
 // import * as Mongoose from "mongoose";
+import database from '../index';
 import DBTable from './dbtable';
 import * as Bcrypt from "bcryptjs";
 
@@ -12,7 +13,9 @@ export interface IUser {
 };
 
 export default class User extends DBTable {
-
+  constructor() {
+    super(database, "users");
+  }
 }
 
 // export const User = ;

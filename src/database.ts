@@ -9,28 +9,11 @@ import { ITask, TaskModel } from "./tasks/task";
 //     taskModel: Mongoose.Model<ITask>;
 // }
 
-export interface KnexDB {
-    db: any;
-}
+// export interface KnexDB {
+//     db: any;
+// }
 
-export function init(config: IDataConfiguration): KnexDB {
-
-    var db = require('knex')(config.connectionString);
-    // console.log("NEW CODE");
-    // db.select().from('random').then(rows => console.log(rows));
-
-    // (<any>Mongoose).Promise = Promise;
-    // Mongoose.connect(config.connectionString);
-
-    // let mongoDb = Mongoose.connection;
-
-    // mongoDb.on('error', () => {
-    //     console.log(`Unable to connect to database: ${config.connectionString}`);
-    // });
-
-    // mongoDb.once('open', () => {
-    //     console.log(`Connected to database: ${config.connectionString}`);
-    // });
-
-    return db;
+export function init(config: IDataConfiguration): any {
+    var database: any = require('knex')(config.connectionString);
+    return database;
 }

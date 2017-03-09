@@ -7,6 +7,7 @@ console.log(`Running enviroment ${process.env.NODE_ENV || "dev"}`);
 //Init Database
 const dbConfigs = Configs.getDatabaseConfig();
 const database = Database.init(dbConfigs);
+export default database;
 
 //Starting Application Server
 const serverConfigs = Configs.getServerConfigs();
