@@ -10,10 +10,12 @@ export default class UserController {
 
     private configs: IServerConfigurations;
     private database: any;
+    private user:User;
 
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
+        this.user= new User();
     }
 
     private generateToken(user: IUser) {
@@ -89,8 +91,8 @@ export default class UserController {
 
 
     public infoUser(request: Hapi.Request, reply: Hapi.IReply) {
-        let user:User = new User();
-        user.getFirstElement().then(rows => {
+
+        this.user.getFirstElement().then(rows => {
             reply(rows);
         })
         .catch(error => {
