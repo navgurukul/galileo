@@ -25,12 +25,12 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         };
 
         let pluginPromises = [];
-
         plugins.forEach((pluginName: string) => {
             var plugin: IPlugin = (require("./plugins/" + pluginName)).default();
             console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
+
 
         Promise.all(pluginPromises).then(() => {
             console.log("all plugins added");
