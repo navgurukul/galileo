@@ -34,12 +34,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    console.log('strategy');
     server.route({
         method:'*',
-        path: '/door',
+        path: '/bell/door',
         config: {
             auth: {
-                strategies: ['google'],
+                strategy: 'google',
                 mode: 'try'
             },
             handler: function (request, reply) {

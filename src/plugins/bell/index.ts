@@ -6,7 +6,7 @@ import * as bell from "bell";
 
 export default (): IPlugin => {
     return {
-        register: (server: Hapi.Server, options: IPluginOptions):Promise<void> => {
+        register: (server: Hapi.Server, options: IPluginOptions):Promise<Hapi.Server> => {
             return new Promise<void>(resolve => {
                 const database = options.database;
                 const serverConfig = options.serverConfigs;

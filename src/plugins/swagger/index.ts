@@ -3,7 +3,7 @@ import * as Hapi from "hapi";
 
 export default (): IPlugin => {
     return {
-        register: (server: Hapi.Server): Promise<void> => {
+        register: (server: Hapi.Server): Promise<Hapi.Server> => {
             return new Promise<void>(resolve => {
                 server.register([
                     require('inert'),
