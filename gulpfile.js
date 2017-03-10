@@ -20,7 +20,7 @@ gulp.task('clean', function() {
 /**
  * Lint all custom TypeScript files.
  */
-gulp.task('tslint', () => {
+gulp.task('lint', () => {
     return gulp.src('src/**/*.ts')
         .pipe(tslint())
         .pipe(tslint.report('prose'));
@@ -63,7 +63,7 @@ gulp.task('configs', (cb) => {
 /**
  * Build the project.
  */
-gulp.task('build', ['compile', 'configs'], () => {
+gulp.task('build', ['lint', 'compile', 'configs'], () => {
     console.log('Building the project ...');
 });
 

@@ -22,6 +22,14 @@
     "watch": "nodemon --watch build/src build/src/index.js"
   },
   "dependencies": {
+    "@types/bcrypt": "1.0.0",
+    "@types/boom": "0.0.33",
+    "@types/chai": "3.4.35",
+    "@types/hapi": "16.0.0",
+    "@types/joi": "10.0.1",
+    "@types/jsonwebtoken": "7.2.0",
+    "@types/mocha": "2.2.39",
+    "@types/nconf": "0.0.33",
     "bcryptjs": "2.4.3",
     "bell": "8.5.0",
     "boom": "3.2.2",
@@ -40,7 +48,6 @@
     "mysql": "2.13.0",
     "nconf": "0.8.4",
     "path": "0.12.7",
-    "typings": "2.1.0",
     "vision": "4.1.1"
   },
   "devDependencies": {

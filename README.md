@@ -6,6 +6,7 @@ Hapi?
 * *npm run setup* (install nuget packages & typings)
 
 **Run**
+* *gulp develop* (rebuilds the application when ts files change)
 * *gulp build* (build ts files)
 * *gulp test* (run mocha tests)
 * *gulp tslint* (run tslint)
