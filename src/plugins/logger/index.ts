@@ -3,7 +3,7 @@ import * as Hapi from "hapi";
 
 export default (): IPlugin => {
     return {
-        register: (server: Hapi.Server): Promise<Hapi.Server> => {
+        register: (server: Hapi.Server): Promise<void> => {
             return new Promise<void>(resolve => {
                 const opts = {
                     opsInterval: 1000,
