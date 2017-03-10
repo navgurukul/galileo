@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/c923214e96b998fff1f6787785467de7cb1f9c36/joi/joi.d.ts",
+    "raw": "registry:dt/joi#9.0.0+20160906140128",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/c923214e96b998fff1f6787785467de7cb1f9c36/joi/joi.d.ts"
+  }
+}
