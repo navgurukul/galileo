@@ -57,4 +57,16 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/users/auth',
+        config: {
+            handler: function(request: Hapi.Request, reply: Hapi.IReply){
+                reply({"text":"token is working"});
+            },
+            auth: 'jwt',
+            validate: {}
+        }
+    });
+
 }

@@ -10,14 +10,7 @@ export default (): IPlugin => {
                 const serverConfig = options.serverConfigs;
 
                 const validateUser = (decoded, request, cb) => {
-                    // database.userModel.findById(decoded.id).lean(true)
-                    //     .then((user: IUser) => {
-                    //         if (!user) {
-                    //             return cb(null, false);
-                    //         }
-
-                    //         return cb(null, true);
-                    //     });
+                    return cb(null, true);
                 };
 
                 server.register({
