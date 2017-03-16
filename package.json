@@ -28,6 +28,7 @@
     "fs": "0.0.2",
     "good": "^6.6.3",
     "good-console": "^5.3.2",
+    "google-auth-library": "^0.10.0",
     "hapi": "16.0.0",
     "hapi-auth-jwt2": "7.2.4",
     "hapi-swagger": "^7.7.0",

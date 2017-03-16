@@ -16,6 +16,10 @@ export interface IServerConfigurations {
     plugins: Array<string>;
     jwtSecret: string;
     jwtExpiration: string;
+    googleAuth: {
+        clientId: string;
+        clientSecret: string;
+    };
 }
 
 export interface IDataConfiguration {
