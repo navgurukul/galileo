@@ -2,7 +2,7 @@ import * as Hapi from "hapi";
 import * as Joi from "joi";
 import TaskController from "./task-controller";
 import * as TaskValidator from "./task-validator";
-import { jwtValidator } from "../users/user-validator";
+// import { jwtValidator } from "../users/user-validator";
 // import { KnexDB } from "../database";
 import { IServerConfigurations } from "../configurations";
 
@@ -23,7 +23,7 @@ export default function (server: Hapi.Server, configs: IServerConfigurations, da
                 params: {
                     id: Joi.string().required()
                 },
-                headers: jwtValidator
+                // headers: jwtValidator
             },
             plugins: {
                 'hapi-swagger': {
@@ -53,7 +53,7 @@ export default function (server: Hapi.Server, configs: IServerConfigurations, da
                     top: Joi.number().default(5),
                     skip: Joi.number().default(0)
                 },
-                headers: jwtValidator
+                // headers: jwtValidator
             }
         }
     });
@@ -70,7 +70,7 @@ export default function (server: Hapi.Server, configs: IServerConfigurations, da
                 params: {
                     id: Joi.string().required()
                 },
-                headers: jwtValidator
+                // headers: jwtValidator
             },
             plugins: {
                 'hapi-swagger': {
@@ -100,7 +100,7 @@ export default function (server: Hapi.Server, configs: IServerConfigurations, da
                     id: Joi.string().required()
                 },
                 payload: TaskValidator.updateTaskModel,
-                headers: jwtValidator
+                // headers: jwtValidator
             },
             plugins: {
                 'hapi-swagger': {
@@ -127,7 +127,7 @@ export default function (server: Hapi.Server, configs: IServerConfigurations, da
             description: 'Create a task.',
             validate: {
                 payload: TaskValidator.createTaskModel,
-                headers: jwtValidator
+                // headers: jwtValidator
             },
             plugins: {
                 'hapi-swagger': {

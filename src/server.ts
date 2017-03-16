@@ -1,8 +1,8 @@
 import * as Hapi from "hapi";
 import { IPlugin } from "./plugins/interfaces";
 import { IServerConfigurations } from "./configurations";
-import * as Tasks from "./tasks";
-import * as Users from "./users";
+// import * as Tasks from "./tasks";
+// import * as Users from "./users";
 
 
 // import { KnexDB } from "./database";
@@ -39,8 +39,8 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         Promise.all(pluginPromises).then(() => {
             console.log("all plugins added");
             //Init Features
-            Tasks.init(server, configs, database);
-            Users.init(server, configs, database);
+            // Tasks.init(server, configs, database);
+            // Users.init(server, configs, database);
 
             resolve(server);
         });
