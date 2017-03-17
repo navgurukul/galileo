@@ -53,7 +53,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
                 });
             },
-            validate: {}
+            validate: {},
+            cors : true
         }
     });
 
@@ -62,6 +63,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users/auth',
         config: {
             handler: function(request: Hapi.Request, reply: Hapi.IReply){
+                console.log(request.hello);
                 reply({"text":"token is working"});
             },
             auth: 'jwt',

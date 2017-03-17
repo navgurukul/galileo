@@ -27,6 +27,7 @@ export interface IDataConfiguration {
 }
 
 export function getDatabaseConfig(): IDataConfiguration {
+    console.log(process.env.NODE_ENV);
     return configs.get("database");
 }
 

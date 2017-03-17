@@ -10,6 +10,8 @@ export default (): IPlugin => {
                 const serverConfig = options.serverConfigs;
 
                 const validateUser = (decoded, request, cb) => {
+                    console.log(decoded);
+                    request.hello = "dadsa";
                     return cb(null, true);
                 };
 
@@ -21,7 +23,7 @@ export default (): IPlugin => {
                     } else {
                         server.auth.strategy('jwt', 'jwt', false,
                             {
-                                key: serverConfig.jwtSecret,
+                                key: "secret",
                                 validateFunc: validateUser,
                                 verifyOptions: { algorithms: ['HS256'] }
                             });
