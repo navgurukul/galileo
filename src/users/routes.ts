@@ -19,7 +19,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 let requestPayload:any = request.payload;
                 let auth = new GoogleAuth;
                 let client = new auth.OAuth2(serverConfigs.googleAuth.clientId, '', '');
-                client.verifyIdToken(requestPayload.id_token, serverConfigs.googleAuth.clientId, function(e, login){
+                client.verifyIdToken(requestPayload.idToken, serverConfigs.googleAuth.clientId, function(e, login){
 
                     let googleAuthPayload = login.getPayload();
 
@@ -37,14 +37,14 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                                 userModel.create(googleAuthPayload['email'], googleAuthPayload['name'],
                                         googleAuthPayload['picture'], googleAuthPayload['sub']).then(
                                         (response) => {
-                                            let token = Jwt.sign({email: googleAuthPayload['email']}, "secret", "24h");
+                                            let token = Jwt.sign({email: googleAuthPayload['email']}, "secret", {expiresIn: "24h"});
                                             console.log(token);
                                             reply({"token": token});
                                         }
                                 );
                             } else {
                                 let user = rows[0];
-                                let token = Jwt.sign({email: user['email']}, "secret", "24h");
+                                let token = Jwt.sign({email: user['email']}, "secret", {expiresIn: "24h"});
                                 console.log(token);
                                 reply({"token": token});
                             }

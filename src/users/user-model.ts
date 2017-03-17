@@ -9,7 +9,7 @@ export class User extends DBTable {
     }
 
     public create(email: string, name: string, profilePicture: string, googleUserId: string) {
-        return this.database('users').insert({email: email, name: name, profilePicture: profilePicture});
+        return this.database('users').insert({email: email, name: name, profilePicture: profilePicture, googleId: googleUserId});
     }
 
     public getByEmail(email: string) {
