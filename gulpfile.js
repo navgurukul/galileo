@@ -6,12 +6,12 @@ const tslint = require('gulp-tslint');
 const mocha = require('gulp-mocha');
 const shell = require('gulp-shell');
 const env = require('gulp-env');
-
+const nodemon = require('gulp-nodemon');
 /**
  * Remove build directory.
  */
-gulp.task('clean', function () {
-  return gulp.src(outDir, { read: false })
+gulp.task('clean', function() {
+  return gulp.src('build/*', { read: false })
     .pipe(rimraf());
 });
 
@@ -47,11 +47,11 @@ gulp.task('compile', shell.task([
  * Watch for changes in TypeScript
  */
 gulp.task('watch', shell.task([
-  'npm run tsc-watch',
-]))
-/**
- * Copy config files
- */
+    'npm run tsc-watch',
+  ]))
+  /**
+   * Copy config files
+   */
 gulp.task('configs', (cb) => {
   return gulp.src("src/configurations/*.json")
     .pipe(gulp.dest('./build/src/configurations'));
@@ -65,8 +65,25 @@ gulp.task('build', ['tslint', 'compile', 'configs'], () => {
 });
 
 /**
- * Run tests.
+ * Build the project when there are changes in TypeScript files
  */
+gulp.task('develop', function() {
+    var stream = nodemon({
+      script: 'build/src/index.js',
+      ext: 'ts',
+      tasks: ['build']
+    })
+    stream
+      .on('restart', function() {
+        console.log('restarted the build process')
+      })
+      .on('crash', function() {
+        console.error('Application has crashed!\n')
+      })
+  })
+  /**
+   * Run tests.
+   */
 gulp.task('test', ['build'], (cb) => {
   const envs = env.set({
     NODE_ENV: 'test'

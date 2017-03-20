@@ -9,7 +9,7 @@ export class User extends DBTable {
     }
 
     public create(email: string, name: string, profilePicture: string, googleUserId: string) {
-        return this.database('users').insert({email: email, name: name, profilePicture: profilePicture, googleId: googleUserId});
+        return this.database('users').insert({email: email, name: name, profilePicture: profilePicture});
     }
 
     public getByEmail(email: string) {
@@ -18,6 +18,14 @@ export class User extends DBTable {
 
     public generateJwtToken(email: string) {
         return Jwt.sign({email: email}, "secret", "24h");
+    }
+
+    // public submitAssignment(userId: number, assignmentName: string, path: string) {
+    //     return this.database('submissions').insert({courseType: 'html', name: assignmentName, userId: userId, filesPath: path});
+    // }
+
+    public getAssignments( courseType: string) {
+        return this.database('assignments').select().orderBy('sequenceNo', 'asc').where('course', courseType);
     }
 
 }

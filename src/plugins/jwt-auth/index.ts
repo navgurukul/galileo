@@ -10,8 +10,8 @@ export default (): IPlugin => {
                 const serverConfig = options.serverConfigs;
 
                 const validateUser = (decoded, request, cb) => {
-                    console.log(decoded);
-                    request.hello = "dadsa";
+                    request.userId = decoded.id;
+                    // console.log('this is the id', request.userId);
                     return cb(null, true);
                 };
 
@@ -40,5 +40,3 @@ export default (): IPlugin => {
         }
     };
 };
-
-
