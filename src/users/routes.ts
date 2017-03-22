@@ -7,57 +7,20 @@ import { User } from "./user-model";
 import * as Jwt from "jsonwebtoken";
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
+import UserController from "./user-controller";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
-    // const userController = new UserController(serverConfigs, database);
-    // server.bind(userController);
+    const userController = new UserController(serverConfigs, database);
+    server.bind(userController);
 
     server.route({
         method: 'POST',
         path: '/users/auth/google',
         config: {
-            handler: function(request: Hapi.Request, reply: Hapi.IReply){
-                let requestPayload:any = request.payload;
-                let auth = new GoogleAuth;
-                let client = new auth.OAuth2(serverConfigs.googleAuth.clientId, '', '');
-                client.verifyIdToken(requestPayload.idToken, serverConfigs.googleAuth.clientId, function(e, login){
-
-                    let googleAuthPayload = login.getPayload();
-
-                    // Check if user has navgurukul.org eMail-ID
-                    if (googleAuthPayload['hd'] !== 'navgurukul.org') {
-                       return reply(Boom.unauthorized("You need to have a navgurukul.org email to access this."));
-                        // return;
-                    }
-
-                    // Check if a user with an email already exists
-                    let userModel = new User();
-                    userModel.getByEmail(googleAuthPayload['email']).then(
-                        (rows) => {
-                            if (rows.length === 0) {
-                                userModel.create(googleAuthPayload['email'], googleAuthPayload['name'],
-                                        googleAuthPayload['picture'], googleAuthPayload['sub']).then(
-                                        (response) => {
-                                            let token = Jwt.sign({
-                                                id: response[0],
-                                                email: googleAuthPayload['email']
-                                            }, "secret", {expiresIn: "24h"});
-                                            console.log(token);
-                                            return reply({"token": token});
-                                        }
-                                );
-                            } else {
-                                let user = rows[0];
-                                let token = Jwt.sign({id: user['id'], email: user['email']}, "secret", {expiresIn: "24h"});
-                                console.log(token);
-                                return reply({"token": token});
-                            }
-                        }
-                    );
-
-                });
-            },
+            handler: userController.loginUser,
+            tags: ['api', 'login'],
+            description: 'Login a user and generate jwt.',
             validate: {},
             cors : true
         }
@@ -126,7 +89,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {}
         },
     });
-    
+
     server.route({
         method: 'POST',
         path: '/submit/html',

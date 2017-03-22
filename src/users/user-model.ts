@@ -16,8 +16,8 @@ export class User extends DBTable {
         return this.database('users').select().where('email', email);
     }
 
-    public generateJwtToken(email: string) {
-        return Jwt.sign({email: email}, "secret", "24h");
+    public generateJwtToken(email: string, id: number) {
+        return Jwt.sign({email: email, id: id}, "secret", {expiresIn: "24h"});
     }
 
     // public submitAssignment(userId: number, assignmentName: string, path: string) {
