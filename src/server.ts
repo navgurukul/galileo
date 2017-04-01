@@ -4,6 +4,8 @@ import { IServerConfigurations } from "./configurations";
 // import * as Tasks from "./tasks";
 // import * as Users from "./users";
 import * as Users from "./users";
+// var corsHeaders = require('')
+// import * as corsHeaders from "hapi-cors-headers";
 
 
 // import { KnexDB } from "./database";
@@ -17,10 +19,13 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         server.connection({
             port: port,
             routes: {
-                cors: true,
-                log: true
+                 cors: {
+                    "headers": ["Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"]
+                 },
+                 log: true
             }
         });
+        // server.ext('onPreResponse', corsHeaders);
 
         //  Setup Hapi Plugins
         const plugins: Array<string> = configs.plugins;

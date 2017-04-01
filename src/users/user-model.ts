@@ -24,8 +24,8 @@ export class User extends DBTable {
     //     return this.database('submissions').insert({courseType: 'html', name: assignmentName, userId: userId, filesPath: path});
     // }
 
-    public getAssignments( courseType: string) {
-        return this.database('assignments').select().orderBy('sequenceNo', 'asc').where('course', courseType);
+    public getAssignment( assignmentId: number) {
+        return this.database('assignments').select().where('id', assignmentId);
     }
 
 }

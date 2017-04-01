@@ -22,7 +22,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             tags: ['api', 'login'],
             description: 'Login a user and generate jwt.',
             validate: {},
-            cors : true
+            // cors : true
         }
     });
 
@@ -41,53 +41,20 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/assignments/html',
+        path: '/assignment/{id*1}',
         config: {
-            handler: function(request, reply){
+            handler: function(request, reply) {
+                let id = request.params.id;
                 let userModel = new User();
-                userModel.getAssignments('html').then(
-                    (rows) => {
-                        return reply({'assignments': rows});
+                userModel.getAssignment(id).then(
+                    (row) => {
+                        return reply(row);
                     }
                 );
             },
             auth: 'jwt',
             validate: {}
         }
-    });
-
-        server.route({
-        method: 'GET',
-        path: '/assignments/js',
-        config: {
-            handler: function(request, reply){
-                let userModel = new User();
-                userModel.getAssignments('js').then(
-                    (rows) => {
-                        return reply({'assignments': rows});
-                    }
-                );
-            },
-            auth: 'jwt',
-            validate: {}
-        }
-    });
-
-        server.route({
-        method: 'GET',
-        path: '/assignments/python',
-        config: {
-            handler: function(request, reply){
-                let userModel = new User();
-                userModel.getAssignments('python').then(
-                    (rows) => {
-                        return reply({'assignments': rows});
-                    }
-                );
-            },
-            auth: 'jwt',
-            validate: {}
-        },
     });
 
     server.route({
@@ -97,11 +64,17 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             payload: {
             output: 'stream',
             parse: true,
-            allow: 'multipart/form-data'
+            allow: 'multipart/form-data',
         },
+        // cors: true,
+
             handler: function(request: Hapi.request, reply: Hapi.Ireply){
+                console.log("hello");
+                // request.response.header('Access-Control-Allow-Origin', '*');
+                // request.response.header('Access-Control-Allow-Credentials', true);
+
                 // console.log(request.userId);
-                // reply("hello");
+                // reply("(propertyhello");
                 // var files = request.payload.files;
                 // // console.log(request.payload.files);
                 // let dir = __dirname + '/../../../uploads/' + request.userId + '/' + request.payload.name;
@@ -123,11 +96,11 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 // }
                 // let userModel = new User();
                 // userModel.submitAssignment(request.id, request.payload.name, dir);
-                reply('hey');
+                reply({'hey': "dsdas"});
             },
             auth: 'jwt',
             validate: {},
-            cors : true
+            // cors : {headers: ['Access-Control-Allow-Headers','Access-Control-Allow-Credentials'] }
         }
     });
 

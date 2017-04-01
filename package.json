@@ -31,6 +31,7 @@
     "google-auth-library": "^0.10.0",
     "hapi": "16.0.0",
     "hapi-auth-jwt2": "7.2.4",
+    "hapi-cors-headers": "1.0.0",
     "hapi-swagger": "^7.7.0",
     "http": "0.0.0",
     "inert": "3.2.1",
