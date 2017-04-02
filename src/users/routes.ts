@@ -8,6 +8,18 @@ import * as Jwt from "jsonwebtoken";
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
 import UserController from "./user-controller";
+// var gcs = require('@google-clowud/storage')();
+// import * as gcs from '@google-cloud/storage';
+
+const Storage = require('@google-cloud/storage');
+const CLOUD_BUCKET = 'user-assignments';
+
+const storage = Storage({
+  projectId: 'saral-162810',
+//   keyFilename: '../configurations/key.json',
+  credentials: require('../configurations/key.json')  
+});
+const bucket = storage.bucket(CLOUD_BUCKET);
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -59,7 +71,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/submit/html',
+        path: '/assignment/upload/{course*1}',
         config : {
             payload: {
             output: 'stream',
@@ -69,34 +81,29 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         // cors: true,
 
             handler: function(request: Hapi.request, reply: Hapi.Ireply){
-                console.log("hello");
-                // request.response.header('Access-Control-Allow-Origin', '*');
-                // request.response.header('Access-Control-Allow-Credentials', true);
+                 var gcs = require('@google-cloud/storage')({
+  projectId: 'saral-162810',
+  keyFilename: '../configurations/key.json'
+});
 
-                // console.log(request.userId);
-                // reply("(propertyhello");
-                // var files = request.payload.files;
-                // // console.log(request.payload.files);
-                // let dir = __dirname + '/../../../uploads/' + request.userId + '/' + request.payload.name;
-                // console.log("hey");
-                // if (!fs.existsSync(dir)) {
-                //     mkdirp(dir, (error) => {});
-                // }
-                // // console.log(files[0].hapi);
-                // if (files) {
-                //     for (let i = 0; i < files.length; i++) {
-                //         let name = files[i].hapi.filename;
-                //         let path = dir + '/' + name;
-                //         let file = fs.createWriteStream(path);
-                //         file.on('error', function (err) {
-                //             console.log(err);
-                //         });
-                //         // fs.pipe(file);
-                //     }
-                // }
-                // let userModel = new User();
-                // userModel.submitAssignment(request.id, request.payload.name, dir);
-                reply({'hey': "dsdas"});
+let b = gcs.bucket('user-assignments');
+                 var fileData = request.payload.file;
+                if (fileData) {
+                let dir = request.userId + '/' + request.params.course;
+                        let name = fileData.hapi.filename;
+                        let filePath = dir + '/' + name;
+                        let file = b.file(filePath);
+                        let stream = file.createWriteStream({
+                            metadata: {
+                                contentType: fileData.hapi.headers['content-type']
+                            }
+                        });
+                        // console.log(stream);
+                        stream.on('finish', () => {
+                            console.log("gsddsfds");
+                          });
+                    }
+                    reply('hey');
             },
             auth: 'jwt',
             validate: {},
