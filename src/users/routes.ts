@@ -1,25 +1,10 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import { IServerConfigurations } from "../configurations";
-import * as GoogleAuth from "google-auth-library";
 import * as Boom from "boom";
-import { User } from "./user-model";
-import * as Jwt from "jsonwebtoken";
-import * as fs from 'fs';
-import * as mkdirp from 'mkdirp';
+
 import UserController from "./user-controller";
-// var gcs = require('@google-clowud/storage')();
-// import * as gcs from '@google-cloud/storage';
-
-// const Storage = require('@google-cloud/storage');
-// const CLOUD_BUCKET = 'user-assignments';
-
-// const storage = Storage({
-//   projectId: 'saral-162810',
-// //   keyFilename: '../configurations/key.json',
-//   credentials: require('../configurations/key.json')
-// });
-// const bucket = storage.bucket(CLOUD_BUCKET);
+import { userSchema, noteSchema } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -30,88 +15,118 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'POST',
         path: '/users/auth/google',
         config: {
-            handler: userController.loginUser,
-            tags: ['api', 'login'],
-            description: 'Login a user and generate jwt.',
-            validate: {},
-            // cors : true
-        }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/users/auth',
-        config: {
-            handler: function(request: Hapi.Request, reply: Hapi.IReply){
-                // console.log(request.hello);
-                reply({"text":"token is working"});
+            description: 'Get a JWT for a user using his short lived google access token.',
+            validate: {
+                payload: Joi.object({
+                    idToken: Joi.string()
+                             .description("Short lived access token provided by google web-sign in.")
+                             .default("aaa.bbb.ccc")
+                })
             },
-            auth: 'jwt',
-            validate: {}
-        }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/assignment/{id*1}',
-        config: {
-            handler: function(request, reply) {
-                let id = request.params.id;
-                let userModel = new User();
-                userModel.getAssignment(id).then(
-                    (row) => {
-                        return reply(row);
+            response: {
+                schema: Joi.object({
+                    "jwt": Joi.string()
+                           .default("xxx.yyy.zzz")
+                           .description("Will authenticate all the future requests.")
+                })
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '200': {
+                            'description': 'User already existed and successfully authenticated.'
+                        },
+                        '201': {
+                            'description': 'New user created and successfully authenticated.'
+                        },
+                        '401': {
+                            'description': 'Auth failiure. Wrong ID token.'
+                        }
                     }
-                );
+                }
             },
-            auth: 'jwt',
-            validate: {}
+            tags: ['api'],
+            handler: userController.loginUser
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/users/{userId}',
+        config: {
+            description: 'Get user info by ID.',
+            response: {
+                schema: userSchema
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '200': {
+                            'description': 'User found.'
+                        },
+                        '404': {
+                            'description': 'User not found.'
+                        }
+                    }
+                }
+            },
+            tags: ['api'],
+            handler: userController.getUserInfo,
         }
     });
 
     server.route({
         method: 'POST',
-        path: '/assignment/upload/{course*1}',
-        config : {
-            payload: {
-            output: 'stream',
-            parse: true,
-            maxBytes: 52428800,
-            allow: 'multipart/form-data',
-        },
-            handler: function(request: Hapi.request, reply: Hapi.Ireply){
-                let gcs = require('@google-cloud/storage')({
-                    projectId: 'saral-162810',
-                    keyFilename: __dirname + '/../configurations/key.json'
-                });
-
-                let bucket = gcs.bucket('user-assignments');
-
-                var fileData = request.payload.file;
-                    if (fileData) {
-                        let dir = request.userId + '/' + request.params.course;
-                        let name = fileData.hapi.filename;
-                        let filePath = dir + '/' + name;
-                        let file = bucket.file(filePath);
-                        // console.log(file);
-                        let stream = file.createWriteStream({
-                            metadata: {
-                                contentType: fileData.hapi.headers['content-type']
-                            }
-                        });
-                        // stream.pipe(file);
-                        // file.pipe();
-                         stream.on('error', (err) => {
-                             console.log(err);
-                        });
-                        stream.on('finish', () => {
-                            console.log("gsddsfds");
-                        });
-                    }
-                reply('hey');
+        path: '/users/{userId}/notes',
+        config: {
+            description: 'Create a note for a user.',
+            validate: {
+                payload: Joi.object({
+                    text: Joi.string().default("Kya aadmi hai yeh? Gazab!")
+                })
             },
-            auth: 'jwt',
-            validate: {},
+            response: {
+                schema: noteSchema
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '201': {
+                            'description': 'Note created successfully.'
+                        }
+                    }
+                }
+            },
+            tags: ['api'],
+            handler: userController.postUserNotes
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/users/{userId}/notes',
+        config: {
+            description: 'Get a list of notes (reverse chronologically sorted) for the user with the given ID.',
+            response: {
+                schema: Joi.object({
+                    data: Joi.array().items(noteSchema)
+                })
+            },
+            tags: ['api'],
+            handler: userController.getUserNotes
+        }
+    });
+
+    server.route({
+        method: 'DELETE',
+        path: '/users/{userId}/notes/{noteId}',
+        config: {
+            description: 'Login a user and generate jwt.',
+            response: {
+                schema: noteSchema.description("The deleted note object.")
+            },
+            tags: ['api'],
+            handler: userController.deleteUserNoteById
         }
     });
 

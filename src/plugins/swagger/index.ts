@@ -12,21 +12,25 @@ export default (): IPlugin => {
                         register: require('hapi-swagger'),
                         options: {
                             info: {
-                                title: 'Task Api',
-                                description: 'Task Api Documentation',
-                                version: '1.0'
+                                title: 'Galielo - SARAL API',
+                                description: 'API powering the the NavGurukul learning platform :)',
+                                version: '0.1'
                             },
                             tags: [
                                 {
-                                    'name': 'tasks',
-                                    'description': 'Api tasks interface.'
+                                    'name': 'users',
                                 },
                                 {
-                                    'name': 'users',
-                                    'description': 'Api users interface.'
+                                    'name': 'courses',
+                                },
+                                {
+                                    'name': 'assignments',
+                                },
+                                {
+                                  'name': 'reports',
                                 }
                             ],
-                            enableDocumentation: true,
+                            documentationPage: true,
                             documentationPath: '/docs'
                         }
                     }
