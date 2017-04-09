@@ -61,7 +61,9 @@ export default class CourseController {
                     parentExercise: null,
                     completed: true,
                     completedOn: Date.now(),
-                    timeTakenToComplete: 12343
+                    timeTakenToComplete: 12343,
+                    completionType: "manual",
+                    assignmentReviewType: null
                 },
                 {
                     id: 242,
@@ -71,7 +73,9 @@ export default class CourseController {
                     parentExercise: null,
                     completed: false,
                     completedOn: null,
-                    timeTakenToComplete: null
+                    timeTakenToComplete: null,
+                    completionType: "assignment",
+                    assignmentReviewType: "auto"
                 },
                 {
                     id: 244,
@@ -81,7 +85,9 @@ export default class CourseController {
                     parentExercise: 242,
                     completed: false,
                     completedOn: null,
-                    timeTakenToComplete: null
+                    timeTakenToComplete: null,
+                    completionType: "assignment",
+                    assignmentReviewType: "peer"
                 }
             ]
         });
@@ -96,7 +102,9 @@ export default class CourseController {
             parentExercise: 242,
             completed: false,
             completedOn: null,
-            timeTakenToComplete: null
+            timeTakenToComplete: null,
+            completionType: "assignment",
+            assignmentReviewType: "peer"
         });
     }
 

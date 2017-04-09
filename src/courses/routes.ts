@@ -41,8 +41,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/courses/{courseId}/exercises',
         config: {
-            description: 'List of exercises within a course. \
-                          If the user is enrolled every course object will also have completion details.',
+            description: 'List of exercises within a course.',
             response: {
                 schema: Joi.object({
                     "data": Joi.array().items(exerciseSchema, enrolledExerciseSchema),
@@ -57,8 +56,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/courses/{courseId}/exercises/{exerciseId}',
         config: {
-            description: 'Get complete details of the exercise with the given ID. \
-                          If the user is enrolled in the course it will also have completion details.',
+            description: 'Get complete details of the exercise with the given ID.',
             response: {
                 schema: enrolledExerciseSchema
             },

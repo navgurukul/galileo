@@ -5,12 +5,14 @@ export const courseSchema:Joi.ObjectSchema = Joi.object({
     name: Joi.string().default("Primary Logic 101"),
     description: Joi.string().default("Primary Logic using Python 2.7"),
     totalExercises: Joi.number().default(123),
-    daysToComplete: Joi.number().default(23).description("Number of days to complete the course. Excluding sundays.")
+    daysToComplete: Joi.number().default(23)
+                    .description("Number of days to complete the course. Excluding sundays.")
 });
 
 export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     enrolled: Joi.bool().allow(null).default(false),
-    facilitatingFor: Joi.array().items(Joi.number()).allow(null).description("IDs of batches for whom the user is a facilitator.")
+    facilitatingFor: Joi.array().items(Joi.number()).allow(null)
+                     .description("IDs of batches for whom the user is a facilitator.")
 });
 
 
@@ -19,7 +21,12 @@ export const exerciseSchema:Joi.ObjectSchema = Joi.object({
     title: Joi.string().default("Adding 2 strings"),
     slug: Joi.string().default("adding-2-strings"),
     content: Joi.string().default("# Some heading \n ## Some sub-heading \n Some content."),
-    parentExercise: Joi.number().default(239),
+    parentExercise: Joi.number().allow(null).default(239),
+    completionType: Joi.string().valid('assignment', 'manual')
+                    .description("`assignment` if the student will have to finish an assignment or `manual` if not."),
+    assignmentReviewType: Joi.string().valid("peer", "auto", "facilitator").allow(null)
+                          .description("`peer` will result in peer review, `auto` means now review and \
+                                        `facilitator` will require a review from the facilitator.")
 });
 
 export const enrolledExerciseSchema:Joi.ObjectSchema = exerciseSchema.keys({
