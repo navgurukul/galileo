@@ -12,7 +12,7 @@ Made using hapi.js, the repository use mysql database.
 * *npm run start* (start the application)
 * *npm run watch* (restart the application when files change)
 
-##Documentation**
+## Documentation
 When the code is running, documentation is accessible at localhost:5000/docs.
 
 I have never met a man so ignorant that I couldn't learn something from him. ~ Galileo
