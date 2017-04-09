@@ -4,6 +4,7 @@ import { IServerConfigurations } from "./configurations";
 
 import * as Users from "./users";
 import * as Courses from "./courses";
+import * as Assignments from "./assignments";
 
 
 export function init(configs: IServerConfigurations, database: any): Promise<Hapi.Server> {
@@ -41,6 +42,7 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         Promise.all(pluginPromises).then(() => {
             Users.init(server,  configs, database);
             Courses.init(server, configs, database);
+            Assignments.init(server, configs, database);
             resolve(server);
         });
 
