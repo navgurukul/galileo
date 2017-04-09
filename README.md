@@ -1,5 +1,5 @@
 # galileo
-Hapi?
+Made using hapi.js, the repository use mysql database.
 
 **Installation**
 * *npm install -g typings* (required for setup)
@@ -7,21 +7,12 @@ Hapi?
 
 **Run**
 * *gulp build* (build ts files)
-* *gulp test* (run mocha tests)
 * *gulp tslint* (run tslint)
 * *gulp watch* (watch ts files)
 * *npm run start* (start the application)
 * *npm run watch* (restart the application when files change)
 
-**Features**
-* *Project Structure - Feature oriented*
-* *Hapijs - REST Api*
-* *Swagger - documentation*
-* *Jwt - authentication*
-* *Mongoose - MongoDb*
-* *nconf - configurations*
-* *Unit Tests - chai + sinon + mocha*
+**Documentation**
+When the code is running, documentation is accessible at localhost:5000/docs.
 
-Running on port 5000 ex: localhost:5000/docs
-
-Have fun :)
+I have never met a man so ignorant that I couldn't learn something from him. ~ Galileo

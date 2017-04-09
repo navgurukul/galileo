@@ -62,7 +62,7 @@ export default class UserController {
                     createdBy: 131
                 }
             ]
-        })
+        });
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
