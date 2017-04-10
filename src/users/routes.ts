@@ -55,6 +55,11 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users/{userId}',
         config: {
             description: 'Get user info by ID.',
+            validate: {
+                params: {
+                    userId: Joi.number(),
+                }
+            },
             response: {
                 schema: userSchema
             },
