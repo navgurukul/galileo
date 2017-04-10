@@ -18,7 +18,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             description: 'Get a JWT for a user using his short lived google access token.',
             validate: {
                 payload: Joi.object({
-                    idToken: Joi.string()
+                    idToken: Joi.string().required()
                              .description("Short lived access token provided by google web-sign in.")
                              .default("aaa.bbb.ccc")
                 })
@@ -55,9 +55,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users/{userId}',
         config: {
             description: 'Get user info by ID.',
+            auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number(),
+                    userId: Joi.number().required(),
                 }
             },
             response: {
@@ -85,9 +86,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/users/{userId}/notes',
         config: {
             description: 'Create a note for a user.',
+            auth: 'jwt',
             validate: {
+                params: {
+                    userId: Joi.number().required(),
+                },
                 payload: Joi.object({
-                    text: Joi.string().default("Kya aadmi hai yeh? Gazab!")
+                    text: Joi.string().required()
                 })
             },
             response: {
@@ -111,7 +116,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/users/{userId}/notes',
         config: {
-            description: 'Get a list of notes (reverse chronologically sorted) for the user with the given ID.',
+            description: 'Get a list of notes (reverse chronologically sorted) of the user.',
+            auth: 'jwt',
+            validate: {
+                params: {
+                    userId: Joi.number().required(),
+                }
+            },
             response: {
                 schema: Joi.object({
                     data: Joi.array().items(noteSchema)
@@ -126,7 +137,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'DELETE',
         path: '/users/{userId}/notes/{noteId}',
         config: {
-            description: 'Login a user and generate jwt.',
+            description: 'Delete a note of the user with a given ID',
+            auth: 'jwt',
+            validate: {
+                params: {
+                    userId: Joi.number().required(),
+                }
+            },
             response: {
                 schema: noteSchema.description("The deleted note object.")
             },
