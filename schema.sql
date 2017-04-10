@@ -98,6 +98,23 @@ CREATE TABLE `exercises` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `notes`
+--
+
+DROP TABLE IF EXISTS `notes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `notes` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `student` int(11) unsigned DEFAULT NULL,
+  `facilitator` int(11) unsigned DEFAULT NULL,
+  `notes` varchar(500) NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `submissions`
 --
 
@@ -153,4 +170,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-04-10 16:01:12
+-- Dump completed on 2017-04-10 18:30:35
