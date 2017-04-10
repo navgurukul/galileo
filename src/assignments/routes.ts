@@ -4,7 +4,8 @@ import { IServerConfigurations } from "../configurations";
 import * as Boom from "boom";
 
 import AssignmentController from "./assignment-controller";
-import { exerciseSubmissionPayload, exerciseSubmission, peerReview } from "./schemas";
+import { exerciseSubmissionPayload, exerciseSubmission,
+         enrolledExerciseSchema, peerReview } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -53,6 +54,21 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             tags: ['api'],
             handler: assignmentController.getExerciseSubmissionById
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/{courseId}/student/{studentId}/exercise',
+        config: {
+            description: 'All the exercise completion details of the given student.',
+            response: {
+                schema: Joi.object({
+                    data: Joi.array().items(enrolledExerciseSchema)
+                })
+            },
+            tags: ['api'],
+            handler: assignmentController.getStudentExerciseDetails
         }
     });
 

@@ -21,3 +21,23 @@ export const peerReview:Joi.ObjectSchema = Joi.object({
     approved: Joi.bool().default(true),
     notes: Joi.string().default()
 });
+
+export const exerciseSchema:Joi.ObjectSchema = Joi.object({
+    id: Joi.number().default(241),
+    title: Joi.string().default("Adding 2 strings"),
+    slug: Joi.string().default("adding-2-strings"),
+    content: Joi.string().default("# Some heading \n ## Some sub-heading \n Some content."),
+    parentExercise: Joi.number().allow(null).default(239),
+    completionType: Joi.string().valid('assignment', 'manual')
+                    .description("`assignment` if the student will have to finish an assignment or `manual` if not."),
+    assignmentReviewType: Joi.string().valid("peer", "auto", "facilitator").allow(null)
+                          .description("`peer` will result in peer review, `auto` means now review and \
+                                        `facilitator` will require a review from the facilitator.")
+});
+
+export const enrolledExerciseSchema:Joi.ObjectSchema = exerciseSchema.keys({
+    completed: Joi.bool().allow(null).default(false),
+    completedOn: Joi.date().timestamp().allow(null),
+    timeTakenToComplete: Joi.number().allow(null).default(3221)
+                         .description("Number of seconds taken to complete")
+});

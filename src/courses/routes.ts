@@ -39,21 +39,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/exercises',
-        config: {
-            description: 'List of exercises within a course.',
-            response: {
-                schema: Joi.object({
-                    "data": Joi.array().items(exerciseSchema, enrolledExerciseSchema),
-                })
-            },
-            tags: ['api'],
-            handler: courseController.getCourseExercises
-        }
-    });
-
-    server.route({
-        method: 'GET',
         path: '/courses/{courseId}/exercises/{exerciseId}',
         config: {
             description: 'Get complete details of the exercise with the given ID.',
