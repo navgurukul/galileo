@@ -4,8 +4,7 @@ import { IServerConfigurations } from "../configurations";
 import * as Boom from "boom";
 
 import AssignmentController from "./assignment-controller";
-import { exerciseSubmissionPayload, exerciseSubmission,
-         enrolledExerciseSchema, peerReview } from "./schemas";
+import { exerciseSubmissionPayload, exerciseSubmission, peerReview } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -18,11 +17,16 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         config: {
             description: 'Do a submission for an exercise.',
             validate: {
+                params: {
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number()
+                },
                 payload: exerciseSubmissionPayload
             },
             response: {
                 schema: exerciseSubmission
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.postExerciseSubmission
         }
@@ -33,12 +37,19 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courses/{courseId}/exercise/{exerciseId}/submission',
         config: {
             description: 'List of all submissions on an exercise.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number()
+                }
+            },
             response: {
                 schema: Joi.object({
                     data: Joi.array().items(exerciseSubmission)
                           .description("List of submissions.")
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.getExerciseSubmissions,
         }
@@ -49,9 +60,16 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/{submissionId}',
         config: {
             description: 'Details of submission of given ID.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number()
+                }
+            },
             response: {
                 schema: exerciseSubmission
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.getExerciseSubmissionById
         }
@@ -67,6 +85,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     data: Joi.array().items(peerReview)
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.getPeerReviewRequests
         }
@@ -86,6 +105,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: peerReview
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.editPeerReviewRequest
         }

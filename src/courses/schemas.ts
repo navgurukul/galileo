@@ -1,27 +1,28 @@
 import * as Joi from "joi";
 
 export const courseSchema:Joi.ObjectSchema = Joi.object({
-    id: Joi.number().default(532),
-    name: Joi.string().default("Primary Logic 101"),
-    description: Joi.string().default("Primary Logic using Python 2.7"),
-    totalExercises: Joi.number().default(123),
-    daysToComplete: Joi.number().default(23)
+    id: Joi.number(),
+    name: Joi.string(),
+    description: Joi.string(),
+    totalExercises: Joi.number(),
+    daysToComplete: Joi.number()
                     .description("Number of days to complete the course. Excluding sundays.")
 });
 
 export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
-    enrolled: Joi.bool().allow(null).default(false),
+    enrolled: Joi.bool().allow(null),
+    enrolledBatch: Joi.bool(),
     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
                      .description("IDs of batches for whom the user is a facilitator.")
 });
 
 
 export const exerciseSchema:Joi.ObjectSchema = Joi.object({
-    id: Joi.number().default(241),
-    title: Joi.string().default("Adding 2 strings"),
-    slug: Joi.string().default("adding-2-strings"),
-    content: Joi.string().default("# Some heading \n ## Some sub-heading \n Some content."),
-    parentExercise: Joi.number().allow(null).default(239),
+    id: Joi.number(),
+    title: Joi.string(),
+    slug: Joi.string(),
+    content: Joi.string(),
+    parentExercise: Joi.number().allow(null),
     completionType: Joi.string().valid('assignment', 'manual')
                     .description("`assignment` if the student will have to finish an assignment or `manual` if not."),
     assignmentReviewType: Joi.string().valid("peer", "auto", "facilitator").allow(null)
@@ -30,8 +31,8 @@ export const exerciseSchema:Joi.ObjectSchema = Joi.object({
 });
 
 export const enrolledExerciseSchema:Joi.ObjectSchema = exerciseSchema.keys({
-    completed: Joi.bool().allow(null).default(false),
+    completed: Joi.bool().allow(null),
     completedOn: Joi.date().timestamp().allow(null),
-    timeTakenToComplete: Joi.number().allow(null).default(3221)
+    timeTakenToComplete: Joi.number().allow(null)
                          .description("Number of seconds taken to complete")
 });

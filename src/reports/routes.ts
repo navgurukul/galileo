@@ -4,7 +4,7 @@ import { IServerConfigurations } from "../configurations";
 import * as Boom from "boom";
 
 import ReportController from "./report-controller";
-import { exerciseSchema, enrolledExerciseSchema, exerciseReportSchema } from "./schemas";
+import { exerciseReportSchema } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -21,6 +21,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "data": Joi.array().items(exerciseReportSchema),
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: reportController.getBatchCourseReport
         }
