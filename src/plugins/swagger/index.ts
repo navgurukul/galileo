@@ -16,6 +16,13 @@ export default (): IPlugin => {
                                 description: 'API powering the the NavGurukul learning platform :)',
                                 version: '0.1'
                             },
+                            securityDefinitions: {
+                                'jwt': {
+                                    'type': 'apiKey',
+                                    'name': 'Authorization',
+                                    'in': 'header'
+                                }
+                            },
                             tags: [
                                 {
                                     'name': 'users',

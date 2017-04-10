@@ -9,8 +9,8 @@ export const userSchema:Joi.ObjectSchema = Joi.object({
 });
 
 export const noteSchema:Joi.ObjectSchema = Joi.object({
-    id: Joi.number().default(241),
-    text: Joi.string().default("Kya aadmi hai yeh? Gazab!"),
-    createdAt: Joi.date().timestamp().default(Date.now()),
-    createdBy: Joi.number().default(131)
+    id: Joi.number().required(),
+    text: Joi.string().required(),
+    createdAt: Joi.date().required(),
+    createdBy: Joi.number().required()
 });
