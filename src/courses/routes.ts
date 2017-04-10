@@ -39,9 +39,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/exercises/{exerciseId}',
+        path: '/courses/{courseId}/exercises/',
         config: {
             description: 'Get complete details of the exercise with the given ID.',
+            validate: {
+                params: {
+                    courseId: Joi.number()                }
+            },
             response: {
                 schema: enrolledExerciseSchema
             },
@@ -55,6 +59,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courses/{courseId}/notes',
         config: {
             description: 'Get any additional notes attached with the course.',
+            validate: {
+                params: {
+                    courseId: Joi.number()                }
+            },
             response: {
                 schema: Joi.object({
                     "notes": Joi.string().default("# Notes Title ## Not sub-title Some content. \n More.")
@@ -70,9 +78,14 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courses/{courseId}/enroll',
         config: {
             description: 'Enroll in the course with the given ID.',
+            validate: {
+                params: {
+                    courseId: Joi.number()                }
+            },
             response: {
                 schema: enrolledOrFacilitatingCourseSchema.description("`enrolled` flag is true now.")
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.enrollInCourse
         }
