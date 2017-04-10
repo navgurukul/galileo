@@ -59,21 +59,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/student/{studentId}/exercise',
-        config: {
-            description: 'All the exercise completion details of the given student.',
-            response: {
-                schema: Joi.object({
-                    data: Joi.array().items(enrolledExerciseSchema)
-                })
-            },
-            tags: ['api'],
-            handler: assignmentController.getStudentExerciseDetails
-        }
-    });
-
-    server.route({
-        method: 'GET',
         path: '/assignments/peerReview',
         config: {
             description: 'List of peer review requests.',

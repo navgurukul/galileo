@@ -50,4 +50,4 @@ export const exerciseReportSchema:Joi.ObjectSchema = exerciseSchema.keys({
         timeTakenToComplete: Joi.number().allow(null).default(3221),
         attemptsTaken: Joi.number().allow(null)
     }))
-})
+});
