@@ -10,7 +10,7 @@ export const courseSchema:Joi.ObjectSchema = Joi.object({
 });
 
 export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
-    enrolled: Joi.bool().allow(null).default(false),
+    enrolled: Joi.bool().allow(null),
     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
                      .description("IDs of batches for whom the user is a facilitator.")
 });
@@ -30,8 +30,8 @@ export const exerciseSchema:Joi.ObjectSchema = Joi.object({
 });
 
 export const enrolledExerciseSchema:Joi.ObjectSchema = exerciseSchema.keys({
-    completed: Joi.bool().allow(null).default(false),
+    completed: Joi.bool().allow(null),
     completedOn: Joi.date().timestamp().allow(null),
-    timeTakenToComplete: Joi.number().allow(null).default(3221)
+    timeTakenToComplete: Joi.number().allow(null)
                          .description("Number of seconds taken to complete")
 });

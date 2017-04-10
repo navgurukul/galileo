@@ -4,8 +4,7 @@ import { IServerConfigurations } from "../configurations";
 import * as Boom from "boom";
 
 import AssignmentController from "./assignment-controller";
-import { exerciseSubmissionPayload, exerciseSubmission,
-         enrolledExerciseSchema, peerReview } from "./schemas";
+import { exerciseSubmissionPayload, exerciseSubmission, peerReview } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
