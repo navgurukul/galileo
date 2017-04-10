@@ -11,6 +11,7 @@ export const courseSchema:Joi.ObjectSchema = Joi.object({
 
 export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     enrolled: Joi.bool().allow(null),
+    enrolledBatch: Joi.bool(),
     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
                      .description("IDs of batches for whom the user is a facilitator.")
 });

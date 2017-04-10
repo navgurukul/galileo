@@ -28,6 +28,7 @@ export default class CourseController {
                     totalExercises: 123,
                     daysToComplete: 40,
                     enrolled: false,
+                    enrolledBatch: null,
                 },
                 {
                     id: 123,
@@ -36,7 +37,8 @@ export default class CourseController {
                     totalExercises: 90,
                     daysToComplete: 25,
                     enrolled: true,
-                    facilitatingFor: [1, 2]
+                    facilitatingFor: [1, 2],
+                    enrolledBatch: 12
                 },
                 {
                     id: 145,
@@ -44,7 +46,8 @@ export default class CourseController {
                     description: "Get yourself to develop any god-damn page under the sun.",
                     totalExercises: 50,
                     daysToComplete: 15,
-                    enrolled: true
+                    enrolled: true,
+                    enrolledBatch: 34
                 }
             ]
         });
