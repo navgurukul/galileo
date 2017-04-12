@@ -29,7 +29,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
-                    "data": Joi.array().items(courseSchema, enrolledOrFacilitatingCourseSchema),
+                    "data": Joi.array(),
+                    // .items(courseSchema, enrolledOrFacilitatingCourseSchema  ),
                 })
             },
             tags: ['api'],

@@ -24,6 +24,7 @@ export default class CourseController {
                 {
                     id: 532,
                     name: "Primary Logic 101",
+                    link: "primarylogic",
                     description: "Primary Logic using Python 2.7",
                     totalExercises: 123,
                     daysToComplete: 40,
@@ -33,16 +34,18 @@ export default class CourseController {
                 {
                     id: 123,
                     name: "JavaScript Basics",
+                    link: "js",                    
                     description: "Basic JS 101 before getting into web-dev.",
                     totalExercises: 90,
                     daysToComplete: 25,
                     enrolled: true,
-                    facilitatingFor: [1, 2],
+                    facilitatingFor: [1, 2, 3],
                     enrolledBatch: 12
                 },
                 {
                     id: 145,
                     name: "HTML / CSS Basics",
+                    link: "html",                    
                     description: "Get yourself to develop any god-damn page under the sun.",
                     totalExercises: 50,
                     daysToComplete: 15,
