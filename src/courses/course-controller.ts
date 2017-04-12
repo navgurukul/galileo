@@ -34,7 +34,7 @@ export default class CourseController {
                 {
                     id: 123,
                     name: "JavaScript Basics",
-                    link: "js",                    
+                    link: "js",
                     description: "Basic JS 101 before getting into web-dev.",
                     totalExercises: 90,
                     daysToComplete: 25,
@@ -45,7 +45,7 @@ export default class CourseController {
                 {
                     id: 145,
                     name: "HTML / CSS Basics",
-                    link: "html",                    
+                    link: "html",
                     description: "Get yourself to develop any god-damn page under the sun.",
                     totalExercises: 50,
                     daysToComplete: 15,

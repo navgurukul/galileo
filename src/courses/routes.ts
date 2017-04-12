@@ -58,6 +58,24 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/courses/{courseId}/exercises',
+        config: {
+            description: 'Get complete list of exercises in the course',
+            validate: {
+                params: {
+                    courseId: Joi.number()
+                }
+            },
+            response: {
+                schema: enrolledExerciseSchema
+            },
+            tags: ['api'],
+            handler: courseController.getCourseExercises
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/courses/{courseId}/notes',
         config: {
             description: 'Get any additional notes attached with the course.',
