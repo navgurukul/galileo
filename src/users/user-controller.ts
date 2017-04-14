@@ -19,7 +19,10 @@ export default class UserController {
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({ "jwt": "xxx.yyy.zzz" });
+        return reply({ 
+            "jwt": Jwt.sign({email: "r@navgurukul.org", id: 12}, 
+            "secret", {expiresIn: "24h"}) 
+        });
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
