@@ -33,7 +33,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     // .items(courseSchema, enrolledOrFacilitatingCourseSchema  ),
                 })
             },
-            auth: 'jwt',            
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCoursesList
         }
