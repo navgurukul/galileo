@@ -29,7 +29,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
-                    "data": Joi.array().items(courseSchema, enrolledOrFacilitatingCourseSchema),
+                    "data": Joi.array(),
+                    // .items(courseSchema, enrolledOrFacilitatingCourseSchema  ),
                 })
             },
             tags: ['api'],
@@ -52,6 +53,24 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             tags: ['api'],
             handler: courseController.getExerciseById
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/{courseId}/exercises',
+        config: {
+            description: 'Get complete list of exercises in the course',
+            validate: {
+                params: {
+                    courseId: Joi.number()
+                }
+            },
+            response: {
+                schema: enrolledExerciseSchema
+            },
+            tags: ['api'],
+            handler: courseController.getCourseExercises
         }
     });
 
