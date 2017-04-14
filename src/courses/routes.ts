@@ -33,6 +33,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     // .items(courseSchema, enrolledOrFacilitatingCourseSchema  ),
                 })
             },
+            auth: 'jwt',            
             tags: ['api'],
             handler: courseController.getCoursesList
         }
@@ -52,6 +53,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: enrolledExerciseSchema
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getExerciseById
         }
@@ -70,6 +72,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 // schema: enrolledExerciseSchema
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseExercises
         }
@@ -90,6 +93,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "notes": Joi.string().default("# Notes Title ## Not sub-title Some content. \n More.")
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseNotes
         }
