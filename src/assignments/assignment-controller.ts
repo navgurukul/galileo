@@ -85,23 +85,66 @@ export default class AssignmentController {
                 {
                     id: 471,
                     reviewerId: 75,
-                    submissionId: 12,
+                    submissionObject: {
+                        files: [
+                            "http://cloud.google.com/randId1_some_filename.html",
+                            "http://cloud.google.com/randId1_some_more.css",
+                            "http://cloud.google.com/randId1_evenmore.js"
+                        ],
+                        notes: "Some notes.",
+                        submittedAt: Date.now(),
+                        userId: 1242
+                    },
                     approved: true,
                     notes: "Jaldi kar dio bhai!!"
                 },
                 {
+                    id: 213,
+                        reviewerId: 75,
+                        submissionObject: {
+                            files: [
+                                "http://cloud.google.com/randId1_some_filename.html",
+                                "http://cloud.google.com/randId1_some_more.css",
+                                "http://cloud.google.com/randId1_evenmore.js"
+                            ],
+                            notes: "Some notes.",
+                            submittedAt: Date.now(),
+                            userId: 1242
+                        },
+                        approved: null,
+                    notes: null
+                },
+                {
                     id: 652,
                     reviewerId: 75,
-                    submissionId: 32,
-                    approved: false,
+                    submissionObject: {
+                        files: [
+                            "http://cloud.google.com/randId1_some_filename.html",
+                            "http://cloud.google.com/randId1_some_more.css",
+                            "http://cloud.google.com/randId1_evenmore.js"
+                        ],
+                        notes: "Some notes.",
+                        submittedAt: Date.now(),
+                        userId: 1242
+                    },
+                    approved: null,
                     notes: null
                 },
                 {
                     id: 897,
                     reviewerId: 75,
-                    submissionId: 221,
+                    submissionObject: {
+                        files: [
+                            "http://cloud.google.com/randId1_some_filename.html",
+                            "http://cloud.google.com/randId1_some_more.css",
+                            "http://cloud.google.com/randId1_evenmore.js"
+                        ],
+                        notes: "Some notes.",
+                        submittedAt: Date.now(),
+                        userId: 1242
+                    },
                     approved: true,
-                    notes: "Jaldi kar dio bhai!!"
+                    notes: "EKdum mast banaya"
                 }
             ]
         });
