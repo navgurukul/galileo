@@ -24,7 +24,7 @@ export default class CourseController {
                 {
                     id: 532,
                     name: "Primary Logic 101",
-                    link: "primarylogic",
+                    link: "python",
                     description: "Primary Logic using Python 2.7",
                     totalExercises: 123,
                     daysToComplete: 40,
