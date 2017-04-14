@@ -45,7 +45,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             description: 'Get complete details of the exercise with the given ID.',
             validate: {
                 params: {
-                    courseId: Joi.number()
+                    courseId: Joi.number(),
+                    exerciseId : Joi.number()
                 }
             },
             response: {
