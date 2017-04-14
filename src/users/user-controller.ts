@@ -19,9 +19,9 @@ export default class UserController {
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({ 
-            "jwt": Jwt.sign({email: "r@navgurukul.org", id: 12}, 
-            "secret", {expiresIn: "24h"}) 
+        return reply({
+            "jwt": Jwt.sign({email: "r@navgurukul.org", id: 12},
+            "secret", {expiresIn: "24h"})
         });
     }
 

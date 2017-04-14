@@ -40,7 +40,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/exercise',
+        path: '/courses/{courseId}/exercise/{exerciseId}',
         config: {
             description: 'Get complete details of the exercise with the given ID.',
             validate: {
@@ -67,7 +67,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-                schema: enrolledExerciseSchema
+                // schema: enrolledExerciseSchema
             },
             tags: ['api'],
             handler: courseController.getCourseExercises
