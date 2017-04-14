@@ -81,9 +81,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         config: {
             description: 'List of peer review requests.',
             response: {
-                schema: Joi.object({
-                    data: Joi.array().items(peerReview)
-                })
+                // schema: Joi.object({
+                    // data: Joi.array().items(peerReview)
+                // })
             },
             auth: 'jwt',
             tags: ['api'],
