@@ -93,7 +93,7 @@ export default class AssignmentController {
                         ],
                         notes: "Some notes.",
                         submittedAt: Date.now(),
-                        userId: 1242
+                        userName: "shivam"
                     },
                     approved: true,
                     notes: "Jaldi kar dio bhai!!"
@@ -109,7 +109,7 @@ export default class AssignmentController {
                             ],
                             notes: "Some notes.",
                             submittedAt: Date.now(),
-                            userId: 1242
+                            userName: "rahul"
                         },
                         approved: null,
                     notes: null
@@ -125,7 +125,7 @@ export default class AssignmentController {
                         ],
                         notes: "Some notes.",
                         submittedAt: Date.now(),
-                        userId: 1242
+                        userName: "dhannu"
                     },
                     approved: null,
                     notes: null
