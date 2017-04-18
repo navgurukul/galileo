@@ -26,55 +26,59 @@ export default class UserController {
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 5675,
-            name: "Rahul",
-            email: "rahul16@navgurukul.org",
-            profilePic: "http://google.com/rahul_pic.png"
-        });
+
+            database.select('*').from('users').where('id','=',request.params.userId).then(function(rows){
+//                console.log(rows);
+                return reply(rows[0]);
+            });
+
     }
 
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 241,
-            text: "Kya aadmi hai yeh? Gazab!",
+        
+       // console.log(request.params.userId);
+       // console.log(request.payload.text);
+   
+        let mynotes=[{'student':request.params.userId,'text':request.payload.text,'facilitator':request.params.userId}];
+        database.insert(mynotes).into('notes').then(function (id) {
+            let entrynumber=id[0];
+  return reply({
+            id: entrynumber,
+            text: request.payload.text,
+            facilitator:request.params.userId,
             createdAt: Date.now(),
-            createdBy: 131
+            student: request.params.userId,
         });
-    }
+
+    });
+}
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        reply({
-            "data": [
-                {
-                    id: 241,
-                    text: "Kya aadmi hai yeh? Gazab!",
-                    createdAt: Date.now(),
-                    createdBy: 131
-                },
-                {
-                    id: 1463,
-                    text: "He has been kicking some ass lately!",
-                    createdAt: Date.now(),
-                    createdBy: 67
-                },
-                {
-                    id: 453,
-                    text: "He has been slacking off lately.",
-                    createdAt: Date.now(),
-                    createdBy: 131
-                }
-            ]
-        });
+
+//console.log(request.params.userId);
+database.select().from('notes').where('student','=',request.params.userId).then(function(rows){
+  //  console.log(rows);
+    reply({"data":rows});
+});
+
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 241,
-            text: "Kya aadmi hai yeh? Gazab!",
-            createdAt: Date.now(),
-            createdBy: 131
-        });
+     //   console.log(request.params.userId);
+       // console.log(request.params.noteId);
+
+  
+    database('notes').where("id",request.params.noteId).del().then(function (rows,count) {
+  console.log(count);
+});  
+  reply({
+      id:request.params.noteId,
+      student:request.params.userId,
+      facilitator:request.params.userId,
+      createdAt:Date.now(),
+      text:"Whats the use of displaying delted note"
+  });
+  
     }
 
 }

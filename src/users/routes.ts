@@ -142,6 +142,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 params: {
                     userId: Joi.number().required(),
+                    noteId:Joi.number().required(),
                 }
             },
             response: {
