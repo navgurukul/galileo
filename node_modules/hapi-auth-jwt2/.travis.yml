@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - "4.2.3"
+  - "6.0.0"
+env:
+  - JWT_SECRET="EverythingIsAwesome!"
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov --file coverage/lcov.info --disable search

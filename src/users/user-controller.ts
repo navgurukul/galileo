@@ -26,19 +26,13 @@ export default class UserController {
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
-
             database.select('*').from('users').where('id','=',request.params.userId).then(function(rows){
-//                console.log(rows);
                 return reply(rows[0]);
             });
 
     }
 
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        
-       // console.log(request.params.userId);
-       // console.log(request.payload.text);
-   
         let mynotes=[{'student':request.params.userId,'text':request.payload.text,'facilitator':request.params.userId}];
         database.insert(mynotes).into('notes').then(function (id) {
             let entrynumber=id[0];
@@ -49,28 +43,20 @@ export default class UserController {
             createdAt: Date.now(),
             student: request.params.userId,
         });
-
     });
 }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-
-//console.log(request.params.userId);
 database.select().from('notes').where('student','=',request.params.userId).then(function(rows){
-  //  console.log(rows);
     reply({"data":rows});
 });
 
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-     //   console.log(request.params.userId);
-       // console.log(request.params.noteId);
-
-  
     database('notes').where("id",request.params.noteId).del().then(function (rows,count) {
   console.log(count);
-});  
+});
   reply({
       id:request.params.noteId,
       student:request.params.userId,
@@ -78,7 +64,6 @@ database.select().from('notes').where('student','=',request.params.userId).then(
       createdAt:Date.now(),
       text:"Whats the use of displaying delted note"
   });
-  
     }
 
 }
