@@ -126,7 +126,7 @@ CREATE TABLE `submissions` (
   `exercise` int(11) unsigned NOT NULL,
   `userId` int(11) unsigned NOT NULL,
   `submittedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `path` json DEFAULT NULL,
+  `path` varchar(1000) DEFAULT NULL,
   `notesStudent` varchar(300) DEFAULT NULL,
   `peerReviewer` int(11) unsigned DEFAULT NULL,
   `approved` tinyint(1) DEFAULT '0',
