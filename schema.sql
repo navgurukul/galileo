@@ -108,7 +108,7 @@ CREATE TABLE `notes` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `student` int(11) unsigned DEFAULT NULL,
   `facilitator` int(11) unsigned DEFAULT NULL,
-  `notes` varchar(500) NOT NULL,
+  `text` varchar(500) NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
