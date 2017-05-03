@@ -90,6 +90,7 @@ CREATE TABLE `exercises` (
   `exerciseReviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
   `content` varchar(500) DEFAULT NULL,
   `parentExercise` int(11) unsigned DEFAULT NULL,
+  `courseId` int(100) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug_UNIQUE` (`slug`),
   KEY `exercises_ibfk_1_idx` (`parentExercise`),
