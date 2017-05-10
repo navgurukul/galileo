@@ -1,174 +1,285 @@
--- MySQL dump 10.13  Distrib 5.7.12, for osx10.10 (x86_64)
+-- phpMyAdmin SQL Dump
+-- version 4.7.0
+-- https://www.phpmyadmin.net/
 --
--- Host: localhost    Database: davinci
--- ------------------------------------------------------
--- Server version	5.7.12
+-- Host: localhost
+-- Generation Time: May 11, 2017 at 01:05 AM
+-- Server version: 10.1.21-MariaDB
+-- PHP Version: 5.6.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `davinci`
+--
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `batch`
 --
 
-DROP TABLE IF EXISTS `batch`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `batch` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `facilitator` int(11) unsigned DEFAULT NULL,
-  `course` int(11) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `batch_ibfk_1_idx` (`facilitator`),
-  KEY `batch_ibfk_2_idx` (`course`),
-  CONSTRAINT `batch_ibfk_1` FOREIGN KEY (`facilitator`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `batch_ibfk_2` FOREIGN KEY (`course`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `id` int(11) UNSIGNED NOT NULL,
+  `facilitator` int(11) UNSIGNED DEFAULT NULL,
+  `course` int(11) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `course_enrolments`
---
-
-DROP TABLE IF EXISTS `course_enrolments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `course_enrolments` (
-  `id` int(11) unsigned NOT NULL,
-  `student` int(11) unsigned DEFAULT NULL,
-  `course` int(11) unsigned DEFAULT NULL,
-  `enrolled` tinyint(1) DEFAULT '0',
-  `batch` int(11) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `course_enrolments_ibfk_1_idx` (`course`),
-  KEY `course_enrolments_ibfk_2_idx` (`student`),
-  KEY `course_enrolments_ibfk_3_idx` (`batch`),
-  CONSTRAINT `course_enrolments_ibfk_1` FOREIGN KEY (`course`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `course_enrolments_ibfk_2` FOREIGN KEY (`student`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `course_enrolments_ibfk_3` FOREIGN KEY (`batch`) REFERENCES `batch` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `courses`
 --
 
-DROP TABLE IF EXISTS `courses`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `courses` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) UNSIGNED NOT NULL,
   `course` enum('html','js','python') DEFAULT NULL,
   `course_logo_url` varchar(45) DEFAULT NULL,
-  `notes` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `notes` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_enrolments`
+--
+
+CREATE TABLE `course_enrolments` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `studentId` int(11) UNSIGNED DEFAULT NULL,
+  `courseId` int(11) UNSIGNED DEFAULT NULL,
+  `enrolled` tinyint(1) DEFAULT '0',
+  `batch` int(11) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_facilitations`
+--
+
+CREATE TABLE `course_facilitations` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `facilitatorId` int(11) UNSIGNED DEFAULT NULL,
+  `courseId` int(11) UNSIGNED DEFAULT NULL,
+  `facilitating` tinyint(1) DEFAULT '0',
+  `batch` int(11) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `exercises`
 --
 
-DROP TABLE IF EXISTS `exercises`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `exercises` (
-  `id` int(11) unsigned NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
   `name` varchar(30) NOT NULL,
   `slug` varchar(30) NOT NULL,
   `course` enum('html','js','python') DEFAULT NULL,
-  `sequenceNum` int(10) unsigned DEFAULT NULL,
+  `sequenceNum` int(10) UNSIGNED DEFAULT NULL,
   `path` varchar(50) DEFAULT NULL,
   `exerciseReviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
   `content` varchar(500) DEFAULT NULL,
-  `parentExercise` int(11) unsigned DEFAULT NULL,
-  `courseId` int(100) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug_UNIQUE` (`slug`),
-  KEY `exercises_ibfk_1_idx` (`parentExercise`),
-  CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`parentExercise`) REFERENCES `exercises` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `parentExercise` int(11) UNSIGNED DEFAULT NULL,
+  `courseId` int(100) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `notes`
 --
 
-DROP TABLE IF EXISTS `notes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notes` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `student` int(11) unsigned DEFAULT NULL,
-  `facilitator` int(11) unsigned DEFAULT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
+  `student` int(11) UNSIGNED DEFAULT NULL,
+  `facilitator` int(11) UNSIGNED DEFAULT NULL,
   `text` varchar(500) NOT NULL,
-  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `submissions`
 --
 
-DROP TABLE IF EXISTS `submissions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `submissions` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `exercise` int(11) unsigned NOT NULL,
-  `userId` int(11) unsigned NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
+  `exercise` int(11) UNSIGNED NOT NULL,
+  `userId` int(11) UNSIGNED NOT NULL,
   `submittedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `path` varchar(1000) DEFAULT NULL,
   `notesStudent` varchar(300) DEFAULT NULL,
-  `peerReviewer` int(11) unsigned DEFAULT NULL,
+  `peerReviewer` int(11) UNSIGNED DEFAULT NULL,
   `approved` tinyint(1) DEFAULT '0',
   `notesReviewer` varchar(300) DEFAULT NULL,
-  `reviewedAt` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `assignmentId` (`exercise`),
-  KEY `userId` (`userId`),
-  KEY `submissions_ibfk_3_idx` (`peerReviewer`),
-  CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`exercise`) REFERENCES `exercises` (`id`),
-  CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users` (`id`),
-  CONSTRAINT `submissions_ibfk_3` FOREIGN KEY (`peerReviewer`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  `reviewedAt` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(11) UNSIGNED NOT NULL,
   `email` char(50) NOT NULL DEFAULT '',
   `name` char(100) NOT NULL DEFAULT '',
   `profilePicture` char(150) DEFAULT NULL,
   `googleUserId` char(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `googleUserId` (`googleUserId`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+  `facilitator` int(2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `email`, `name`, `profilePicture`, `googleUserId`, `facilitator`) VALUES
+(1, 'srivastavadi12@gmail.com', 'Divyanshu Srivastava', 'http://google.png', 'googleid', 0),
+(2, '6677aditya@gmail.com', 'Aditya Kumar', 'http://googlek.png', 'googleID1', 1);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `batch`
+--
+ALTER TABLE `batch`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `batch_ibfk_1_idx` (`facilitator`),
+  ADD KEY `batch_ibfk_2_idx` (`course`);
+
+--
+-- Indexes for table `courses`
+--
+ALTER TABLE `courses`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `course_enrolments`
+--
+ALTER TABLE `course_enrolments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_enrolments_ibfk_1_idx` (`courseId`),
+  ADD KEY `course_enrolments_ibfk_2_idx` (`studentId`),
+  ADD KEY `course_enrolments_ibfk_3_idx` (`batch`);
+
+--
+-- Indexes for table `course_facilitations`
+--
+ALTER TABLE `course_facilitations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_enrolments_ibfk_1_idx` (`courseId`),
+  ADD KEY `course_enrolments_ibfk_2_idx` (`facilitatorId`),
+  ADD KEY `course_enrolments_ibfk_3_idx` (`batch`);
+
+--
+-- Indexes for table `exercises`
+--
+ALTER TABLE `exercises`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug_UNIQUE` (`slug`),
+  ADD KEY `exercises_ibfk_1_idx` (`parentExercise`);
+
+--
+-- Indexes for table `notes`
+--
+ALTER TABLE `notes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `submissions`
+--
+ALTER TABLE `submissions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `assignmentId` (`exercise`),
+  ADD KEY `userId` (`userId`),
+  ADD KEY `submissions_ibfk_3_idx` (`peerReviewer`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `googleUserId` (`googleUserId`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `batch`
+--
+ALTER TABLE `batch`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `courses`
+--
+ALTER TABLE `courses`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `notes`
+--
+ALTER TABLE `notes`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `submissions`
+--
+ALTER TABLE `submissions`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `batch`
+--
+ALTER TABLE `batch`
+  ADD CONSTRAINT `batch_ibfk_1` FOREIGN KEY (`facilitator`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `batch_ibfk_2` FOREIGN KEY (`course`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `course_enrolments`
+--
+ALTER TABLE `course_enrolments`
+  ADD CONSTRAINT `course_enrolments_ibfk_1` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `course_enrolments_ibfk_2` FOREIGN KEY (`studentId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `course_enrolments_ibfk_3` FOREIGN KEY (`batch`) REFERENCES `batch` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `exercises`
+--
+ALTER TABLE `exercises`
+  ADD CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`parentExercise`) REFERENCES `exercises` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `submissions`
+--
+ALTER TABLE `submissions`
+  ADD CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`exercise`) REFERENCES `exercises` (`id`),
+  ADD CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `submissions_ibfk_3` FOREIGN KEY (`peerReviewer`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+COMMIT;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2017-04-10 18:30:35
