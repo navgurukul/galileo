@@ -5,7 +5,8 @@ export const userSchema:Joi.ObjectSchema = Joi.object({
     batchId: Joi.number(),
     name: Joi.string(),
     email: Joi.string().email(),
-    profilePic: Joi.string().uri()
+    profilePic: Joi.string().uri(),
+    role: Joi.string()
 });
 
 export const noteSchema:Joi.ObjectSchema = Joi.object({

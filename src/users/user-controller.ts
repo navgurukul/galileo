@@ -30,7 +30,9 @@ export default class UserController {
             id: 5675,
             name: "Rahul",
             email: "rahul16@navgurukul.org",
-            profilePic: "http://google.com/rahul_pic.png"
+            profilePic: "http://google.com/rahul_pic.png",
+            batchId: "123",
+            role: 'facilitator'
         });
     }
 
