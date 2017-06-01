@@ -1,4 +1,4 @@
-build
+build/
 node_modules
 src/configurations/config.local.json
 .DS_Store

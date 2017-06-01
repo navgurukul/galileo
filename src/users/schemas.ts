@@ -7,7 +7,7 @@ export const userSchema:Joi.ObjectSchema = Joi.object({
     email: Joi.string().email(),
     profilePicture: Joi.string().uri(),
     googleUserId:Joi.string(),
-});
+}).unknown();
 
 export const noteSchema:Joi.ObjectSchema = Joi.object({
     id: Joi.number().required(),
@@ -15,5 +15,4 @@ export const noteSchema:Joi.ObjectSchema = Joi.object({
     text: Joi.string().required(),
     createdAt: Joi.date().required(),
     facilitator: Joi.number().required(),
-
 });

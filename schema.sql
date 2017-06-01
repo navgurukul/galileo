@@ -21,6 +21,7 @@ SET time_zone = "+00:00";
 --
 -- Database: `davinci`
 --
+use davinci;
 
 -- --------------------------------------------------------
 
@@ -138,7 +139,7 @@ CREATE TABLE `users` (
   `email` char(50) NOT NULL DEFAULT '',
   `name` char(100) NOT NULL DEFAULT '',
   `profilePicture` char(150) DEFAULT NULL,
-  `googleUserId` char(20) DEFAULT NULL,
+  `googleUserId` char(30) DEFAULT NULL,
   `facilitator` int(2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
