@@ -18,7 +18,7 @@ export default class CourseController {
         this.configs = configs;
     }
 
-    public getCoursesList(request: Hapi.Request, reply: Hapi.IReply) {
+    public getCoursesList(request: Hapi.Request, reply: Hapi.IReply) {        
         return reply({
             "data": [
                 {
@@ -115,9 +115,13 @@ export default class CourseController {
     }
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
+       database.select('*').from('courses').where('id','=',request.params.courseId).then(function(rows){
+        let mynotes=rows[0].notes;
+        console.log(mynotes);
         reply({
-            "notes": "# Some Heading ## Some sub-heading ## Some more sub-heading. Some text."
+            "notes":mynotes
         });
+    });
     }
 
     public enrollInCourse(request: Hapi.Request, reply: Hapi.IReply) {

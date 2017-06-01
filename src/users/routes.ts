@@ -25,7 +25,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
-                    "jwt": Joi.string()
+                    "user": userSchema,
+                    "jwt": Joi.string().required()
                            .default("xxx.yyy.zzz")
                            .description("Will authenticate all the future requests.")
                 })
@@ -85,7 +86,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'POST',
         path: '/users/{userId}/notes',
         config: {
-            description: 'Create a note for a user.',
+            description: 'Will be used by the facilitator to create a new note against a user.',
             auth: 'jwt',
             validate: {
                 params: {
@@ -142,6 +143,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 params: {
                     userId: Joi.number().required(),
+                    noteId:Joi.number().required(),
                 }
             },
             response: {

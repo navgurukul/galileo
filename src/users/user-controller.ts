@@ -19,62 +19,85 @@ export default class UserController {
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            "jwt": Jwt.sign({email: "r@navgurukul.org", id: 12},
-            "secret", {expiresIn: "24h"})
+
+        let auth = new GoogleAuth;
+        let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+        client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (e, login) => {
+
+            let googleAuthPayload = login.getPayload();
+            console.log("payload", googleAuthPayload);
+
+            // Check if user has navgurukul.org eMail-ID.
+            // Currently only NG students are allowed to access the platform.
+            if (googleAuthPayload['hd'] !== 'navgurukul.org') {
+                return reply(Boom.unauthorized("You need to have a navgurukul.org email to access this."));
+            }
+
+            database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
+                // If a user does not exist then create a user and return the ID.
+                if (rows.length === 0) {
+                    return database('users').insert({
+                        email: googleAuthPayload['email'],
+                        name: googleAuthPayload['name'],
+                        profilePicture: googleAuthPayload['picture'],
+                        googleUserId: googleAuthPayload['sub']
+                    }).then((response) => {
+                        // return Promise.resolve({"hello": "123"});
+                        return database('users').select().where('email', googleAuthPayload['email']).then( (rows) => {
+                            let user = rows[0];
+                            return Promise.resolve(user);
+                        });
+                    })
+                } 
+                // If the user already exists
+                else {
+                    let user = rows[0];
+                    return Promise.resolve(user);
+                }
+            }).then((user) => {
+                console.log("promise response", user);
+                // Return the signed token & the user object             
+                let token = Jwt.sign({email: user.email, id: user.id}, "secret", {expiresIn: "24h"});
+                return reply({
+                    "user": user,
+                    "jwt": token
+                });
+            });
         });
+
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 5675,
-            name: "Rahul",
-            email: "rahul16@navgurukul.org",
-            profilePic: "http://google.com/rahul_pic.png"
+
+        database.select('*').from('users').where('id','=',request.params.userId).then(function(rows){
+            return reply(rows[0]);
         });
+
     }
 
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 241,
-            text: "Kya aadmi hai yeh? Gazab!",
-            createdAt: Date.now(),
-            createdBy: 131
+
+        let note = { 'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId };
+        database.insert(note).into('notes').then((id) => {
+            return reply({ id: id[0] });
         });
+
     }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        reply({
-            "data": [
-                {
-                    id: 241,
-                    text: "Kya aadmi hai yeh? Gazab!",
-                    createdAt: Date.now(),
-                    createdBy: 131
-                },
-                {
-                    id: 1463,
-                    text: "He has been kicking some ass lately!",
-                    createdAt: Date.now(),
-                    createdBy: 67
-                },
-                {
-                    id: 453,
-                    text: "He has been slacking off lately.",
-                    createdAt: Date.now(),
-                    createdBy: 131
-                }
-            ]
+    
+        database.select().from('notes').where('student', request.params.userId).then((rows) => {
+            reply({ "data": rows });
         });
+
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-        return reply({
-            id: 241,
-            text: "Kya aadmi hai yeh? Gazab!",
-            createdAt: Date.now(),
-            createdBy: 131
+
+        database('notes').where("id",request.params.noteId).del().then( (rows,count) => {
+            return reply({ "success": true });
         });
+
     }
 
 }
