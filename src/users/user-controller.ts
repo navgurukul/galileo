@@ -25,7 +25,6 @@ export default class UserController {
         client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (e, login) => {
 
             let googleAuthPayload = login.getPayload();
-            console.log("payload", googleAuthPayload);
 
             // Check if user has navgurukul.org eMail-ID.
             // Currently only NG students are allowed to access the platform.
@@ -55,7 +54,6 @@ export default class UserController {
                     return Promise.resolve(user);
                 }
             }).then((user) => {
-                console.log("promise response", user);
                 // Return the signed token & the user object             
                 let token = Jwt.sign({email: user.email, id: user.id}, "secret", {expiresIn: "24h"});
                 return reply({
@@ -86,16 +84,16 @@ export default class UserController {
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
     
-        database.select().from('notes').where('student', request.params.userId).then((rows) => {
-            reply({ "data": rows });
+        database.select().from('notes').where('student', request.params.userId).orderBy('createdAt', 'desc').then((rows) => {
+            reply({ 'data': rows });
         });
 
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('notes').where("id",request.params.noteId).del().then( (rows,count) => {
-            return reply({ "success": true });
+        database('notes').where('id',request.params.noteId).del().then( (rows,count) => {
+            return reply({ success: true });
         });
 
     }

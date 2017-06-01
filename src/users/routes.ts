@@ -97,7 +97,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 })
             },
             response: {
-                schema: noteSchema
+                schema: {
+                    id: Joi.number().required()
+                }
             },
             plugins: {
                 'hapi-swagger': {
@@ -147,7 +149,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-                schema: noteSchema.description("The deleted note object.")
+                schema: Joi.object({
+                    success: Joi.bool().required()
+                })
             },
             tags: ['api'],
             handler: userController.deleteUserNoteById
