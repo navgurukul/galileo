@@ -47,7 +47,7 @@ export default class UserController {
                             let user = rows[0];
                             return Promise.resolve(user);
                         });
-                    })
+                    });
                 } 
                 // If the user already exists
                 else {
