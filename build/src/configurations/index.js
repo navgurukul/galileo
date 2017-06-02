@@ -12,7 +12,7 @@ const configs = new nconf.Provider({
     }
 });
 function getDatabaseConfig() {
-    console.log(process.env.NODE_ENV);
+    console.log("Node Environment: ", process.env.NODE_ENV);
     return configs.get("database");
 }
 exports.getDatabaseConfig = getDatabaseConfig;

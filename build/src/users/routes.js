@@ -20,7 +20,8 @@ function default_1(server, serverConfigs, database) {
             },
             response: {
                 schema: Joi.object({
-                    "jwt": Joi.string()
+                    "user": schemas_1.userSchema,
+                    "jwt": Joi.string().required()
                         .default("xxx.yyy.zzz")
                         .description("Will authenticate all the future requests.")
                 })
@@ -78,7 +79,7 @@ function default_1(server, serverConfigs, database) {
         method: 'POST',
         path: '/users/{userId}/notes',
         config: {
-            description: 'Create a note for a user.',
+            description: 'Will be used by the facilitator to create a new note against a user.',
             auth: 'jwt',
             validate: {
                 params: {
@@ -89,7 +90,9 @@ function default_1(server, serverConfigs, database) {
                 })
             },
             response: {
-                schema: schemas_1.noteSchema
+                schema: {
+                    id: Joi.number().required()
+                }
             },
             plugins: {
                 'hapi-swagger': {
@@ -137,7 +140,9 @@ function default_1(server, serverConfigs, database) {
                 }
             },
             response: {
-                schema: schemas_1.noteSchema.description("The deleted note object.")
+                schema: Joi.object({
+                    success: Joi.bool().required()
+                })
             },
             tags: ['api'],
             handler: userController.deleteUserNoteById

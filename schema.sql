@@ -140,7 +140,7 @@ CREATE TABLE `users` (
   `name` char(100) NOT NULL DEFAULT '',
   `profilePicture` char(150) DEFAULT NULL,
   `googleUserId` char(30) DEFAULT NULL,
-  `facilitator` int(2) DEFAULT NULL
+  `facilitator` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

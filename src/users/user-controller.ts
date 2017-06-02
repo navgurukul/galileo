@@ -35,11 +35,14 @@ export default class UserController {
             database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
                 // If a user does not exist then create a user and return the ID.
                 if (rows.length === 0) {
+                    // Check if the user needs to be created as a facilitator
+                    let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1 ? true : false;
                     return database('users').insert({
                         email: googleAuthPayload['email'],
                         name: googleAuthPayload['name'],
                         profilePicture: googleAuthPayload['picture'],
-                        googleUserId: googleAuthPayload['sub']
+                        googleUserId: googleAuthPayload['sub'],
+                        facilitator: isFacilitator
                     }).then((response) => {
                         // return Promise.resolve({"hello": "123"});
                         return database('users').select().where('email', googleAuthPayload['email']).then( (rows) => {

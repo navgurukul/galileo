@@ -6,8 +6,9 @@ export const userSchema:Joi.ObjectSchema = Joi.object({
     name: Joi.string(),
     email: Joi.string().email(),
     profilePicture: Joi.string().uri(),
-    googleUserId:Joi.string(),
-}).unknown();
+    googleUserId: Joi.string(),
+    facilitator: Joi.bool()
+});
 
 export const noteSchema:Joi.ObjectSchema = Joi.object({
     id: Joi.number().required(),

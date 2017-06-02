@@ -10,25 +10,40 @@ function default_1(server, serverConfigs, database) {
         method: 'GET',
         path: '/courses',
         config: {
-            description: 'List of courses under 3 categories: \n \
-                          1. User has enrolled in. \n \
-                          2. User is facilitating. \n \
+            description: 'List of courses under 3 categories: \
+                          1. User has enrolled in. \
+                          2. User is facilitating. \
                           3. All courses (includes courses from 1 and 2.)',
-            validate: {
-                params: {
-                    facilitating: Joi.bool().default(true),
-                    enrolled: Joi.bool().default(true),
-                    allAvailable: Joi.bool().default(true)
-                }
-            },
             response: {
                 schema: Joi.object({
-                    "data": Joi.array(),
+                    "facilitatingCourses": schemas_1.facilitatingCourseSchema,
+                    "enrolledCourses": schemas_1.enrolledCourseSchema,
+                    "availableCourses": schemas_1.courseSchema
                 })
             },
             auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCoursesList
+        }
+    });
+    server.route({
+        method: 'GET',
+        path: '/courses/{courseId}/exercises',
+        config: {
+            description: 'Get complete list of exercises in the course',
+            validate: {
+                params: {
+                    courseId: Joi.number().required()
+                }
+            },
+            response: {
+                schema: Joi.object({
+                    "data": Joi.array().items(schemas_1.exerciseSchema)
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.getCourseExercises
         }
     });
     server.route({
@@ -43,27 +58,11 @@ function default_1(server, serverConfigs, database) {
                 }
             },
             response: {
-                schema: schemas_1.enrolledExerciseSchema
+                schema: schemas_1.exerciseSchema
             },
             auth: 'jwt',
             tags: ['api'],
             handler: courseController.getExerciseById
-        }
-    });
-    server.route({
-        method: 'GET',
-        path: '/courses/{courseId}/exercises',
-        config: {
-            description: 'Get complete list of exercises in the course',
-            validate: {
-                params: {
-                    courseId: Joi.number()
-                }
-            },
-            response: {},
-            auth: 'jwt',
-            tags: ['api'],
-            handler: courseController.getCourseExercises
         }
     });
     server.route({
@@ -78,7 +77,9 @@ function default_1(server, serverConfigs, database) {
             },
             response: {
                 schema: Joi.object({
-                    "notes": Joi.string().default("# Notes Title ## Not sub-title Some content. \n More.")
+                    "notes": Joi.string()
+                        .default("# Notes Title ## Not sub-title Some content. \n More.")
+                        .description("Notes in markdown.")
                 })
             },
             auth: 'jwt',
@@ -97,7 +98,9 @@ function default_1(server, serverConfigs, database) {
                 }
             },
             response: {
-                schema: schemas_1.enrolledOrFacilitatingCourseSchema.description("`enrolled` flag is true now.")
+                schema: {
+                    "enrolled": Joi.bool()
+                }
             },
             auth: 'jwt',
             tags: ['api'],

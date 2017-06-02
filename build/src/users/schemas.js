@@ -8,6 +8,7 @@ exports.userSchema = Joi.object({
     email: Joi.string().email(),
     profilePicture: Joi.string().uri(),
     googleUserId: Joi.string(),
+    facilitator: Joi.bool()
 });
 exports.noteSchema = Joi.object({
     id: Joi.number().required(),
