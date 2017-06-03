@@ -30,6 +30,11 @@
             "clientId": "330505979484-sgfkanh7p0nsqvua8susd9q60i94dnbh.apps.googleusercontent.com",
             "clientSecret": "x5UGIUszCFBvRTGW41xpA5-g"
         },
+        "googleCloud": {
+            "projectId": "navgurukul-159107",
+            "keyFilename": "configurations/ng-gcloud-key.json",
+            "assignmentsBucket": "ng-user-assignments"
+        },
         "facilitatorEmails": [
             "a@navgurukul.org",
             "r@navgurukul.org"

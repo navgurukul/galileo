@@ -21,9 +21,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                           3. All courses (includes courses from 1 and 2.)',
             response: {
                 schema: Joi.object({
-                    "facilitatingCourses": facilitatingCourseSchema,
-                    "enrolledCourses": enrolledCourseSchema,
-                    "availableCourses": courseSchema
+                    "facilitatingCourses": Joi.array().items(facilitatingCourseSchema),
+                    "enrolledCourses": Joi.array().items(enrolledCourseSchema),
+                    "availableCourses": Joi.array().items(courseSchema)
                 })
             },
             auth: 'jwt',
@@ -57,7 +57,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/courses/{courseId}/exercise/{exerciseId}',
         config: {
-            description: 'Get complete details of the exercise with the given ID.',
+            description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
             validate: {
                 params: {
                     courseId: Joi.number(),

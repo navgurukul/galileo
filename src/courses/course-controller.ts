@@ -25,44 +25,83 @@ export default class CourseController {
         let enrolledCourses = [];
         let availableCourses = [];
 
-        let enrolledQ = this.database('course_enrolments').select('courses.id', 'courses.name', 'courses.type', 
-                'courses.logo', knex.raw('COUNT(exercises.id) as total_exercises'))
-            .innerJoin('exercises', 'exercises.course_id', 'course_enrolments.course_id')
-            .innerJoin('courses', 'course_enrolments.student_id', request.userId)
-            .groupBy('courses.id')
+        let enrolledQ = 
+            database('course_enrolments')
+            .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
+                    'courses.shortDescription', 'course_enrolments.enrolledAt',
+                    database.raw('COUNT(exercises.id) as totalExercises'),
+                    database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
+            .innerJoin('courses', 'course_enrolments.courseId', 'courses.id')
+            .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
+            .leftJoin('submissions', function(){
+                this.on('submissions.userId', '=', request.userId)
+                    .andOn('submissions.exerciseId', '=', 'exercises.id')
+                    .andOn('submissions.completed', '=', 1);
+            })
+            .where({ 'course_enrolments.studentId': 25 })
+            .groupBy('exercises.courseId')
             .then( (rows) => {
                 enrolledCourses = rows;
-                return Promise.resolve();
-            });
+                let lastSubmissionQueries = [];
+                for (let i = 0; i < enrolledCourses.length; i++) {
+                    let oneDay = 24*60*60*1000;
+                    enrolledCourses[i].daysSinceEnrolled = Math.abs( +new Date() - enrolledCourses[i].enrolledAt ) / oneDay;
+                    lastSubmissionQueries.push(
+                        database('submissions')
+                        .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
+                        .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
+                        .innerJoin('courses', 'courses.id', 'exercises.courseId')
+                        .where({ 'exercises.courseId': enrolledCourses[i].id, 'submissions.userId': request.userId })
+                        .orderBy('submissions.submittedAt', 'desc')
+                        .limit(1)
+                        .then( (rows) =>{
+                            if (rows.length < 1)  {
+                                enrolledCourses[i].lastSubmission = {};
+                            } else {
+                                enrolledCourses[i].lastSubmission = rows[0];
+                            }
+                            return Promise.resolve();
+                        })
+                    );
+                }
+                return Promise.all(lastSubmissionQueries).then( () =>{
+                    return Promise.resolve();
+                });
+            }); 
         
-        let facilitatingQ = this.database('courses')
-            .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'batches.name as batch_name', 'batches.id as batch_id')
+        let facilitatingQ = 
+            database('courses')
+            .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
+                    'batches.name as batch_name', 'batches.id as batch_id')
             .join('batches', function(){
-                this.on('courses.id', '=', 'batches.course_id').andOn('batches.facilitator_id', request.userId);
-            }).then( (rows) => {
+                this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
+            })
+            .then( (rows) => {
                 facilitatingCourses = rows;
                 return Promise.resolve();
             });
         
 
-        let availableQ = database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo')
+        let availableQ = 
+            database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
             .where('courses.id', 'not in', 
             database('courses').distinct().select('courses.id').join('batches', function(){
-                this.on('courses.id', '=', 'batches.course_id').andOn('batches.facilitator_id', '=', request.userId);
-            }).union(function(){
+                this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
+            })
+            .union(function(){
                 this.select('courses.id').distinct().from('courses').join('course_enrolments', function(){
-                    this.on('courses.id', '=', 'course_enrolments.course_id').andOn('course_enrolments.student_id', '=', request.userId);
+                    this.on('courses.id', '=', 'course_enrolments.courseId').andOn('course_enrolments.studentId', '=', request.userId);
                 });
             })
-        ).then( (rows) => {
-            availableCourses = rows;
-            return Promise.resolve();
-        });
+            ).then( (rows) => {
+                availableCourses = rows;
+                return Promise.resolve();
+            });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
             return reply({
-                "facilitatingCourses": facilitatingCourses,
                 "enrolledCourses": enrolledCourses,
+                "facilitatingCourses": facilitatingCourses,
                 "availableCourses": availableCourses
             });
         });
@@ -72,8 +111,19 @@ export default class CourseController {
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];
-        database('exercises').select('*').where('courseId', request.params.courseId)
-        .orderBy('sequenceNum', 'asc').then( (rows) => {
+
+        database('exercises')
+        .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
+                'submissions.completedAt as submissionCompleteAt')
+        .leftJoin('submissions', function(){
+            this.on('submissions.id', '=', 
+                knex.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+            );
+        })
+        .where({ 'exercises.courseId': request.params.courseId })
+        .orderBy('exercises.sequenceNum', 'asc')
+        .then( (rows) => {
             for(let i = 0; i < rows.length; i++){
                 let exercise = rows[i];
                 if (exercise.sequenceNum % 1 !== 0){
@@ -83,17 +133,24 @@ export default class CourseController {
                     exercise.childExercises = [];
                     exercises.push(exercise);
                 }
-            }
-            return reply({
-                "data": exercises
-            });
+            }    
+            return reply({data: exercises});
         });
 
     }
 
     public getExerciseById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('exercises').select('*').where('exerciseId', request.params.exerciseId)
+        database('exercises')
+        .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                'exercises.reviewType', 'exercises.content',
+                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
+        .leftJoin('submissions', function(){
+            this.on('submissions.id', '=', 
+                database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+            );
+        })
+        .where({ 'exercises.id': request.params.exerciseId })
         .then( (rows) => {
             let exercise = rows[0];
             return reply(exercise);
@@ -105,9 +162,7 @@ export default class CourseController {
 
         database('courses').select('notes').where('id', request.params.courseId).then(function(rows){
             let notes = rows[0].notes;
-            return reply({
-                "notes": notes
-            });
+            return reply({ "notes": notes });
         });
 
     }
@@ -117,21 +172,24 @@ export default class CourseController {
         database('course_enrolments').select('*').where({'studentId': request.userId, 'courseId': request.params.courseId})
         .then( (rows) => {
             if (rows.length > 0){
-                return reply(Boom.expectationFailed("An enrolment against the user ID already exists."));
+                reply(Boom.expectationFailed("An enrolment against the user ID already exists."));
+                return Promise.resolve({alreadyEnrolled: true});
             } else {
-                return Promise.resolve({noEnrolment: true});
+                return Promise.resolve({alreadyEnrolled: false});
             }
         })
-        .then( () => {
-            database('course_enrolments').insert({
-                studentId: request.userId,
-                courseId: request.params.courseId,
-                batchId: this.configs.defaultBatchId
-            }).then( (response) => {
-                return reply({
-                    "enrolled": true
+        .then( (response) => {
+            if (response.alreadyEnrolled === false){
+                database('course_enrolments').insert({
+                    studentId: request.userId,
+                    courseId: request.params.courseId,
+                    batchId: this.configs.defaultBatchId
+                }).then( (response) => {
+                    return reply({
+                        "enrolled": true
+                    });
                 });
-            });
+            }
         });
 
     }
