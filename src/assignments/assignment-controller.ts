@@ -18,6 +18,8 @@ function generateUID() {
     return firstPart + secondPart;
 }
 
+// #TODO: Add support for tracking assignmnt completion time.
+
 export default class AssignmentController {
 
     private configs: IServerConfigurations;
