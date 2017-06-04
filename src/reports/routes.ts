@@ -16,11 +16,19 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/reports/batch/{batchId}/course/{courseId}',
         config: {
             description: 'Details of all excercise attempts of the given batch and course.',
-            response: {
-                schema: Joi.object({
-                    "data": Joi.array().items(exerciseReportSchema),
-                })
-            },
+            validate: {
+                params: {
+                    batchId: Joi.number().required(),
+                    courseId: Joi.number().required()
+                }
+            }
+            // #TODO: Leaving out the response right now.
+            // Will add when we re-factor the code.
+            // response: {
+            //     schema: Joi.object({
+            //         "data": Joi.array().items(exerciseReportSchema),
+            //     })
+            // },
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.getBatchCourseReport
