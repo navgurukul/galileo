@@ -14,14 +14,21 @@ dbConfigs.connection.typeCast = (field, next) => {
     }
     return next();
 };
-const database = Database.init(dbConfigs);
-export default database;
+export const database = Database.init(dbConfigs);
+// export default database;
 
 //Starting Application Server
 const serverConfigs = Configs.getServerConfigs();
 
 const server = Server.init(serverConfigs, database).then((server) => {
-    server.start(() => {
-        console.log('Server running at:', server.info.uri);
-    });
+
+    if (!module.parent) {
+        server.start(() => {
+            console.log('Server running at:', server.info.uri);
+        });
+        console.log("Running server from parent :)");
+    } else {
+        console.log("Not running the server because it is not run through parent module.");
+    }
+
 });
