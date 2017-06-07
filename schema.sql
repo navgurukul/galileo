@@ -86,7 +86,7 @@ DROP TABLE IF EXISTS `exercises`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `exercises` (
-  `id` int(11) unsigned NOT NULL,
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parentExerciseId` int(11) unsigned DEFAULT NULL,
   `courseId` int(100) unsigned NOT NULL,
   `name` varchar(30) NOT NULL,

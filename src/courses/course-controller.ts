@@ -41,6 +41,7 @@ export default class CourseController {
             .where({ 'course_enrolments.studentId': 25 })
             .groupBy('exercises.courseId')
             .then( (rows) => {
+                console.log(rows);
                 enrolledCourses = rows;
                 let lastSubmissionQueries = [];
                 for (let i = 0; i < enrolledCourses.length; i++) {
