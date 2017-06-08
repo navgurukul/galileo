@@ -35,7 +35,7 @@ export default class ReportController {
             .select('users.name', 'users.id', 'users.profilePicture', 'users.facilitator')
             .innerJoin('users', 'course_enrolments.studentId', 'users.id')
             .where({
-                'course_enrolments.batchId': this.configs.defaultBatchId,
+                'course_enrolments.batchId': request.params.batchId,
                 'course_enrolments.courseId': request.params.courseId
             })
             .then( (rows) => {
@@ -83,19 +83,22 @@ export default class ReportController {
                 // No submission is stored in the object
                 if (Object.keys(storedSubmission).length === 0) {
                     exercisesList[submission.exerciseId]['completionDetails'][submission.userId] = submission;
+                     exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] = 1;
                 }
-                // If the submission is not stored
+                // If the submission is stored
                 else {
-                    let storedSubState = subStateOrder.indexOf(storedSubmission.state);
+                    let storedSubState = subStateOrder.indexOf(storedSubmission.state);  
+                    let attempts = exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] + 1;                    
                     // Replace the stored submission with the current submission if
                     // the stored one is of a lesser level
                     if (storedSubState < curSubState) {
                         exercisesList[submission.exerciseId]['completionDetails'][submission.userId] = submission;
                     }
+                    exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] = attempts;
                 }
             }
             
-            // Convert the dictionary of exercises into an array to return
+            //  Convert the dictionary of exercises into an array to return
             let _exercises = [];
             for (let i in exercisesList) {
                 _exercises.push(exercisesList[i]);
@@ -122,7 +125,7 @@ export default class ReportController {
                     exercises.push(exercise);
                 }
             }
-
+            console.log(exercises[1].completionDetails[25]);
             return reply({
                 "exercises": exercises,
                 "users": usersList
