@@ -242,7 +242,7 @@ export default class AssignmentController {
                 'submissions.files', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
                 'submissions.completedAt', 'submissions.submittedAt', 'submissions.submittedAt',
                 // Exercises Table
-                'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.courseId',
+                'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.name',
                 'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
                 'exercises.reviewType', 'exercises.content as exerciseContent',
                 // Users table
