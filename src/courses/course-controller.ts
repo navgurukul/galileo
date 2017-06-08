@@ -28,7 +28,7 @@ export default class CourseController {
         let enrolledQ = 
             database('course_enrolments')
             .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
-                    'courses.shortDescription', 'course_enrolments.enrolledAt',
+                    'courses.shortDescription', 'course_enrolments.enrolledAt', 'course_enrolments.batchId',
                     database.raw('COUNT(exercises.id) as totalExercises'),
                     database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
             .innerJoin('courses', 'course_enrolments.courseId', 'courses.id')
@@ -73,7 +73,7 @@ export default class CourseController {
         let facilitatingQ = 
             database('courses')
             .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
-                    'batches.name as batch_name', 'batches.id as batch_id')
+                    'batches.name as batch_name', 'batches.id as batchId')
             .join('batches', function(){
                 this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
             })
