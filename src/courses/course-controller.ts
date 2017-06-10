@@ -116,11 +116,11 @@ export default class CourseController {
         database('exercises')
         .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
                 'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
-                'submissions.completedAt as submissionCompleteAt')
+                'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
         .leftJoin('submissions', function(){
             this.on('submissions.id', '=', 
                 knex.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
-            );
+            ).on('submissions.userId', '=', request.userId);
         })
         .where({ 'exercises.courseId': request.params.courseId })
         .orderBy('exercises.sequenceNum', 'asc')
