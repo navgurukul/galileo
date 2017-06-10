@@ -71,11 +71,11 @@ CREATE TABLE `courses` (
   `type` enum('html','js','python') DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `logo` varchar(45) DEFAULT NULL,
-  `notes` varchar(500) DEFAULT NULL,
+  `notes` varchar(10000) DEFAULT NULL,
   `daysToComplete` int(11) DEFAULT NULL,
   `shortDescription` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,18 +89,16 @@ CREATE TABLE `exercises` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parentExerciseId` int(11) unsigned DEFAULT NULL,
   `courseId` int(100) unsigned NOT NULL,
-  `name` varchar(30) NOT NULL,
-  `slug` varchar(30) NOT NULL,
+  `name` varchar(300) NOT NULL DEFAULT '',
+  `slug` varchar(100) NOT NULL DEFAULT '',
   `sequenceNum` float unsigned DEFAULT NULL,
   `reviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
   `content` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug_UNIQUE` (`slug`),
-  KEY `exercises_ibfk_1_idx` (`parentExerciseId`),
   KEY `course_id` (`courseId`),
-  CONSTRAINT `exercises_ibfk_1` FOREIGN KEY (`parentExerciseId`) REFERENCES `exercises` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `exercises_ibfk_2` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,4 +177,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-07 11:50:39
+-- Dump completed on 2017-06-07 19:52:07

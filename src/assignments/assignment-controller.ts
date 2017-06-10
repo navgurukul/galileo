@@ -162,7 +162,7 @@ export default class AssignmentController {
                 stream.on('finish', () => {
                     return reply({
                         "success": true,
-                        "filePath": "https://storage.googleapis.com/" + this.configs.googleCloud.assignmentsBucket + '/' + filePath;
+                        "filePath": "https://storage.googleapis.com/" + this.configs.googleCloud.assignmentsBucket + '/' + filePath
                     });
                 });
 
