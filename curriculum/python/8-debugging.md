@@ -1,5 +1,4 @@
-### Debugging
-
+# Debugging
 
 * [Exercise](http://navgurukul.org/python/debugging/basic_debugging.py) 1 (Printing)
 * [Exercise](http://navgurukul.org/python/debugging/basic_debugging.1.2.py) 2 (Type Conversion and Printing)
