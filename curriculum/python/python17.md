@@ -1,0 +1,12 @@
+### Iterating the lists
+
+Class mei teacher ek ek naam bol kar attendance mark karti hai, list of students ki. Iss  
+process ko iteration bolte hai. Ek ek karke list ke elements ke saath same action repeat  
+karna.
+
+[list-3.py](http://navgurukul.org/python/list-3.py) (example), [list-c.py](http://navgurukul.org/python/list-c.py) (exercise), [list-4.py](http://navgurukul.org/python/list-4.py) (example), [list-d.py](http://navgurukul.org/python/list-d.py) (exercise)
+
+
+
+Inn exercises ke baad hum KBC ki ek basic version banayenge. [KBC ki pehli exercise.](http://navgurukul.org/python/kbc.py)
+
