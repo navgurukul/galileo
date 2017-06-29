@@ -1,3 +1,7 @@
+```ngMeta
+name: Debugging
+completionMethod: facilitator
+```
 # Debugging
 
 - [Exercise 1](http://navgurukul.org/python/debugging/cipher.2.0.py) (Cipher 2.0)

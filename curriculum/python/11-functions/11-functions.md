@@ -1,3 +1,7 @@
+```ngMeta
+name: Functions in Lightbot
+completionMethod: manual
+```
 # Functions in Lightbot
 
 Lightbot ke 2-2 level ko yaad karo. Yahan humne baar baar hone wala kaam - **Aage, Left, mudna, Aage Right Mudna** PROC1 mein daala hai.   
