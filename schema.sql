@@ -161,7 +161,6 @@ CREATE TABLE `users` (
   `name` char(100) NOT NULL DEFAULT '',
   `profilePicture` char(150) DEFAULT NULL,
   `googleUserId` char(30) DEFAULT NULL,
-  `facilitator` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `googleUserId` (`googleUserId`)

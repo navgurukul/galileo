@@ -10,7 +10,7 @@ export const courseSchema:Joi.ObjectSchema = Joi.object({
 
 export const facilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     batch_name: Joi.string(),
-    batch_id: Joi.number()
+    batchId: Joi.number()
 });
 
 export const enrolledCourseSchema:Joi.ObjectSchema = courseSchema.keys({
@@ -19,6 +19,7 @@ export const enrolledCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     enrolledAt: Joi.date(),
     daysToComplete: Joi.number(),
     daysSinceEnrolled: Joi.number(),
+    batchId: Joi.number(),
     lastSubmission: Joi.object({
         name: Joi.string().allow(null),
         slug: Joi.string().allow(null),
