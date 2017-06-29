@@ -31,14 +31,14 @@ export default class CourseController {
                     'courses.shortDescription', 'course_enrolments.enrolledAt',
                     database.raw('COUNT(exercises.id) as totalExercises'),
                     database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
-            .innerJoin('courses', 'course_enrolments.courseId', 'courses.id')
+            .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
             .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
             .leftJoin('submissions', function(){
                 this.on('submissions.userId', '=', request.userId)
                     .andOn('submissions.exerciseId', '=', 'exercises.id')
                     .andOn('submissions.completed', '=', 1);
             })
-            .where({ 'course_enrolments.studentId': 25 })
+            .where({ 'course_enrolments.studentId': request.userId })
             .groupBy('exercises.courseId')
             .then( (rows) => {
                 console.log(rows);

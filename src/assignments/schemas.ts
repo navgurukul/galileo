@@ -7,7 +7,7 @@ export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
     submittedAt: Joi.date(),
     submitterNotes: Joi.string().allow(null),
     files: Joi.array().items(Joi.string().uri()).allow(null),
-    notesReviewer: Joi.number().allow(null),
+    notesReviewer: Joi.string().allow(null),
     state: Joi.string(),
     completed: Joi.bool(),
     completedAt: Joi.date().allow(null),

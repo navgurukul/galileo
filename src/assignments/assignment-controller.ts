@@ -76,7 +76,7 @@ export default class AssignmentController {
                     userId: request.userId,
                     submitterNotes: request.payload.notes,
                     files: JSON.stringify(request.payload.files),
-                    state: 'approved',
+                    state: 'completed',
                     completed: 1
                 })
             } 
@@ -251,7 +251,7 @@ export default class AssignmentController {
         )
         .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
         .innerJoin('users', 'submissions.userId', 'users.id')
-        .where({ 'submissions.peerReviewerId': 28 })
+        .where({ 'submissions.peerReviewerId': request.userId })
         .orderBy('submittedAt', 'desc')
         .then( (rows) => {
             let submissions = [];

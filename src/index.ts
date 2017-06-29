@@ -14,8 +14,8 @@ dbConfigs.connection.typeCast = (field, next) => {
     }
     return next();
 };
-export const database = Database.init(dbConfigs);
-// export default database;
+const database = Database.init(dbConfigs);
+export default database;
 
 //Starting Application Server
 const serverConfigs = Configs.getServerConfigs();
