@@ -1,14 +1,13 @@
 {
     "database": {
-        "client" : "mysql",
+        "client": "mysql",
         "connection": {
-            "database"                : "knex_try",
-            "host"                    : "localhost",       
-            "_comment"                : "Add `127.0.0.1 doeaws.ddns.net` to /etc/hosts when using aws tunnel if port 1433 is blocked. for AWS Tunnel ssh -f -L 1433:59.180.230.82:1433 ubuntu@52.77.111.177 -N and set up passwordless ssh to server.",
-            "user"                    : "vidur149",
-            "password"                : "9949@Vidur",
-            "requestTimeout"          : 90000,
-            "connectionTimeout"       : 30000,
+            "database": "knex_try",
+            "host": "localhost",
+            "_comment": "Add `127.0.0.1 doeaws.ddns.net` to /etc/hosts when using aws tunnel if port 1433 is blocked. for AWS Tunnel ssh -f -L 1433:59.180.230.82:1433 ubuntu@52.77.111.177 -N and set up passwordless ssh to server.",
+            "user": "vidur149",
+            "requestTimeout": 90000,
+            "connectionTimeout": 30000,
             "acquireConnectionTimeout": 30000
         },
         "pool": {
