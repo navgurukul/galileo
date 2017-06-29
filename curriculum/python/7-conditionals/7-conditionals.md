@@ -1,3 +1,7 @@
+```ngMeta
+name: Conditionals
+completionMethod: manual
+```
 # Conditionals
 
 Programming karte hue hume “condition” likhne ki jaroorat padti hai.  

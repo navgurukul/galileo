@@ -1,3 +1,7 @@
+```ngMeta
+name: Lists
+completionMethod: peer
+```
 # LISTS
 
 List ek aisa variable hai, jisme hum bahut saare values rakh sakte hai. List kaafi useful hoti hai kyuki hum bahut saari 

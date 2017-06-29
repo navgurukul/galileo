@@ -1,3 +1,7 @@
+```ngMeta
+name: Operators and Operations
+completionMethod: manual
+```
 # Operators & Operations
 
 Operation se aap kya samajhte hai? Ise kuch examples se samajhte hai:
