@@ -1,3 +1,7 @@
+```ngMeta
+name: Debugging
+completionMethod: peer
+```
 # Debugging
 
 - [Exercise 1](http://navgurukul.org/python/debugging/basic_debugging.1.6.py) ( Pass by reference and Functions

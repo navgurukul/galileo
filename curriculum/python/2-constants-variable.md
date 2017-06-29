@@ -1,3 +1,7 @@
+```ngMeta
+name: Constants and Variables
+completionMethod: automatic
+```
 
 # Constants & Variables
 

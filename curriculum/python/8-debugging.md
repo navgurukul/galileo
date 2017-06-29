@@ -1,3 +1,7 @@
+```ngMeta
+name: Debugging
+completionMethod: facilitator
+```
 # Debugging
 
 * [Exercise](http://navgurukul.org/python/debugging/basic_debugging.py) 1 (Printing)

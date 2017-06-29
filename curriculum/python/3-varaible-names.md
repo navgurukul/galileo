@@ -1,4 +1,8 @@
 
+```ngMeta
+name: Variable Naming
+completionMethod: automatic
+```
 # VARIABLE ko naam dene ke rules
 
 

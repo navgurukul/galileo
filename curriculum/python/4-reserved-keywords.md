@@ -1,3 +1,7 @@
+```ngMeta
+name: Reserved Keywords
+completionMethod: manual
+```
 # Reserved Keywords
 
 

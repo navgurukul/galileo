@@ -1,3 +1,8 @@
+```ngMeta
+name: Kuch aur exercises
+completionMethod: facilitator
+```
+
 # Kuch Aur Exercises
 
 - Humne abhi tak python ke kaafi saare buniyadi siddhant seekh liye hain.

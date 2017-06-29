@@ -1,3 +1,7 @@
+```ngMeta
+name: files
+completionMethod: facilitator
+```
 # Files padhna aur banana
 
 - Hum python se apne computer jo bhi koi files hain, unko padh sakte hain aur saath hi saath nayi files bana ke unme data bhi daal sakte hain. Isse hum bahot interesting cheezein kar sakte hain.

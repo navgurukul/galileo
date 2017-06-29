@@ -1,3 +1,8 @@
+```ngMeta
+name: Iss course ko kaise use karein?
+completionMethod: manual
+```
+
 # Iss course ko kaise use karein?
 
 - Python kaise use karte hai, iss [**video**](https://www.youtube.com/watch?v=ccPrUbz1oto) ko dekh kar samjhe

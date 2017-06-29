@@ -1,3 +1,7 @@
+```ngMeta
+name: Type Conversion
+completionMethod: automatic
+```
 # Type Conversions
 Aap python mei ek type of value ko doosre type ki value mei change kar sakte hai. Jaise  
 

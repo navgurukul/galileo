@@ -1,3 +1,7 @@
+```ngMeta
+name: Indentation
+completionMethod: manual
+```
 # Indentation 
 
 - Indentation samajh ke hum yeh bahot behtar samajh payenge ki python aapke likhe
