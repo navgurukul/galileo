@@ -82,7 +82,7 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
         // If the file name does not start with the pattern 'number-' where number is a string or integer skip it
         let regExMatch = file.match(/^[0-9]+([.][0-9]+)?-/g);
         if (!regExMatch || regExMatch.length < 1) {
-            next();
+            next();getCurriculumExerciseFiles
             return;
         }
         let sequenceNum = regExMatch[0].split('-')[0];
@@ -125,6 +125,11 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
         }
     }
     next();
+    exercises.sort(function(a, b) {
+        return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
+    });
+    console.log(exercises);
+    console.log('--------------------------');
     return exercises;
 }
 
