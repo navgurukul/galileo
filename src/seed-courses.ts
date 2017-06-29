@@ -2,7 +2,7 @@ import * as colors from "colors";
 import * as fs from "fs-extra";
 import * as marked from "marked";
 import * as Joi from "joi";
-import { database } from './';
+import database from './index';
 
 /**
  * 1. Get the course name as an argument.
