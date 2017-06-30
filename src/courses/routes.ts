@@ -53,23 +53,43 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    // server.route({
+    //     method: 'GET',
+    //     path: '/courses/{courseId}/exercise/{exerciseId}',
+    //     config: {
+    //         description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
+    //         validate: {
+    //             params: {
+    //                 courseId: Joi.number(),
+    //                 exerciseId : Joi.number()
+    //             }
+    //         },
+    //         response: {
+    //             schema: exerciseSchema
+    //         },
+    //         auth: 'jwt',
+    //         tags: ['api'],
+    //         handler: courseController.getExerciseById
+    //     }
+    // });
+
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/exercise/{exerciseId}',
+        path: '/courses/{courseId}/exercise/getBySlug',
         config: {
-            description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
+            description: 'Get complete details of the exercise with the given slug. Does not return child exercises.',
             validate: {
                 params: {
                     courseId: Joi.number(),
-                    exerciseId : Joi.number()
+                    slug : Joi.string()
                 }
             },
-            response: {
-                schema: exerciseSchema
-            },
+            // response: {
+            //     schema: exerciseSchema
+            // },
             auth: 'jwt',
             tags: ['api'],
-            handler: courseController.getExerciseById
+            handler: courseController.getExerciseBySlug
         }
     });
 

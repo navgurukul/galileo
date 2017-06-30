@@ -159,6 +159,25 @@ export default class CourseController {
         
     }
 
+    public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
+
+        database('exercises')
+        .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                'exercises.reviewType', 'exercises.content',
+                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
+        .leftJoin('submissions', function(){
+            this.on('submissions.id', '=', 
+                database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+            );
+        })
+        .where({ 'exercises.slug': request.query.slug })
+        .then( (rows) => {
+            let exercise = rows[0];
+            return reply(exercise);
+        });
+        
+    }
+
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
 
         database('courses').select('notes').where('id', request.params.courseId).then(function(rows){
@@ -184,7 +203,7 @@ export default class CourseController {
                 database('course_enrolments').insert({
                     studentId: request.userId,
                     courseId: request.params.courseId,
-                    batchId: this.configs.defaultBatchId
+                    batchId: 1
                 }).then( (response) => {
                     return reply({
                         "enrolled": true

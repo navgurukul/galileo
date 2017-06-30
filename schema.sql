@@ -93,7 +93,7 @@ CREATE TABLE `exercises` (
   `slug` varchar(100) NOT NULL DEFAULT '',
   `sequenceNum` float unsigned DEFAULT NULL,
   `reviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
-  `content` varchar(500) DEFAULT NULL,
+  `content` varchar(1500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug_UNIQUE` (`slug`),
   KEY `course_id` (`courseId`),

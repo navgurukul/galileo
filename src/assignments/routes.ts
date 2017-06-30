@@ -98,12 +98,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     submissionState: Joi.string().allow('pending', 'completed', 'rejected', 'all').required()
                 }
             },
-            response: {
-                schema: Joi.object({
-                    data: Joi.array().items(exerciseSubmission)
-                          .description("List of submissions.")
-                })
-            },
+            // response: {
+            //     schema: Joi.object({
+            //         data: Joi.array().items(exerciseSubmission)
+            //               .description("List of submissions.")
+            //     })
+            // },
             auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.getExerciseSubmissions,
