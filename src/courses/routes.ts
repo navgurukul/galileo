@@ -81,7 +81,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 params: {
                     courseId: Joi.number(),
-                    slug : Joi.string()
+                },
+                query: {
+                    slug: Joi.string().description('write exercise slug here')
                 }
             },
             // response: {

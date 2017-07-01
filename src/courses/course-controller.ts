@@ -160,7 +160,8 @@ export default class CourseController {
     }
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
-
+        console.log(request.query.slug);
+    
         database('exercises')
         .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
                 'exercises.reviewType', 'exercises.content',
@@ -175,7 +176,7 @@ export default class CourseController {
             let exercise = rows[0];
             return reply(exercise);
         });
-        
+        // return 'het';
     }
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {

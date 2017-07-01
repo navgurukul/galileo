@@ -2,7 +2,6 @@ import * as Joi from "joi";
 
 export const userSchema:Joi.ObjectSchema = Joi.object({
     id: Joi.number(),
-    batchID: Joi.number(),
     name: Joi.string(),
     email: Joi.string().email(),
     profilePicture: Joi.string().uri(),
