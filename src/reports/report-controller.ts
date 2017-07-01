@@ -50,19 +50,20 @@ export default class ReportController {
             .then( (rows) => {
                 for (let i = 0; i < rows.length; i++) {
                     exercisesList[ rows[i].id ] = rows[i];
-                    exercisesList[ rows[i].id ]['completionDetails'] = {}
+                    exercisesList[ rows[i].id ]['completionDetails'] = {};
                 }
             });
         
         Promise.all([userQuery, exercisesQuery]).then( () => {
             return database('submissions')
-            .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt', 'submissions.submitterNotes',
-                    'submissions.files', 'submissions.state', 'submissions.completed', 'submissions.completedAt')
+            .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt', 
+            'submissions.submitterNotes', 'submissions.files', 'submissions.state', 
+            'submissions.completed', 'submissions.completedAt')
             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
             .where({ 'exercises.courseId': request.params.courseId })
             .then( (rows) => {
                 return Promise.resolve(rows);
-            })
+            });
         })
         .then( (rows) => {  
             for (let i = 0; i < rows.length; i++) {
@@ -88,7 +89,8 @@ export default class ReportController {
                 // If the submission is stored
                 else {
                     let storedSubState = subStateOrder.indexOf(storedSubmission.state);  
-                    let attempts = exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] + 1;                    
+                    let attempts = exercisesList[submission.exerciseId]['completionDetails']
+                        [submission.userId]['attempts'] + 1;                    
                     // Replace the stored submission with the current submission if
                     // the stored one is of a lesser level
                     if (storedSubState < curSubState) {
@@ -106,11 +108,11 @@ export default class ReportController {
             // Sort the exercises on basis of sequence numbers
             _exercises.sort( (a, b) => {
                 if (a.sequenceNum < b.sequenceNum) {
-                    return -1
+                    return -1;
                 } else if (a.sequenceNum > b.sequenceNum) {
-                    return 1
+                    return 1;
                 } else {
-                    return 0
+                    return 0;
                 }
             });
             // Nest child exercises in parent exercises
@@ -130,7 +132,7 @@ export default class ReportController {
                 "exercises": exercises,
                 "users": usersList
             });
-        })
+        });
 
     }
 

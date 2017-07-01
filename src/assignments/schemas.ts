@@ -31,4 +31,4 @@ export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     exerciseSlug: Joi.string(),
     exerciseSequenceNum: Joi.number(),
     reviewType: Joi.string(),
-})
+});

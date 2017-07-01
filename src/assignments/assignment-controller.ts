@@ -49,13 +49,13 @@ export default class AssignmentController {
                 'exerciseId': request.params.exerciseId,
                 'completed': 1
             }).then( (rows) => {
-                let count = rows[0].count
+                let count = rows[0].count;
                 if ((count) > 0) {
                     reply(Boom.conflict("An approved submission for the given exercise ID by the user already exists."));
                     return Promise.reject("Rejected");
                 }
                 return Promise.resolve(exercise);
-            })
+            });
         })
         .then( (exercise) => {
             let submissionInsertQuery;
@@ -67,10 +67,10 @@ export default class AssignmentController {
                     completed: 1,
                     state: 'completed',
                     completedAt: new Date()
-                })
+                });
             } 
             
-            else if (exercise.reviewType == 'automatic') {
+            else if (exercise.reviewType === 'automatic') {
                 submissionInsertQuery = database('submissions').insert({
                     exerciseId: request.params.exerciseId,
                     userId: request.userId,
@@ -78,16 +78,16 @@ export default class AssignmentController {
                     files: JSON.stringify(request.payload.files),
                     state: 'completed',
                     completed: 1
-                })
+                });
             } 
             
-            else if (exercise.reviewType == 'peer' || exercise.reviewType == 'facilitator') {
+            else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
                 
                 let reviewerIdQuery, facilitatorIdQuery;
                 facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
                     .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
                     .where({ 'course_enrolments.studentId': request.userId });
-                if (exercise.reviewType == 'peer') {
+                if (exercise.reviewType === 'peer') {
                     reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
                     .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
                     .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
@@ -123,14 +123,14 @@ export default class AssignmentController {
                         completed: 0,
                         peerReviewerId: response.reviewerId,
                     });
-                })
+                });
             }
 
             submissionInsertQuery.then( (rows) =>{
                 return reply({ 'success': true });
             });
 
-        })
+        });
     }
 
     public uploadExerciseAssignment(request: Hapi.request, reply: Hapi.IReply) {
@@ -177,25 +177,27 @@ export default class AssignmentController {
             .select(
                     // Submissions table fields
                     'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes', 
-                    'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 'submissions.completedAt', 
+                    'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 
+                    'submissions.completedAt', 
                     // Reviewer details
-                    'reviewUsers.name as reviwerName', 'reviewUsers.id as reviwerId', 'reviewUsers.profilePicture as reviewerProfilePicture',
+                    'reviewUsers.name as reviwerName', 'reviewUsers.id as reviwerId', 
+                    'reviewUsers.profilePicture as reviewerProfilePicture',
                     'reviewUsers.facilitator as isReviewerFacilitator',
                     // Submitter Details
                     'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
                     'users.facilitator as isSubmitterFacilitator'
             )
             .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
-            .leftJoin('users', 'submissions.userId', 'users.id')
+            .leftJoin('users', 'submissions.userId', 'users.id');
 
         let whereClause = {
             'submissions.exerciseId': request.params.exerciseId
-        }
+        };
         if (request.query.submissionUsers === 'current') {
-            whereClause['submissions.userId'] = request.userId
+            whereClause['submissions.userId'] = request.userId;
         }
         if (request.query.submissionState !== 'all') {
-            whereClause['submissions.state'] = request.query.submissionState
+            whereClause['submissions.state'] = request.query.submissionState;
         }
 
         submissionQuery.where(whereClause)
@@ -264,7 +266,7 @@ export default class AssignmentController {
                 submissions.push(submission);
             }
             return reply({ "data": submissions });
-        })
+        });
 
     }
 
@@ -300,10 +302,10 @@ export default class AssignmentController {
             }
             return database('submissions')
                    .update(updateFields)
-                   .where({ id: request.params.submissionId })
+                   .where({ id: request.params.submissionId });
         })
         .then( (response) => {
-            return {'success': true}
+            return {'success': true};
         });
 
     }
