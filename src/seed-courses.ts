@@ -36,7 +36,8 @@ import database from './index';
  *      flask_backend/
  * 4. Check if a html/details/notes.md exists and just add the notes directly from there into the course or throw and error.
  * 5. Check if a html/details/info.md exists and add the info into the course object or throw an error.`
- * 6. Get a list of all files and strip of the numbers and check if they are sequential integers or throw an error. Do this for nested stuff too.
+ * 6. Get a list of all files and strip of the numbers and check if they are sequential integers or throw an error.
+ *    Do this for nested stuff too.
  * 7. Validate every exercise *.md file for the following things in `ngMeta` or throw an error:
  *      a. `name` should be there.
  *      b. `completionMethod` should be there and will be something out of 'manual','peer','facilitator','automatic'
@@ -46,6 +47,13 @@ import database from './index';
 
 console.log( colors.green.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
 console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
+
+// Helper method to throw an error with the given text and exit the script
+let showErrorAndExit = function(message:string) {
+    console.log( colors.red.bold(message) );
+    console.log( colors.red("Fix the above error and re-run this script.") );
+    process.exit();
+};
 
 // Globals
 let courseDir, // Path of the course directory relative to this file
@@ -77,12 +85,13 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
     let i = 0;
     let next = function() {
         let file = files[i++];
-        if (!file)
+        if (!file) {
             return;
+        }
         // If the file name does not start with the pattern 'number-' where number is a string or integer skip it
         let regExMatch = file.match(/^[0-9]+([.][0-9]+)?-/g);
         if (!regExMatch || regExMatch.length < 1) {
-            next();getCurriculumExerciseFiles
+            next();
             return;
         }
         let sequenceNum = regExMatch[0].split('-')[0];
@@ -123,7 +132,7 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
         } catch (err) {
             console.log(err);
         }
-    }
+    };
     next();
     exercises.sort(function(a, b) {
         return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
@@ -131,7 +140,7 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
     console.log(exercises);
     console.log('--------------------------');
     return exercises;
-}
+};
 
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
@@ -140,13 +149,13 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
 let _nextSeqNum = function (sequenceNum) {
     let num = String(sequenceNum);
     let tokens = num.split('.');
-    if (tokens.length == 1) {
+    if (tokens.length === 1) {
         return Number(num) + 1;
     } else  {
         let numToSum = Number(Array(tokens[0].length).join('0') + '1');
         return Number(num) + numToSum;
     }
-}
+};
 
 // Validate if sequence numbers are in a proper sequence.
 // If they are not this will automatically end the script and show the error.
@@ -159,8 +168,9 @@ let validateSequenceNumber = function(exercises, depthLevel?) {
         if  (!exercises[i+1]) {
             continue;
         }
-        if (exercises[i+1].sequenceNum != _nextSeqNum(exercises[i].sequenceNum)) {
-            let msg = exercises[i].sequenceNum + " and " + _nextSeqNum(exercises[i].sequenceNum) + " don't have sequential sequence numbers.";
+        if (exercises[i+1].sequenceNum !== _nextSeqNum(exercises[i].sequenceNum)) {
+            let msg = exercises[i].sequenceNum + " and " + _nextSeqNum(exercises[i].sequenceNum) +
+                " don't have sequential sequence numbers.";
             showErrorAndExit(msg);
         }
         if (exercises[i].childExercises.length > 0) {
@@ -171,7 +181,7 @@ let validateSequenceNumber = function(exercises, depthLevel?) {
         }
     }
     return true;
-}
+};
 
 // Method to parse a text block which is assumed to have ky value pairs like we decided in the ngMeta code block
 // These ngMeta text blocks will be used to store some semantic meta information about a mark down curriculum.
@@ -184,7 +194,8 @@ daysToComplete: 20
 shortDescription: Build any web page under the sun after taking up this course :)
 ```
 */
-// This assumes that every line under the triple tilde (```) will be a valid key/value pair. If it is not, it returns null for the whole block.
+// This assumes that every line under the triple tilde (```) will be a valid key/value pair. 
+// If it is not, it returns null for the whole block.
 let parseNgMetaText = function(text: string) {
     let lines = text.split('\n');
     let parsed = {};
@@ -204,25 +215,18 @@ let parseNgMetaText = function(text: string) {
         parsed[ lineKey ] = lineValue;
     });
     return parsed;
-} 
-
-// Helper method to throw an error with the given text and exit the script
-let showErrorAndExit = function(message:string) {
-    console.log( colors.red.bold(message) );
-    console.log( colors.red("Fix the above error and re-run this script.") );
-    process.exit()
-}
+}; 
 
 // Validate the course directory given in the parameters
 let validateCourseDirParam = function() {
 
     // Parse the process to look for `courseDir`
     for (let i = 0; i < process.argv.length; i++){
-        if (process.argv[i] == '--courseDir') {
+        if (process.argv[i] === '--courseDir') {
             courseDir = process.argv[i+1];
         }
     }
-    if (courseDir == undefined) {
+    if (courseDir === undefined) {
         showErrorAndExit("Course directory is not specified using the --courseDir parameter");
     }
     courseDir = 'curriculum/' + courseDir;
@@ -235,7 +239,7 @@ let validateCourseDirParam = function() {
         showErrorAndExit("Course directory you have specified does not exist.");
     });
 
-}
+};
 
 
 // Validate and return notes.md contents
@@ -247,7 +251,7 @@ let validateCourseNotes = function() {
         console.log(err);
         showErrorAndExit("`details/notes.md` does not exist.");
     });
-}
+};
 
 // Validate and return the course info
 let validateCourseInfo = function() {
@@ -262,7 +266,7 @@ let validateCourseInfo = function() {
     }).catch( (err) => {
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
     });
-}
+};
 
 // Validate and return the content and meta information of an exercise on the given path
 let _getExerciseInfo = function(path, sequenceNum) { 
@@ -272,7 +276,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
-    if (tokens[0].type != 'code' || tokens[0].lang != 'ngMeta') {
+    if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
         showErrorAndExit("No code block of type `ngMeta` exists at the top of the exercise file " + path);
     }
     exInfo  = parseNgMetaText(tokens[0]['text']);
@@ -281,7 +285,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo['content'] = data;
     exInfo['sequenceNum'] = sequenceNum;
     return exInfo;
-}
+};
 
 let getAllExercises = function(exercises) {
     let exerciseInfos = [];
@@ -294,7 +298,7 @@ let getAllExercises = function(exercises) {
         exerciseInfos.push(info);
     }
     return exerciseInfos;
-}
+};
 
 let addExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
@@ -306,7 +310,7 @@ let addExercises = function(exercises, courseId, promiseObj?) {
             sequenceNum: exercises[i]['sequenceNum'],
             reviewType: exercises[i]['completionMethod'],
             content: exercises[i]['content']
-        }
+        };
         let insertQ;
         if (!promiseObj) {
             insertQ = database('exercises').insert(courseInsertObj).then( (rows) => {
@@ -327,7 +331,7 @@ let addExercises = function(exercises, courseId, promiseObj?) {
         
     }
     return exInsertQs;
-}
+};
 
 let addCourseAndExercises = function() {
     database('courses')
@@ -342,14 +346,14 @@ let addCourseAndExercises = function() {
         courseId = rows[0];
         return Promise.resolve(courseId);
     }).then( (courseId) => {
-        console.log( addExercises(exercises, courseId) )
+        console.log( addExercises(exercises, courseId) );
         // Promise.all(exInsertQs).then( () => {
         //     console.log("Ho gaya");
         // }).catch( (err) => {
         //     console.log(err);
         // }); 
     });
-}
+};
 
 
 validateCourseDirParam()
