@@ -1,12 +1,11 @@
 import * as Hapi from "hapi";
 import { IPlugin } from "./plugins/interfaces";
 import { IServerConfigurations } from "./configurations";
-// import * as Tasks from "./tasks";
-// import * as Users from "./users";
+
 import * as Users from "./users";
-
-
-// import { KnexDB } from "./database";
+import * as Courses from "./courses";
+import * as Assignments from "./assignments";
+import * as Reports from "./reports";
 
 
 export function init(configs: IServerConfigurations, database: any): Promise<Hapi.Server> {
@@ -17,10 +16,13 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         server.connection({
             port: port,
             routes: {
-                cors: true,
-                log: true
+                 cors: {
+                    "headers": ["Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"]
+                 },
+                 log: true
             }
         });
+        // server.ext('onPreResponse', corsHeaders);
 
         //  Setup Hapi Plugins
         const plugins: Array<string> = configs.plugins;
@@ -37,13 +39,12 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
 
+        // Register all the routes once all plugins have been initialized
         Promise.all(pluginPromises).then(() => {
-            console.log("all plugins added");
-            //Init Features
-            // Tasks.init(server, configs, database);
-            // Users.init(server, configs, database);
             Users.init(server,  configs, database);
-
+            Courses.init(server, configs, database);
+            Assignments.init(server, configs, database);
+            Reports.init(server, configs, database);
             resolve(server);
         });
 

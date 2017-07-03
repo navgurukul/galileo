@@ -20,14 +20,24 @@ export interface IServerConfigurations {
         clientId: string;
         clientSecret: string;
     };
+    googleCloud: {
+        projectId: string;
+        keyFilename: string;
+        assignmentsBucket: string;
+    };
+    facilitatorEmails: Array<string>;
+    defaultBatchId: number;
 }
 
 export interface IDataConfiguration {
     connectionString: string;
+    connection: {
+        typeCast: object;
+    };
 }
 
 export function getDatabaseConfig(): IDataConfiguration {
-    console.log(process.env.NODE_ENV);
+    console.log("Node Environment: ", process.env.NODE_ENV);
     return configs.get("database");
 }
 
