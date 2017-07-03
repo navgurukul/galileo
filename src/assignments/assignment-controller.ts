@@ -77,7 +77,8 @@ export default class AssignmentController {
                     submitterNotes: request.payload.notes,
                     files: JSON.stringify(request.payload.files),
                     state: 'completed',
-                    completed: 1
+                    completed: 1,
+                    completedAt: new Date()
                 });
             } 
             
@@ -289,26 +290,26 @@ export default class AssignmentController {
         })
         .then( (submission) => {
             let updateFields = {
-                notesReviewer: request.params.notes
+                notesReviewer: request.payload.notes
             };
-            if (request.params.approved) {
+            if (request.payload.approved) {
                 updateFields['completed'] = 1;
-                updateFields['state'] = 'approved';
+                updateFields['state'] = 'completed';
                 updateFields['completedAt'] = new Date();
             } else {
                 updateFields['completed'] = 0;
                 updateFields['state'] = 'rejected';
                 updateFields['completedAt'] = new Date();
             }
-            return database('submissions')
-                   .update(updateFields)
-                   .where({ id: request.params.submissionId });
-        })
-        .then( (response) => {
-            return {'success': true};
-        });
-
+            return Promise.resolve(updateFields);            
+        }).then ((updateFields) => {
+            database('submissions')
+                .update(updateFields)
+                .where({ id: request.params.submissionId })
+                .then(()=> {
+                    console.log('aa gaya yahan');
+                    return reply({'success': true});     
+                });
+            });
+        }
     }
-
-}
-
