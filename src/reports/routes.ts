@@ -36,7 +36,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/reports/{courseId}/user/{userId}/submission',
+        path: '/reports/{courseId}/users/{userId}/submission',
         config: {
             description: 'List of all submissions on a course by a user.',
             validate: {
