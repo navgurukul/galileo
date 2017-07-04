@@ -52,6 +52,7 @@
     "path": "0.12.7",
     "prompt": "^1.0.0",
     "sigmund": "1.0.1",
+    "to-iso-string": "0.0.2",
     "typings": "2.1.0",
     "vision": "4.1.1"
   },
