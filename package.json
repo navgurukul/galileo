@@ -38,6 +38,7 @@
     "hapi-swagger": "^7.7.0",
     "http": "0.0.0",
     "inert": "3.2.1",
+    "is-utf8": "0.2.1",
     "joi": "8.4.2",
     "jsonwebtoken": "7.3.0",
     "knex": "0.12.7",
