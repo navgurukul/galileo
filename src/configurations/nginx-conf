@@ -40,14 +40,23 @@ server {
 		try_files $uri $uri/ =404;
 	}
 
-	location /api {
-        proxy_pass http://localhost:5000;
+	location /api/ {
+        proxy_pass http://localhost:5000/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
+
+	location /api/docs/ {
+		proxy_pass http://localhost:5000/docs;
+		proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+	}
 
 	# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
 	#
