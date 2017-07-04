@@ -33,111 +33,124 @@ export default class AssignmentController {
 
     public postExerciseSubmission(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('exercises').select().where('id', request.params.exerciseId)
+        database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
             .then((rows) => {
-                if (rows.length < 1) {
-                    reply(Boom.notFound('The exercise with the given ID is not found.'));
-                    return Promise.reject("Rejected");
-                }
-                else {
-                    return Promise.resolve(rows[0]);
+                if (rows.length > 0) {
+                    return Promise.resolve({ canSubmit: true });
+                } else {
+                    reply(Boom.expectationFailed("User can't submit an assignment unless enrolled in course"));
+                    return Promise.resolve({ canSubmit: false });
                 }
             })
-            .then((exercise) => {
-                return database('submissions').count('id as count').where({
-                    'submissions.userId': request.userId,
-                    'exerciseId': request.params.exerciseId,
-                    'completed': 1
-                }).then((rows) => {
-                    let count = rows[0].count;
-                    if ((count) > 0) {
-                        reply(Boom.conflict("An approved submission for the given exercise ID by the user already exists."));
-                        return Promise.reject("Rejected");
-                    }
-                    return Promise.resolve(exercise);
-                });
-            })
-            .then((exercise) => {
-                let submissionInsertQuery;
-
-                if (exercise.reviewType === 'manual') {
-                    submissionInsertQuery = database('submissions').insert({
-                        exerciseId: request.params.exerciseId,
-                        userId: request.userId,
-                        completed: 1,
-                        state: 'completed',
-                        completedAt: new Date()
-                    });
-                }
-
-                else if (exercise.reviewType === 'automatic') {
-                    submissionInsertQuery = database('submissions').insert({
-                        exerciseId: request.params.exerciseId,
-                        userId: request.userId,
-                        submitterNotes: request.payload.notes,
-                        files: JSON.stringify(request.payload.files),
-                        state: 'completed',
-                        completed: 1,
-                        completedAt: new Date()
-                    });
-                }
-
-                else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
-
-                    let reviewerIdQuery, facilitatorIdQuery;
-                    facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
-                        .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
-                        .where({ 'course_enrolments.studentId': request.userId });
-                    if (exercise.reviewType === 'peer') {
-                        reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
-                            .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
-                            .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
-                            .where({
-                                'submissions.completed': 1,
-                                'submissions.exerciseId': request.params.exerciseId,
-                                'course_enrolments.courseId': request.params.courseId
-                            }).orderByRaw('RAND()').limit(1);
-                    } else {
-                        reviewerIdQuery = facilitatorIdQuery;
-
-                    }
-
-                    submissionInsertQuery = reviewerIdQuery.then((rows) => {
-                        let reviewerId;
-                        if (rows.length < 1 && exercise.reviewType === 'peer') {
-                            return facilitatorIdQuery.then((rows) => {
-                                reviewerId = rows[0].reviewerID;
-                                return Promise.resolve({ reviewerId: reviewerId });
+            .then((response) => {
+                if (response.canSubmit === true) {
+                    database('exercises').select().where('id', request.params.exerciseId)
+                        .then((rows) => {
+                            if (rows.length < 1) {
+                                reply(Boom.notFound('The exercise with the given ID is not found.'));
+                                return Promise.reject("Rejected");
+                            }
+                            else {
+                                return Promise.resolve(rows[0]);
+                            }
+                        })
+                        .then((exercise) => {
+                            return database('submissions').count('id as count').where({
+                                'submissions.userId': request.userId,
+                                'exerciseId': request.params.exerciseId,
+                                'completed': 1
+                            }).then((rows) => {
+                                let count = rows[0].count;
+                                if ((count) > 0) {
+                                    reply(Boom.conflict("An approved submission for the given exercise ID by the user already exists."));
+                                    return Promise.reject("Rejected");
+                                }
+                                return Promise.resolve(exercise);
                             });
-                        } else {
-                            let reviewerId = rows[0].reviewerID;
-                            return Promise.resolve({ reviewerId: reviewerId });
-                        }
-                    })
-                        .then((response) => {
-                            return database('submissions').insert({
-                                exerciseId: request.params.exerciseId,
-                                userId: request.userId,
-                                submitterNotes: request.payload.notes,
-                                files: JSON.stringify(request.payload.files),
-                                state: 'pending',
-                                completed: 0,
-                                peerReviewerId: response.reviewerId,
+                        })
+                        .then((exercise) => {
+                            let submissionInsertQuery;
+
+                            if (exercise.reviewType === 'manual') {
+                                submissionInsertQuery = database('submissions').insert({
+                                    exerciseId: request.params.exerciseId,
+                                    userId: request.userId,
+                                    completed: 1,
+                                    state: 'completed',
+                                    completedAt: new Date()
+                                });
+                            }
+
+                            else if (exercise.reviewType === 'automatic') {
+                                submissionInsertQuery = database('submissions').insert({
+                                    exerciseId: request.params.exerciseId,
+                                    userId: request.userId,
+                                    submitterNotes: request.payload.notes,
+                                    files: JSON.stringify(request.payload.files),
+                                    state: 'completed',
+                                    completed: 1,
+                                    completedAt: new Date()
+                                });
+                            }
+
+                            else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
+
+                                let reviewerIdQuery, facilitatorIdQuery;
+                                facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
+                                    .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
+                                    .where({ 'course_enrolments.studentId': request.userId });
+                                if (exercise.reviewType === 'peer') {
+                                    reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
+                                        .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
+                                        .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
+                                        .where({
+                                            'submissions.completed': 1,
+                                            'submissions.exerciseId': request.params.exerciseId,
+                                            'course_enrolments.courseId': request.params.courseId
+                                        }).orderByRaw('RAND()').limit(1);
+                                } else {
+                                    reviewerIdQuery = facilitatorIdQuery;
+
+                                }
+
+                                submissionInsertQuery = reviewerIdQuery.then((rows) => {
+                                    let reviewerId;
+                                    if (rows.length < 1 && exercise.reviewType === 'peer') {
+                                        return facilitatorIdQuery.then((rows) => {
+                                            reviewerId = rows[0].reviewerID;
+                                            return Promise.resolve({ reviewerId: reviewerId });
+                                        });
+                                    } else {
+                                        let reviewerId = rows[0].reviewerID;
+                                        return Promise.resolve({ reviewerId: reviewerId });
+                                    }
+                                })
+                                    .then((response) => {
+                                        return database('submissions').insert({
+                                            exerciseId: request.params.exerciseId,
+                                            userId: request.userId,
+                                            submitterNotes: request.payload.notes,
+                                            files: JSON.stringify(request.payload.files),
+                                            state: 'pending',
+                                            completed: 0,
+                                            peerReviewerId: response.reviewerId,
+                                        });
+                                    });
+                            }
+
+                            submissionInsertQuery.then((rows) => {
+                                return database('submissions')
+                                    .select(
+                                    // Submissions table fields
+                                    'submissions.state', 'submissions.completed')
+                                    .where(
+                                    { 'submissions.id': rows[0] }
+                                    );
+                            }).then((rows) => {
+                                return reply(rows[0]);
                             });
                         });
                 }
-
-                submissionInsertQuery.then((rows) => {
-                    return database('submissions')
-                        .select(
-                        // Submissions table fields
-                        'submissions.state', 'submissions.completed')
-                        .where(
-                        { 'submissions.id': rows[0] }
-                        );
-                }).then((rows) => {
-                    return reply(rows[0]);
-                });
             });
     }
 
