@@ -8,7 +8,7 @@
         "env": {
             "NODE_ENV": "dev"
         },
-        "out_file": "saral-node-app.log",
-        "error_file": "saral-node-app-err.log"
+        "out_file": "/logs/saral-node-app.log",
+        "error_file": "/logs/saral-node-app-err.log"
     }]
 }
