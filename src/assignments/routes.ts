@@ -110,6 +110,31 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/courses/{courseId}/submission',
+        config: {
+            description: 'List of all submissions by the logged in user on a course.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                },
+                query: {
+                    submissionState: Joi.string().allow('pending', 'completed', 'rejected', 'all').required()
+                }
+            },
+            // response: {
+            //     schema: Joi.object({
+            //         data: Joi.array().items(exerciseSubmission)
+            //               .description("List of submissions.")
+            //     })
+            // },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: assignmentController.getCourseSubmissions,
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/{submissionId}',
         config: {
             description: 'Details of submission of given ID.',

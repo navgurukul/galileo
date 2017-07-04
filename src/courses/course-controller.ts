@@ -91,7 +91,8 @@ export default class CourseController {
                 })
                     .union(function () {
                         this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
-                            this.on('courses.id', '=', 'course_enrolments.courseId').andOn('course_enrolments.studentId', '=', request.userId);
+                            this.on('courses.id', '=', 'course_enrolments.courseId')
+                                .andOn('course_enrolments.studentId', '=', request.userId);
                         });
                     })
                 ).then((rows) => {
