@@ -107,30 +107,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: assignmentController.getExerciseSubmissions,
         }
     });
-
-    server.route({
-        method: 'GET',
-        path: '/courses/{courseId}/user/{userId}submission',
-        config: {
-            description: 'List of all submissions on a course by a user.',
-            validate: {
-                params: {
-                    courseId: Joi.number(),
-                    userId: Joi.number(),
-                }
-            },
-            // response: {
-            //     schema: Joi.object({
-            //         data: Joi.array().items(exerciseSubmission)
-            //               .description("List of submissions.")
-            //     })
-            // },
-            auth: 'jwt',
-            tags: ['api'],
-            handler: assignmentController.getCourseSubmissions,
-        }
-    });
-
+    
     server.route({
         method: 'GET',
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/{submissionId}',

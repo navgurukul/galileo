@@ -136,5 +136,69 @@ export default class ReportController {
 
     }
 
+    public getStudentReport(request: Hapi.Request, reply: Hapi.IReply) {
+
+        let submissionsObj = {};
+        let submissionsList = [];
+        database('submissions')
+            .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
+            'submissions.submitterNotes', 'submissions.files', 'submissions.state',
+            'submissions.completed', 'submissions.completedAt', 'exercises.name')
+            .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
+            .where({
+                'exercises.courseId': request.params.courseId,
+                'submissions.userId': request.params.userId
+            })
+            .then((rows) => {
+                return Promise.resolve(rows);
+            })
+            .then((rows) => {
+                for (let i = 0; i < rows.length; i++) {
+                    let submission = rows[i];
+                    // Parse the files as JSON
+                    if (submission.files !== null) {
+                        submission.files = JSON.parse(submission.files);
+                    }
+                    /*
+                    1. Check if a submission of higher or same level exist in the corresponding exercise/student id dict
+                    2. If it does do not do anything
+                    3. If it does not then replace it
+                    */
+                    let subStateOrder = ['rejected', 'pending', 'completed'];
+                    let curSubState = subStateOrder.indexOf(submission.state);
+                    let storedSubmission = submissionsObj[submission.exerciseId] || {};
+
+                    // No submission is stored in the object
+                    if (Object.keys(storedSubmission).length === 0) {
+                        submissionsObj[submission.exerciseId] = submission;
+                        submissionsObj[submission.exerciseId]['attempts'] = 1;
+                    }
+                    // If the submission is stored
+                    else {
+                        let storedSubState = subStateOrder.indexOf(storedSubmission.state);
+                        let attempts = submissionsObj[submission.exerciseId]['attempts'] + 1;
+                        // Replace the stored submission with the current submission if
+                        // the stored one is of a lesser level
+                        if (storedSubState < curSubState) {
+                            submissionsObj[submission.exerciseId] = submission;
+                        }
+                        submissionsObj[submission.exerciseId]['attempts'] = attempts;
+                    }
+                }
+                for (let exerciseId in submissionsObj) {
+                    if (submissionsObj.hasOwnProperty(exerciseId)) {
+                        submissionsList.push(submissionsObj[exerciseId]);
+                    }
+                }
+                return reply(
+                    {
+                        "data": submissionsList
+                    }
+                );
+            });
+
+    }
+
+
 }
 

@@ -34,4 +34,27 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/reports/{courseId}/user/{userId}/submission',
+        config: {
+            description: 'List of all submissions on a course by a user.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                    userId: Joi.number(),
+                }
+            },
+            // response: {
+            //     schema: Joi.object({
+            //         data: Joi.array().items(exerciseSubmission)
+            //               .description("List of submissions.")
+            //     })
+            // },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.getStudentReport,
+        }
+    });
+
 }
