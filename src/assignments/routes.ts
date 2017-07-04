@@ -5,7 +5,7 @@ import * as Boom from "boom";
 const Readable = require('stream').Readable;
 
 import AssignmentController from "./assignment-controller";
-import { exerciseSubmission, peerReviewSubmission } from "./schemas";
+import { exerciseSubmission, peerReviewSubmission, postSubmission } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -33,9 +33,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 .without('notes', 'manualDone')
             },
             response: {
-                schema: Joi.object({
-                    success: Joi.bool()
-                })
+                schema: postSubmission
             },
             auth: 'jwt',
             tags: ['api'],
