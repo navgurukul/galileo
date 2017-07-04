@@ -11,8 +11,7 @@ export const userSchema:Joi.ObjectSchema = Joi.object({
 
 export const noteSchema:Joi.ObjectSchema = Joi.object({
     id: Joi.number().required(),
-    student:Joi.number().required(),
     text: Joi.string().required(),
     createdAt: Joi.date().required(),
-    facilitator: Joi.number().required(),
+    name: Joi.string().required(),
 });

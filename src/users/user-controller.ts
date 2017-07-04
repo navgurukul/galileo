@@ -11,7 +11,7 @@ export default class UserController {
 
     private configs: IServerConfigurations;
     private database: any;
-    private user: any ;
+    private user: any;
 
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
@@ -45,12 +45,12 @@ export default class UserController {
                         facilitator: isFacilitator
                     }).then((response) => {
                         // return Promise.resolve({"hello": "123"});
-                        return database('users').select().where('email', googleAuthPayload['email']).then( (rows) => {
+                        return database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
                             let user = rows[0];
                             return Promise.resolve(user);
                         });
                     });
-                } 
+                }
                 // If the user already exists
                 else {
                     let user = rows[0];
@@ -58,7 +58,7 @@ export default class UserController {
                 }
             }).then((user) => {
                 // Return the signed token & the user object             
-                let token = Jwt.sign({email: user.email, id: user.id}, "secret", {expiresIn: "24h"});
+                let token = Jwt.sign({ email: user.email, id: user.id }, "secret", { expiresIn: "24h" });
                 return reply({
                     "user": user,
                     "jwt": token
@@ -70,7 +70,7 @@ export default class UserController {
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database.select('*').from('users').where('id','=',request.params.userId).then(function(rows){
+        database.select('*').from('users').where('id', '=', request.params.userId).then(function (rows) {
             return reply(rows[0]);
         });
 
@@ -86,16 +86,19 @@ export default class UserController {
     }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-    
-        database.select().from('notes').where('student', request.params.userId).orderBy('createdAt', 'desc').then((rows) => {
-            reply({ 'data': rows });
-        });
-
+        database('notes').select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
+            .join('users', 'notes.facilitator', 'users.id')
+            .where({
+                'notes.student': request.params.userId
+            })
+            .then((rows) => {
+                return reply({ data: rows });
+            });
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('notes').where('id',request.params.noteId).del().then( (rows,count) => {
+        database('notes').where('id', request.params.noteId).del().then((rows, count) => {
             return reply({ success: true });
         });
 
