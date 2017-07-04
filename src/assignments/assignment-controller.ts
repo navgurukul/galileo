@@ -202,7 +202,7 @@ export default class AssignmentController {
             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
             .where({
                 'exercises.courseId': request.params.courseId,
-                'submissions.userId': request.userId
+                'submissions.userId': request.params.userId
             })
             .then((rows) => {
                 return Promise.resolve(rows);

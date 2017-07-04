@@ -110,15 +110,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/submission',
+        path: '/courses/{courseId}/user/{userId}submission',
         config: {
-            description: 'List of all submissions by the logged in user on a course.',
+            description: 'List of all submissions on a course by a user.',
             validate: {
                 params: {
                     courseId: Joi.number(),
-                },
-                query: {
-                    submissionState: Joi.string().allow('pending', 'completed', 'rejected', 'all').required()
+                    userId: Joi.number(),
                 }
             },
             // response: {
