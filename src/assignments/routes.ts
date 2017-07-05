@@ -22,15 +22,15 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     courseId: Joi.number(),
                     exerciseId: Joi.number()
                 },
-                payload: Joi.object({
-                    manualDone: Joi.bool(),
-                    // files: Joi.array().items(Joi.string().uri())
-                    //     .description("List of URLs of submitted files"),
-                    notes: Joi.string()
-                })
-                    .without('manualDone', ['files', 'notes'])
-                    .without('files', 'manualDone')
-                    .without('notes', 'manualDone')
+                // payload: Joi.object({
+                //     manualDone: Joi.bool(),
+                //     // files: Joi.array().items(Joi.string().uri())
+                //     //     .description("List of URLs of submitted files"),
+                //     notes: Joi.string()
+                // })
+                //     .without('manualDone', ['files', 'notes'])
+                //     .without('files', 'manualDone')
+                //     .without('notes', 'manualDone')
             },
             response: {
                 schema: postSubmission
