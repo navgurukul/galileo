@@ -113,7 +113,8 @@ export default class CourseController {
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' 
+        + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
@@ -162,7 +163,8 @@ export default class CourseController {
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
         console.log(request.query.slug);
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 
+        'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'exercises.content',
