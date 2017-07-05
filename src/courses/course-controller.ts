@@ -113,14 +113,14 @@ export default class CourseController {
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];
-
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
             'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
-                    knex.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+                    knex.raw(xyz)
                 ).on('submissions.userId', '=', request.userId);
             })
             .where({ 'exercises.courseId': request.params.courseId })
@@ -162,14 +162,14 @@ export default class CourseController {
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
         console.log(request.query.slug);
-
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'exercises.content',
             'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
-                    database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+                    database.raw(xyz)
                 );
             })
             .where({ 'exercises.slug': request.query.slug })
