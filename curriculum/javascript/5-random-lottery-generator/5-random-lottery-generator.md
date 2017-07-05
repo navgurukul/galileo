@@ -1,6 +1,6 @@
 ```ngMeta
 name: Randome Lottery Generator
-completionMethod: autmoatic
+completionMethod: automatic
 ```
 
 # Random Lottery Generator
