@@ -24,8 +24,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 },
                 payload: Joi.object({
                     manualDone: Joi.bool(),
-                    files: Joi.array().items(Joi.string().uri())
-                        .description("List of URLs of submitted files"),
+                    // files: Joi.array().items(Joi.string().uri())
+                    //     .description("List of URLs of submitted files"),
                     notes: Joi.string()
                 })
                     .without('manualDone', ['files', 'notes'])
