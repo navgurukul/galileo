@@ -1,3 +1,8 @@
+```ngMeta
+name: Using Codepen
+completionMethod: manual
+```
+
 # Using CodePen.io
 
 - Javascript exercises ke liye hum codepen.io use karenge.

@@ -25,12 +25,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 payload: Joi.object({
                     manualDone: Joi.bool(),
                     files: Joi.array().items(Joi.string().uri())
-                           .description("List of URLs of submitted files"),
+                        .description("List of URLs of submitted files"),
                     notes: Joi.string()
                 })
-                .without('manualDone', ['files', 'notes'])
-                .without('files', 'manualDone')
-                .without('notes', 'manualDone')
+                    .without('manualDone', ['files', 'notes'])
+                    .without('files', 'manualDone')
+                    .without('notes', 'manualDone')
             },
             response: {
                 schema: postSubmission
@@ -44,7 +44,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     server.route({
         method: 'POST',
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/upload_files',
-        config : {
+        config: {
             description: "Uploads the given file and returns a URL for the file",
             payload: {
                 output: 'stream',
@@ -59,9 +59,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 },
                 payload: {
                     file: Joi.object()
-                          .type(Readable).required()
-                          .meta({ swaggerType: 'file' })
-                          .description('The file which needs to be uploaded.')
+                        .type(Readable).required()
+                        .meta({ swaggerType: 'file' })
+                        .description('The file which needs to be uploaded.')
                 }
             },
             response: {
@@ -91,8 +91,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 },
                 query: {
                     submissionUsers: Joi.string().allow('current', 'all')
-                                     .required()
-                                     .description('Submissions for the current user or all the users?'),
+                        .required()
+                        .description('Submissions for the current user or all the users?'),
                     submissionState: Joi.string().allow('pending', 'completed', 'rejected', 'all').required()
                 }
             },
@@ -107,7 +107,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: assignmentController.getExerciseSubmissions,
         }
     });
-    
+
     server.route({
         method: 'GET',
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/{submissionId}',

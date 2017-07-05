@@ -1,3 +1,8 @@
+```ngMeta
+name: Javascript Events
+completionMethod: manual
+```
+
 # Javascript Events
 
 - Aapne onClick event ke baarein mei padha hoga. Aise hi bahut saare events hote hai jaise onchange, **onclick**, **onmouseover**, **onmouseout**, **onkeydown**, **onload**. 

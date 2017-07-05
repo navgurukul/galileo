@@ -1,5 +1,9 @@
-# Concepts
+```ngMeta
+name: Javascript Concepts
+completionMethod: manual
+```
 
+# Concepts
 
 - Including Js [En,](https://www.javatpoint.com/external-javascript-file) Hi
 - Constants - [En,](http://eloquentjavascript.net/01_values.html) Hi

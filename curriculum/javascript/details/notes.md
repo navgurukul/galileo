@@ -1,4 +1,4 @@
-## Here is the Holy Grail for the python Course
+## Here is the Holy Grail for the js Course
 
 1. Some random cool description.
 2. Programmers don't understand their logic too a lot of times.

@@ -1,3 +1,0 @@
-# Calculator
-
-#### Project III

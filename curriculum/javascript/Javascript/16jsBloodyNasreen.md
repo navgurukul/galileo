@@ -1,4 +1,0 @@
-# Bloody Nasreen
-
-#### Project II
-
