@@ -1,7 +1,6 @@
-```ngmeta
-name: Instructions...
-
-completionMethod:
+```ngMeta
+name: Instructions
+completionMethod: manual
 ```
 # Instructions...
 

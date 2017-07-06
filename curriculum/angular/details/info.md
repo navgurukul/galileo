@@ -1,7 +1,7 @@
 ```ngMeta
-name: Learn To Control AngularJs
+name: Angular
 type: js
-daysToComplete: 35
-shortDescription: Learn to make web apps using angular
+daysToComplete: 30
+shortDescription: Learn to write code in angularjs
 logo: http://google.com/logo.png
 ```
