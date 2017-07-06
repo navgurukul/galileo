@@ -1,5 +1,5 @@
 ```ngMeta
-name: Instructions
+name: Weather
 completionMethod: manual
 ```
 

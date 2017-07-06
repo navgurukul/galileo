@@ -1,5 +1,5 @@
 ```ngMeta
-name: Part I Ui Router
+name: Ui Router
 completionMethod: automatic
 ```
 # Part I… Ui Router

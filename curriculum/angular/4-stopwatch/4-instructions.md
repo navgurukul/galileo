@@ -1,10 +1,9 @@
 ```ngMeta
-name: Instructions
+name: Stopwatch
 completionMethod: manual
-
+```
 # Instructions...
 
-```
 - Hum iss project ko karne ke liye [iss](https://github.com/vidur149/angular-stopwatch) repository ka user karenge.
 
 - Sabse pehle aap yeh repository ko **download/clone** kar lo. Aap dekhenge ki iss repo mei **part-1, part-2** jaise folders hai. Aapko yeh project complete karne ke liye inn folders mein jaa kar ek-ek karkar saare parts complete karne honge.
