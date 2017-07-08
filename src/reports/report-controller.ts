@@ -127,7 +127,6 @@ export default class ReportController {
                         exercises.push(exercise);
                     }
                 }
-                console.log(exercises[1].completionDetails[25]);
                 return reply({
                     "exercises": exercises,
                     "users": usersList

@@ -41,7 +41,7 @@ export default class CourseController {
                 .where({ 'course_enrolments.studentId': request.userId })
                 .groupBy('exercises.courseId')
                 .then((rows) => {
-                    console.log(rows);
+                    // console.log(rows);
                     enrolledCourses = rows;
                     let lastSubmissionQueries = [];
                     for (let i = 0; i < enrolledCourses.length; i++) {
@@ -162,7 +162,6 @@ export default class CourseController {
     }
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
-        console.log(request.query.slug);
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 
         'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')

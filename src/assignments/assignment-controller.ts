@@ -226,7 +226,7 @@ export default class AssignmentController {
                 let submissions = [];
                 for (let i = 0; i < rows.length; i++) {
                     let submission = rows[i];
-                    console.log(submission.files);
+                    // console.log(submission.files);
                     if (submission.files !== null) {
                         submission.files = JSON.parse(submission.files);
                     }
@@ -280,7 +280,7 @@ export default class AssignmentController {
                 let submissions = [];
                 for (let i = 0; i < rows.length; i++) {
                     let submission = rows[i];
-                    console.log(submission.files);
+                    // console.log(submission.files);
                     if (submission.files !== null) {
                         submission.files = JSON.parse(submission.files);
                     }
@@ -327,7 +327,6 @@ export default class AssignmentController {
                     .update(updateFields)
                     .where({ id: request.params.submissionId })
                     .then(() => {
-                        console.log('aa gaya yahan');
                         return reply({ 'success': true });
                     });
             });
