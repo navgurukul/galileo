@@ -113,8 +113,8 @@ export default class CourseController {
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' 
-        + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
+            + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
@@ -162,8 +162,8 @@ export default class CourseController {
     }
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' + 
-        'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
+            'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'exercises.content',
@@ -203,15 +203,25 @@ export default class CourseController {
             })
             .then((response) => {
                 if (response.alreadyEnrolled === false) {
-                    database('course_enrolments').insert({
-                        studentId: request.userId,
-                        courseId: request.params.courseId,
-                        batchId: 1
-                    }).then((response) => {
-                        return reply({
-                            "enrolled": true
-                        });
-                    });
+                    database('batches').select('batches.id as batchId').where({ 'courseId': request.params.courseId })
+                        .then((rows) => {
+                            if (rows.length > 0) {
+                                return Promise.resolve(rows[0]);
+                            } else {
+                                reply(Boom.expectationFailed("The course with the given Id doesn't exists or there is no facilitator for the course"));
+                            }
+                        })
+                        .then((batchId) => {
+                            database('course_enrolments').insert({
+                                studentId: request.userId,
+                                courseId: request.params.courseId,
+                                batchId: batchId['batchId']
+                            }).then((response) => {
+                                return reply({
+                                    "enrolled": true,
+                                });
+                            });
+                        })
                 }
             });
     }
