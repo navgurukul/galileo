@@ -208,7 +208,8 @@ export default class CourseController {
                             if (rows.length > 0) {
                                 return Promise.resolve(rows[0]);
                             } else {
-                                reply(Boom.expectationFailed("The course with the given Id doesn't exists or there is no facilitator for the course"));
+                                reply(Boom.expectationFailed("The course with the given Id doesn't exists" +
+                                    "or there is no facilitator for the course"));
                             }
                         })
                         .then((batchId) => {
@@ -221,7 +222,7 @@ export default class CourseController {
                                     "enrolled": true,
                                 });
                             });
-                        })
+                        });
                 }
             });
     }
