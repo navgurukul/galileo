@@ -20,7 +20,7 @@ export default class CourseController {
     }
 
     public getCoursesList(request: Hapi.Request, reply: Hapi.IReply) {
-
+        console.log('it started');
         let facilitatingCourses = [];
         let enrolledCourses = [];
         let availableCourses = [];
@@ -101,6 +101,7 @@ export default class CourseController {
                 });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
+        console.log('it ended');            
             return reply({
                 "enrolledCourses": enrolledCourses,
                 "facilitatingCourses": facilitatingCourses,
