@@ -12,4 +12,5 @@ completionMethod: manual
 **Kisi bhi assignment ko kisi se pooch kar nahi karna.**
 **Isse aap aage toh badh jaooge, par aapko aage chal kar pareshaani hogi jab mushkil concepts aane shuru honge.**
 
-![undo commit](./try/undo_commit.png)
+
+   ![undo commit](./undo_commit.png)

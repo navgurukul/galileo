@@ -226,7 +226,7 @@ function generateUID() {
     return firstPart + secondPart;
 }
 
-function parseAndUploadImage (imageText: string, sequenceNum: string, path: string) {
+function parseAndUploadImage(imageText: string, sequenceNum: string, path: string) {
 
     // get relative image path and image name
     let temp1 = imageText.split(']')[1];
@@ -254,17 +254,17 @@ function parseAndUploadImage (imageText: string, sequenceNum: string, path: stri
     let dir = '/' + courseData['info']['name'] + '/' + sequenceNum;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
-    let remoteWriteStream = bucket.file(filePath).createWriteStream();
-    localReadStream.pipe(remoteWriteStream)
-        .on('error', function (err) {
-            console.log(err);
-        })
-        .on('finish', function () {
-            return ({
+    return new Promise((resolve, reject) => {
+        let remoteWriteStream = bucket.file(filePath).createWriteStream();
+        let stream = localReadStream.pipe(remoteWriteStream);
+
+        stream.on('finish', () => {
+            resolve({
                 relativePath: imagePath,
                 gcsLink: "https://storage.googleapis.com/ng-curriculum-images" + filePath
             });
         });
+    });
 }
 
 // Validate the course directory given in the parameters
@@ -323,6 +323,7 @@ let _getExerciseInfo = function (path, sequenceNum) {
     let exInfo = {};
     let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
+    // console.log(tokens);
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
@@ -330,17 +331,36 @@ let _getExerciseInfo = function (path, sequenceNum) {
         showErrorAndExit("No code block of type `ngMeta` exists at the top of the exercise file " + path);
     }
     exInfo = parseNgMetaText(tokens[0]['text']);
+
+    // array to store image data
     let images = [];
-    tokens.forEach(token => {
-        if (token.lang === 'image') {
-            images.push(parseAndUploadImage(token.text, sequenceNum, path));
-        }
+
+    let promises = [];
+    new Promise((resolve, rejet) => {
+        tokens.forEach(token => {
+            if (token.type === 'paragraph') {
+                let tokenWithouSpaces = (token.text.replace(/ /g, ''));
+                if (tokenWithouSpaces.match(/!\[(.*?)\]\((.*?)\)/)) {
+                    let uploadPromise = parseAndUploadImage(tokenWithouSpaces.match(/!\[(.*?)\]\((.*?)\)/)[0], sequenceNum, path);
+                    promises.push(uploadPromise
+                        .then((res) => {
+                            images.push(res);
+                            resolve();
+                        }));
+                }
+            }
+        });
     });
-    exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
-    exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
-    exInfo['content'] = data;
-    exInfo['sequenceNum'] = sequenceNum;
-    return exInfo;
+
+    // after all the images have finished uploading
+    Promise.all(promises).then(() => {
+        console.log(images);
+        exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
+        exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
+        exInfo['content'] = data;
+        exInfo['sequenceNum'] = sequenceNum;
+        return exInfo;
+    });
 };
 
 let getAllExercises = function (exercises) {
