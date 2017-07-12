@@ -1,6 +1,6 @@
 ```ngMeta
 name: quesion 1
-completionMethod:
+completionMethod: facilitator
 ```
 # flowcharts-lists
 

@@ -1,6 +1,6 @@
 ```ngMeta
 name: flowcharts-loop
-completionMethod:
+completionMethod: facilitator
 ```
 
 # flowcharts-loop
