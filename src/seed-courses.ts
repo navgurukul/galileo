@@ -267,6 +267,14 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     });
 }
 
+function updateContent(images: any[], content: string): string {
+    let updateContent = content;
+    images.forEach(image => {
+        updateContent = updateContent.replace(image.relativePath, image.gcsLink);
+    });
+    return updateContent;
+}
+
 // Validate the course directory given in the parameters
 let validateCourseDirParam = function () {
 
@@ -351,29 +359,45 @@ let _getExerciseInfo = function (path, sequenceNum) {
             }
         });
     });
-
-    // after all the images have finished uploading
-    Promise.all(promises).then(() => {
-        console.log(images);
-        exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
-        exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
-        exInfo['content'] = data;
-        exInfo['sequenceNum'] = sequenceNum;
-        return exInfo;
+    return new Promise((resolve, reject) => {
+        // after all the images have finished uploading
+        Promise.all(promises).then(() => {
+            console.log('finished uploading');
+            exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
+            exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
+            exInfo['content'] = updateContent(images, data);
+            exInfo['sequenceNum'] = sequenceNum;
+            // return new Promise((resolve, reject) => {
+            resolve(exInfo);
+            // });
+        });
     });
 };
 
 let getAllExercises = function (exercises) {
     let exerciseInfos = [];
+    let promises = [];
     for (let i = 0; i < exercises.length; i++) {
-        let info = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum);
-        if (exercises[i].childExercises.length > 0) {
-            let childExercisesInfo = getAllExercises(exercises[i].childExercises);
-            info['childExercises'] = childExercisesInfo;
-        }
-        exerciseInfos.push(info);
+        let exercisePromise = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum)
+        promises.push(exercisePromise
+            .then((res) => {
+                let info = res;
+                if (exercises[i].childExercises.length > 0) {
+                    getAllExercises(exercises[i].childExercises)
+                        .then((res) => {
+                            info['childExercises'] = res;
+                            exerciseInfos.push(info);
+                        });
+                }
+                exerciseInfos.push(info);
+            })
+        );
     }
-    return exerciseInfos;
+    return new Promise((resolve, reject) => {
+        Promise.all(promises).then(() => {
+            resolve(exerciseInfos);
+        });
+    });
 };
 
 let addExercises = function (exercises, courseId, promiseObj?) {
@@ -444,9 +468,13 @@ validateCourseDirParam()
     }).then(() => {
         exercises = getCurriculumExerciseFiles(courseDir);
         validateSequenceNumber(exercises);
-        exercises = getAllExercises(exercises);
+        getAllExercises(exercises).then((res) => {
+            console.log('-------------------------------------');
+            console.log(res);
+            console.log('-------------------------------------');            
+            addCourseAndExercises();
+        })
         // console.log(exercises);
-        addCourseAndExercises();
     }).catch((err) => {
         console.log(err);
     });
