@@ -331,7 +331,6 @@ let _getExerciseInfo = function (path, sequenceNum) {
     let exInfo = {};
     let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
-    // console.log(tokens);
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
@@ -362,7 +361,6 @@ let _getExerciseInfo = function (path, sequenceNum) {
     return new Promise((resolve, reject) => {
         // after all the images have finished uploading
         Promise.all(promises).then(() => {
-            console.log('finished uploading');
             exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
             exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
             exInfo['content'] = updateContent(images, data);
@@ -468,13 +466,11 @@ validateCourseDirParam()
     }).then(() => {
         exercises = getCurriculumExerciseFiles(courseDir);
         validateSequenceNumber(exercises);
-        getAllExercises(exercises).then((res) => {
-            console.log('-------------------------------------');
-            console.log(res);
-            console.log('-------------------------------------');            
+        getAllExercises(exercises).then((res: any[]) => {
+            exercises = res;
+            console.log(colors.red("Finished uploading images to GCS and updated relatve path with link"));
             addCourseAndExercises();
         })
-        // console.log(exercises);
     }).catch((err) => {
         console.log(err);
     });
