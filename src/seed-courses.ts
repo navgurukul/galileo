@@ -376,7 +376,7 @@ let getAllExercises = function (exercises) {
     let exerciseInfos = [];
     let promises = [];
     for (let i = 0; i < exercises.length; i++) {
-        let exercisePromise = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum)
+        let exercisePromise = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum);
         promises.push(exercisePromise
             .then((res) => {
                 let info = res;
@@ -444,7 +444,7 @@ let addCourseAndExercises = function () {
             courseId = rows[0];
             return Promise.resolve(courseId);
         }).then((courseId) => {
-            addExercises(exercises, courseId)
+            addExercises(exercises, courseId);
             // console.log(  );
             // Promise.all(exInsertQs).then( () => {
             //     console.log("Ho gaya");
@@ -470,7 +470,7 @@ validateCourseDirParam()
             exercises = res;
             console.log(colors.red("Finished uploading images to GCS and updated relatve path with link"));
             addCourseAndExercises();
-        })
+        });
     }).catch((err) => {
         console.log(err);
     });
