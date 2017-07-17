@@ -1,12 +1,12 @@
 {
     "apps": [{
         "exec_mode": "fork",
-		"instances" : 4,
+        "instances": 4,
         "script": "./build/src/index.js",
         "name": "saral-node-app",
         "interpreter": "node",
         "env": {
-            "NODE_ENV": "dev"
+            "NODE_ENV": "prod"
         },
         "out_file": "/logs/saral-node-app.log",
         "error_file": "/logs/saral-node-app-err.log"

@@ -5,7 +5,7 @@ import * as Boom from "boom";
 const Readable = require('stream').Readable;
 
 import AssignmentController from "./assignment-controller";
-import { exerciseSubmission, peerReviewSubmission } from "./schemas";
+import { exerciseSubmission, peerReviewSubmission, postSubmission } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -22,20 +22,18 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     courseId: Joi.number(),
                     exerciseId: Joi.number()
                 },
-                payload: Joi.object({
-                    manualDone: Joi.bool(),
-                    files: Joi.array().items(Joi.string().uri())
-                           .description("List of URLs of submitted files"),
-                    notes: Joi.string()
-                })
-                .without('manualDone', ['files', 'notes'])
-                .without('files', 'manualDone')
-                .without('notes', 'manualDone')
+                // payload: Joi.object({
+                //     manualDone: Joi.bool(),
+                //     // files: Joi.array().items(Joi.string().uri())
+                //     //     .description("List of URLs of submitted files"),
+                //     notes: Joi.string()
+                // })
+                //     .without('manualDone', ['files', 'notes'])
+                //     .without('files', 'manualDone')
+                //     .without('notes', 'manualDone')
             },
             response: {
-                schema: Joi.object({
-                    success: Joi.bool()
-                })
+                schema: postSubmission
             },
             auth: 'jwt',
             tags: ['api'],
@@ -46,7 +44,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     server.route({
         method: 'POST',
         path: '/courses/{courseId}/exercise/{exerciseId}/submission/upload_files',
-        config : {
+        config: {
             description: "Uploads the given file and returns a URL for the file",
             payload: {
                 output: 'stream',
@@ -61,9 +59,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 },
                 payload: {
                     file: Joi.object()
-                          .type(Readable).required()
-                          .meta({ swaggerType: 'file' })
-                          .description('The file which needs to be uploaded.')
+                        .type(Readable).required()
+                        .meta({ swaggerType: 'file' })
+                        .description('The file which needs to be uploaded.')
                 }
             },
             response: {
@@ -93,8 +91,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 },
                 query: {
                     submissionUsers: Joi.string().allow('current', 'all')
-                                     .required()
-                                     .description('Submissions for the current user or all the users?'),
+                        .required()
+                        .description('Submissions for the current user or all the users?'),
                     submissionState: Joi.string().allow('pending', 'completed', 'rejected', 'all').required()
                 }
             },
@@ -137,9 +135,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         config: {
             description: 'List of peer review requests.',
             response: {
-                schema: Joi.object({
-                    'data': Joi.array().items(peerReviewSubmission)
-                })
+                // schema: Joi.object({
+                //     // 'data': Joi.array().items(peerReviewSubmission)
+                // })
             },
             auth: 'jwt',
             tags: ['api'],

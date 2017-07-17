@@ -32,3 +32,8 @@ export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     exerciseSequenceNum: Joi.number(),
     reviewType: Joi.string(),
 });
+
+export const postSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
+    completed: Joi.bool(),
+    state: Joi.string(), 
+});

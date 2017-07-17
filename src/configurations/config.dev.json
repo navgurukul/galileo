@@ -3,10 +3,10 @@
         "client": "mysql",
         "connection": {
             "database": "davinci",
-            "host": "localhost",
+            "host": "35.189.19.99",
             "_comment": "Add `127.0.0.1 doeaws.ddns.net` to /etc/hosts when using aws tunnel if port 1433 is blocked. for AWS Tunnel ssh -f -L 1433:59.180.230.82:1433 ubuntu@52.77.111.177 -N and set up passwordless ssh to server.",
             "user": "root",
-            "password": "Hello123!",
+            "password": "hello123",
             "requestTimeout": 90000,
             "connectionTimeout": 30000,
             "acquireConnectionTimeout": 30000

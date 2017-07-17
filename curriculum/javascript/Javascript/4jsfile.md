@@ -1,5 +1,0 @@
-# Quotes
-
-#### Project I
-
-

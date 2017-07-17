@@ -14,6 +14,6 @@ values apni sahuliyat se list mei pack kar sakte hai. Jaise
 * mohd rafi ke gaano ki list
 * etc.
 
-Iska example [navgurukul.org/python/list-1.py](navgurukul.org/python/list-1.py) mei hai.  
-Exercise [navgurukul.org/python/list-a.py](navgurukul.org/python/list-a.py) mei hai.
+Iska example [http://navgurukul.org/python/list-1.py](navgurukul.org/python/list-1.py) mei hai.  
+Exercise [https://navgurukul.org/python/list-a.py](navgurukul.org/python/list-a.py) mei hai.
 

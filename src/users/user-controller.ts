@@ -28,9 +28,9 @@ export default class UserController {
 
             // Check if user has navgurukul.org eMail-ID.
             // Currently only NG students are allowed to access the platform.
-            if (googleAuthPayload['hd'] !== 'navgurukul.org') {
-                return reply(Boom.unauthorized("You need to have a navgurukul.org email to access this."));
-            }
+            // if (googleAuthPayload['hd'] !== 'navgurukul.org') {
+            //     return reply(Boom.unauthorized("You need to have a navgurukul.org email to access this."));
+            // }
 
             database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
                 // If a user does not exist then create a user and return the ID.

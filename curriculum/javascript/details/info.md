@@ -1,7 +1,7 @@
 ```ngMeta
-name: Learning Python
-type: python
-daysToComplete: 30
-shortDescription: Learn to write code in python
+name: Become A JS Ninja
+type: js
+daysToComplete: 40
+shortDescription: Learn to write code in javascript
 logo: http://google.com/logo.png
 ```
