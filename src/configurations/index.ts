@@ -29,12 +29,12 @@ export interface IServerConfigurations {
     defaultBatchId: number;
 }
 
-export interface IDataConfiguration {
-    connectionString: string;
-    connection: {
-        typeCast: object;
-    };
-}
+// export interface IDataConfiguration {
+//     connectionString: string;
+//     connection: {
+//         typeCast: object;
+//     };
+// }
 
 export function getDatabaseConfig(): IDataConfiguration {
     console.log("Node Environment: ", process.env.NODE_ENV);

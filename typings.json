@@ -15,6 +15,7 @@
     "mocha": "registry:dt/mocha#2.2.5+20160720003353"
   },
   "dependencies": {
-    "hapi": "registry:dt/hapi#16.0.0+20170125175540"
+    "hapi": "registry:dt/hapi#16.0.0+20170125175540",
+    "sequelize": "registry:npm/sequelize#4.0.0+20170608093451"
   }
 }
