@@ -3,9 +3,7 @@ import * as Boom from "boom";
 import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 
-import database from "../";
 import { IServerConfigurations } from "../configurations";
-
 
 export default class ReportController {
 
@@ -31,7 +29,7 @@ export default class ReportController {
         let exercisesList = {};
 
         let userQuery =
-            database('course_enrolments')
+            this.database('course_enrolments')
                 .select('users.name', 'users.id', 'users.profilePicture', 'users.facilitator')
                 .innerJoin('users', 'course_enrolments.studentId', 'users.id')
                 .where({
@@ -43,7 +41,7 @@ export default class ReportController {
                 });
 
         let exercisesQuery =
-            database('exercises')
+            this.database('exercises')
                 .select('id', 'parentExerciseId', 'name', 'slug', 'sequenceNum', 'reviewType', 'content')
                 .where({ 'courseId': request.params.courseId })
                 .orderBy('sequenceNum', 'asc')
@@ -55,7 +53,7 @@ export default class ReportController {
                 });
 
         Promise.all([userQuery, exercisesQuery]).then(() => {
-            return database('submissions')
+            return this.database('submissions')
                 .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
                 'submissions.submitterNotes', 'submissions.files', 'submissions.state',
                 'submissions.completed', 'submissions.completedAt')
@@ -139,7 +137,7 @@ export default class ReportController {
 
         let submissionsObj = {};
         let submissionsList = [];
-        database('submissions')
+        this.database('submissions')
             .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
             'submissions.submitterNotes', 'submissions.files', 'submissions.state',
             'submissions.completed', 'submissions.completedAt', 'exercises.name')

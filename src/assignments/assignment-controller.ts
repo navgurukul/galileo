@@ -4,7 +4,6 @@ import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 import * as GoogleCloudStorage from "@google-cloud/storage";
 
-import database from "../";
 import { IServerConfigurations } from "../configurations";
 
 // Helper function to generate UIDs
@@ -33,7 +32,7 @@ export default class AssignmentController {
 
     public postExerciseSubmission(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
+        this.database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
             .then((rows) => {
                 if (rows.length > 0) {
                     return Promise.resolve({ canSubmit: true });
@@ -44,7 +43,7 @@ export default class AssignmentController {
             })
             .then((response) => {
                 if (response.canSubmit === true) {
-                    database('exercises').select().where('id', request.params.exerciseId)
+                    this.database('exercises').select().where('id', request.params.exerciseId)
                         .then((rows) => {
                             if (rows.length < 1) {
                                 reply(Boom.notFound('The exercise with the given ID is not found.'));
@@ -55,7 +54,7 @@ export default class AssignmentController {
                             }
                         })
                         .then((exercise) => {
-                            return database('submissions').count('id as count').where({
+                            return this.database('submissions').count('id as count').where({
                                 'submissions.userId': request.userId,
                                 'exerciseId': request.params.exerciseId,
                                 'completed': 1
@@ -72,7 +71,7 @@ export default class AssignmentController {
                             let submissionInsertQuery;
 
                             if (exercise.reviewType === 'manual') {
-                                submissionInsertQuery = database('submissions').insert({
+                                submissionInsertQuery = this.database('submissions').insert({
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     completed: 1,
@@ -82,7 +81,7 @@ export default class AssignmentController {
                             }
 
                             else if (exercise.reviewType === 'automatic') {
-                                submissionInsertQuery = database('submissions').insert({
+                                submissionInsertQuery = this.database('submissions').insert({
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     submitterNotes: request.payload.notes,
@@ -96,11 +95,11 @@ export default class AssignmentController {
                             else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
 
                                 let reviewerIdQuery, facilitatorIdQuery;
-                                facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
+                                facilitatorIdQuery = this.database('batches').select('batches.facilitatorId as reviewerID')
                                     .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
                                     .where({ 'course_enrolments.studentId': request.userId });
                                 if (exercise.reviewType === 'peer') {
-                                    reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
+                                    reviewerIdQuery = this.database('submissions').select('submissions.userId as reviewerID')
                                         .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
                                         .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
                                         .where({
@@ -126,7 +125,7 @@ export default class AssignmentController {
                                     }
                                 })
                                     .then((response) => {
-                                        return database('submissions').insert({
+                                        return this.database('submissions').insert({
                                             exerciseId: request.params.exerciseId,
                                             userId: request.userId,
                                             submitterNotes: request.payload.notes,
@@ -139,7 +138,7 @@ export default class AssignmentController {
                             }
 
                             submissionInsertQuery.then((rows) => {
-                                return database('submissions')
+                                return this.database('submissions')
                                     .select(
                                     // Submissions table fields
                                     'submissions.state', 'submissions.completed')
@@ -194,7 +193,7 @@ export default class AssignmentController {
     public getExerciseSubmissions(request: Hapi.Request, reply: Hapi.IReply) {
 
         let submissionQuery =
-            database('submissions')
+            this.database('submissions')
                 .select(
                 // Submissions table fields
                 'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
@@ -208,7 +207,7 @@ export default class AssignmentController {
                 'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
                 'users.facilitator as isSubmitterFacilitator'
                 )
-                .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
+                .leftJoin(this.database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
                 .leftJoin('users', 'submissions.userId', 'users.id');
 
         let whereClause = {
@@ -239,7 +238,7 @@ export default class AssignmentController {
 
     public getExerciseSubmissionById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('submissions')
+        this.database('submissions')
             .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
             'submissions.submitterNotes', 'submissions.files', 'submissions.notesReviewer', 'submissions.state',
             'submissions.completed', 'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName',
@@ -258,7 +257,7 @@ export default class AssignmentController {
 
     public getPeerReviewRequests(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('submissions')
+        this.database('submissions')
             .select(
             // Submissions table
             'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
@@ -293,7 +292,7 @@ export default class AssignmentController {
 
     public editPeerReviewRequest(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('submissions')
+        this.database('submissions')
             .select('*')
             .where({ 'id': request.params.submissionId })
             .then((rows) => {
@@ -323,7 +322,7 @@ export default class AssignmentController {
                 }
                 return Promise.resolve(updateFields);
             }).then((updateFields) => {
-                database('submissions')
+                this.database('submissions')
                     .update(updateFields)
                     .where({ id: request.params.submissionId })
                     .then(() => {

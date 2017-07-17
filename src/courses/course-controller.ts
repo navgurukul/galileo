@@ -4,7 +4,6 @@ import * as Jwt from "jsonwebtoken";
 import * as Joi from "joi";
 import * as knex from "knex";
 
-import database from "../";
 import { IServerConfigurations } from "../configurations";
 
 
@@ -26,11 +25,11 @@ export default class CourseController {
         let availableCourses = [];
 
         let enrolledQ =
-            database('course_enrolments')
+            this.database('course_enrolments')
                 .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
                 'courses.shortDescription', 'course_enrolments.enrolledAt', 'course_enrolments.batchId',
-                database.raw('COUNT(exercises.id) as totalExercises'),
-                database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
+                this.database.raw('COUNT(exercises.id) as totalExercises'),
+                this.database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
                 .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
                 .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
                 .leftJoin('submissions', function () {
@@ -48,7 +47,7 @@ export default class CourseController {
                         let oneDay = 24 * 60 * 60 * 1000;
                         enrolledCourses[i].daysSinceEnrolled = Math.abs(+new Date() - enrolledCourses[i].enrolledAt) / oneDay;
                         lastSubmissionQueries.push(
-                            database('submissions')
+                            this.database('submissions')
                                 .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
                                 .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
                                 .innerJoin('courses', 'courses.id', 'exercises.courseId')
@@ -71,7 +70,7 @@ export default class CourseController {
                 });
 
         let facilitatingQ =
-            database('courses')
+            this.database('courses')
                 .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
                 'batches.name as batch_name', 'batches.id as batchId')
                 .join('batches', function () {
@@ -84,9 +83,9 @@ export default class CourseController {
 
 
         let availableQ =
-            database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+            this.database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
                 .where('courses.id', 'not in',
-                database('courses').distinct().select('courses.id').join('batches', function () {
+                this.database('courses').distinct().select('courses.id').join('batches', function () {
                     this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
                 })
                     .union(function () {
@@ -101,7 +100,7 @@ export default class CourseController {
                 });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
-        console.log('it ended');            
+            console.log('it ended');
             return reply({
                 "enrolledCourses": enrolledCourses,
                 "facilitatingCourses": facilitatingCourses,
@@ -116,7 +115,7 @@ export default class CourseController {
         let exercises = [];
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
             + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
-        database('exercises')
+        this.database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
             'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
@@ -145,13 +144,14 @@ export default class CourseController {
 
     public getExerciseById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('exercises')
+        this.database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'exercises.content',
             'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
-                    database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+                    this.database
+                        .raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
                 );
             })
             .where({ 'exercises.id': request.params.exerciseId })
@@ -165,13 +165,13 @@ export default class CourseController {
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
             'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
-        database('exercises')
+        this.database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
             'exercises.reviewType', 'exercises.content',
             'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
-                    database.raw(xyz)
+                    this.database.raw(xyz)
                 );
             })
             .where({ 'exercises.slug': request.query.slug })
@@ -184,7 +184,7 @@ export default class CourseController {
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('courses').select('notes').where('id', request.params.courseId).then(function (rows) {
+        this.database('courses').select('notes').where('id', request.params.courseId).then(function (rows) {
             let notes = rows[0].notes;
             return reply({ "notes": notes });
         });
@@ -193,7 +193,7 @@ export default class CourseController {
 
     public enrollInCourse(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
+        this.database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
             .then((rows) => {
                 if (rows.length > 0) {
                     reply(Boom.expectationFailed("An enrolment against the user ID already exists."));
@@ -204,7 +204,7 @@ export default class CourseController {
             })
             .then((response) => {
                 if (response.alreadyEnrolled === false) {
-                    database('batches').select('batches.id as batchId').where({ 'courseId': request.params.courseId })
+                    this.database('batches').select('batches.id as batchId').where({ 'courseId': request.params.courseId })
                         .then((rows) => {
                             if (rows.length > 0) {
                                 return Promise.resolve(rows[0]);
@@ -214,7 +214,7 @@ export default class CourseController {
                             }
                         })
                         .then((batchId) => {
-                            database('course_enrolments').insert({
+                            this.database('course_enrolments').insert({
                                 studentId: request.userId,
                                 courseId: request.params.courseId,
                                 batchId: batchId['batchId']

@@ -39,7 +39,6 @@
         "hapi": "16.0.0",
         "hapi-auth-jwt2": "7.2.4",
         "hapi-cors-headers": "1.0.0",
-        "hapi-sequelize": "3.0.4",
         "hapi-swagger": "^7.7.0",
         "har-schema": "2.0.0",
         "har-validator": "5.0.3",

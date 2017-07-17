@@ -3,7 +3,6 @@ import * as Boom from "boom";
 import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 
-import database from "../";
 import { IServerConfigurations } from "../configurations";
 
 
@@ -32,12 +31,12 @@ export default class UserController {
             //     return reply(Boom.unauthorized("You need to have a navgurukul.org email to access this."));
             // }
 
-            database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
+            this.database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
                 // If a user does not exist then create a user and return the ID.
                 if (rows.length === 0) {
                     // Check if the user needs to be created as a facilitator
                     let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1 ? true : false;
-                    return database('users').insert({
+                    return this.database('users').insert({
                         email: googleAuthPayload['email'],
                         name: googleAuthPayload['name'],
                         profilePicture: googleAuthPayload['picture'],
@@ -45,7 +44,7 @@ export default class UserController {
                         facilitator: isFacilitator
                     }).then((response) => {
                         // return Promise.resolve({"hello": "123"});
-                        return database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
+                        return this.database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
                             let user = rows[0];
                             return Promise.resolve(user);
                         });
@@ -70,7 +69,7 @@ export default class UserController {
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database.select('*').from('users').where('id', '=', request.params.userId).then(function (rows) {
+        this.database.select('*').from('users').where('id', '=', request.params.userId).then(function (rows) {
             return reply(rows[0]);
         });
 
@@ -79,14 +78,14 @@ export default class UserController {
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
 
         let note = { 'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId };
-        database.insert(note).into('notes').then((id) => {
+        this.database.insert(note).into('notes').then((id) => {
             return reply({ id: id[0] });
         });
 
     }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        database('notes').select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
+        this.database('notes').select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
             .join('users', 'notes.facilitator', 'users.id')
             .where({
                 'notes.student': request.params.userId
@@ -98,7 +97,7 @@ export default class UserController {
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('notes').where('id', request.params.noteId).del().then((rows, count) => {
+        this.database('notes').where('id', request.params.noteId).del().then((rows, count) => {
             return reply({ success: true });
         });
 

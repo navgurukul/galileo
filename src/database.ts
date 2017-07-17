@@ -1,6 +1,7 @@
 //import * as Mongoose from "mongoose";
 // import * as Mysql from 'mysql';
 import { IDataConfiguration } from "./configurations";
+import * as Sequelize from 'sequelize';
 // import { IUser, UserModel } from "./users/user";
 // import { ITask, TaskModel } from "./tasks/task";
 
@@ -14,6 +15,16 @@ import { IDataConfiguration } from "./configurations";
 // }
 
 export function init(config: IDataConfiguration): any {
-    let database: any = require('knex')(config);
-    return database;
+    let sequelize = new Sequelize(config.connection.database, config.connection.user, config.connection.password, {
+        host: config.connection.host,
+        dialect: config.client,
+        pool: config.pool
+    });
+
+    return sequelize.authenticate().then(() => {
+        console.log("connection established with database");
+        return Promise.resolve(sequelize);
+    }).catch((err) => {
+        console.log("connection failed", err);
+    });
 }
