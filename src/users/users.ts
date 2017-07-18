@@ -1,29 +1,37 @@
 import * as Sequelize from 'sequelize';
 
-export function defineModel(sequelize) {
-    const user = sequelize.define('try', {
-        id: { type: Sequelize.STRING, primaryKey: true },
-
-        // instantiating will automatically set the flag to true if not set
-        // flag: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
-
-        // // default values for dates => current time
-        // myDate: { type: Sequelize.DATE, defaultValue: Sequelize.NOW },
-
-        // setting allowNull to false will add NOT NULL to the column, which means an error will be
-        // thrown from the DB when the query is executed if the column is null. If you want to check that a value
-        // is not null before querying the DB, look at the validations section below.
-        title: { type: Sequelize.STRING, allowNull: false },
-
-        // Creating two objects with the same value will throw an error. The unique property can be either a
-        // boolean, or a string. If you provide the same string for multiple columns, they will form a
-        // composite unique key.
-        // uniqueOne: { type: Sequelize.STRING, unique: 'compositeIndex' },
-        // uniqueTwo: { type: Sequelize.INTEGER, unique: 'compositeIndex' }
-    });
-
-    return user.sync({ force: false }).then(() => {
-        // Table created
-        return Promise.resolve(user);
-    });
+export default function (sequelize: Sequelize.Sequelize, DataTypes) {
+    const User = sequelize.define('user', {
+        id: {
+            type: Sequelize.INTEGER(11),
+            primaryKey: true,
+            autoIncrement: true
+        },
+        email: {
+            type: Sequelize.STRING(50),
+            allowNull: false,
+            defaultValue: ''
+        },
+        name: {
+            type: Sequelize.STRING(150),
+            allowNull: false,
+            defaultValue: ''
+        },
+        profilePicture: {
+            type: Sequelize.STRING(150),
+            defaultValue: null
+        },
+        googleUserId: {
+            type: Sequelize.STRING(30),
+            defaultValue: null
+        },
+        facilitator: {
+            type: Sequelize.INTEGER(1).ZEROFILL
+        }
+    }, {
+            classMethods: {
+                associate: function (models) { }
+            }
+        });
+    return User;
 }

@@ -6,21 +6,13 @@ console.log(`Running enviroment ${process.env.NODE_ENV || "dev"}`);
 
 //Init Database
 const dbConfigs = Configs.getDatabaseConfig();
-// This will type cast a TINYINT type into a boolean if it is not `null` or just return `null` in case it is null
-// dbConfigs.connection.typeCast = (field, next) => {
-//     if (field.type === 'TINY' && field.length === 1) {
-//         let value = field.string();
-//         return value ? (value === '1') : null;
-//     }
-//     return next();
-// };
-let database;
+const database = Database.init(dbConfigs);
 
-Database.init(dbConfigs).then((sequelize) => {
-    database = sequelize;
-    //Starting Application Server
+database.sequelize.sync().then(() => {
+    // console.log(database);
     const serverConfigs = Configs.getServerConfigs();
 
+    //Starting Application Server
     const server = Server.init(serverConfigs, database).then((server) => {
 
         if (!module.parent) {

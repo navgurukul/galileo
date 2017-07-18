@@ -15,7 +15,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/try',
         handler: userController.try
-    })
+    });
+    
     server.route({
         method: 'POST',
         path: '/users/auth/google',

@@ -18,15 +18,19 @@ export default class UserController {
     }
 
     public try(request: Hapi.Request, reply: Hapi.IReply) {
-        const a = this.database.build({
-            id: 1,
-            title: 'hello world'
+        // console.log(this.database);
+        const a = this.database.user.build({
+            email: "vidur@navvv",
+            name: "vidur singla",
+            profilePicture: "dasas",
+            googleUserId: 1234,
+            facilitator: 1
         });
-        a.save().then((res)=> {
+        a.save().then((res) => {
             console.log('very good');
-            return reply(res);            
+            return reply(res);
         }).catch((err) => {
-            console.log(err);            
+            console.log(err);
         });
     }
 

@@ -44,6 +44,7 @@ export interface IDataConfiguration {
         min: number;
         max: number;
     };
+    models: Array<string>;
 }
 
 export function getDatabaseConfig(): IDataConfiguration {
