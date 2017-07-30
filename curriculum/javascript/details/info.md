@@ -1,7 +1,7 @@
 ```ngMeta
-name: Become A JS Ninja
+name: Introduction to Javascript
 type: js
 daysToComplete: 40
-shortDescription: Learn to write code in javascript
+shortDescription: Hindi Tutorials to learn to write code in javascript
 logo: http://google.com/logo.png
 ```
