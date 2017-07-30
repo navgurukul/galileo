@@ -3,10 +3,29 @@ import * as Joi from "joi";
 export const courseSchema:Joi.ObjectSchema = Joi.object({
     id: Joi.number(),
     name: Joi.string(),
-    description: Joi.string(),
+    type: Joi.string(),
+    logo: Joi.string(),
+    shortDescription: Joi.string()
+});
+
+export const facilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
+    batch_name: Joi.string(),
+    batchId: Joi.number()
+});
+
+export const enrolledCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     totalExercises: Joi.number(),
-    daysToComplete: Joi.number()
-                    .description("Number of days to complete the course. Excluding sundays.")
+    completedSubmissions: Joi.number(),
+    enrolledAt: Joi.date(),
+    daysToComplete: Joi.number(),
+    daysSinceEnrolled: Joi.number(),
+    batchId: Joi.number(),
+    lastSubmission: Joi.object({
+        name: Joi.string().allow(null),
+        slug: Joi.string().allow(null),
+        submittedAt: Joi.date().allow(null),
+        completedAt: Joi.date().allow(null)
+    })
 });
 
 export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
@@ -17,22 +36,19 @@ export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.
 });
 
 
-export const exerciseSchema:Joi.ObjectSchema = Joi.object({
+let _exerciseSchema:Joi.ObjectSchema = Joi.object({
+    // Exercise Specific
     id: Joi.number(),
-    title: Joi.string(),
+    parentExerciseId: Joi.number().allow(null),
+    courseId: Joi.number(),
+    name: Joi.string(),
     slug: Joi.string(),
+    sequenceNum: Joi.number(),
+    reviewType: Joi.string(),
     content: Joi.string(),
-    parentExercise: Joi.number().allow(null),
-    completionType: Joi.string().valid('assignment', 'manual')
-                    .description("`assignment` if the student will have to finish an assignment or `manual` if not."),
-    assignmentReviewType: Joi.string().valid("peer", "auto", "facilitator").allow(null)
-                          .description("`peer` will result in peer review, `auto` means now review and \
-                                        `facilitator` will require a review from the facilitator.")
-});
-
-export const enrolledExerciseSchema:Joi.ObjectSchema = exerciseSchema.keys({
-    completed: Joi.bool().allow(null),
-    completedOn: Joi.date().timestamp().allow(null),
-    timeTakenToComplete: Joi.number().allow(null)
-                         .description("Number of seconds taken to complete")
-});
+    // Submission specfic
+    submissionState: Joi.string().allow(null),
+    submissionId: Joi.number().allow(null),
+    submissionCompleteAt: Joi.date().allow(null)
+}).unknown();
+export const exerciseSchema = _exerciseSchema.keys({ childExercises: Joi.array().items(_exerciseSchema) });

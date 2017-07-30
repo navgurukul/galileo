@@ -4,8 +4,7 @@ import { IServerConfigurations } from "../configurations";
 import * as Boom from "boom";
 
 import CourseController from "./course-controller";
-import { courseSchema, enrolledOrFacilitatingCourseSchema,
-         exerciseSchema, enrolledExerciseSchema } from "./schemas";
+import { courseSchema, facilitatingCourseSchema, enrolledCourseSchema, exerciseSchema } from "./schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -16,21 +15,15 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/courses',
         config: {
-            description: 'List of courses under 3 categories: \n \
-                          1. User has enrolled in. \n \
-                          2. User is facilitating. \n \
+            description: 'List of courses under 3 categories: \
+                          1. User has enrolled in. \
+                          2. User is facilitating. \
                           3. All courses (includes courses from 1 and 2.)',
-            validate: {
-                params: {
-                    facilitating: Joi.bool().default(true),
-                    enrolled: Joi.bool().default(true),
-                    allAvailable: Joi.bool().default(true)
-                }
-            },
             response: {
                 schema: Joi.object({
-                    "data": Joi.array(),
-                    // .items(courseSchema, enrolledOrFacilitatingCourseSchema  ),
+                    "facilitatingCourses": Joi.array().items(facilitatingCourseSchema),
+                    "enrolledCourses": Joi.array().items(enrolledCourseSchema),
+                    "availableCourses": Joi.array().items(courseSchema)
                 })
             },
             auth: 'jwt',
@@ -41,40 +34,64 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{courseId}/exercise/{exerciseId}',
-        config: {
-            description: 'Get complete details of the exercise with the given ID.',
-            validate: {
-                params: {
-                    courseId: Joi.number(),
-                    exerciseId : Joi.number()
-                }
-            },
-            response: {
-                schema: enrolledExerciseSchema
-            },
-            auth: 'jwt',
-            tags: ['api'],
-            handler: courseController.getExerciseById
-        }
-    });
-
-    server.route({
-        method: 'GET',
         path: '/courses/{courseId}/exercises',
         config: {
             description: 'Get complete list of exercises in the course',
             validate: {
                 params: {
-                    courseId: Joi.number()
+                    courseId: Joi.number().required()
                 }
             },
             response: {
-                // schema: enrolledExerciseSchema
+                schema: Joi.object({
+                    "data": Joi.array().items(exerciseSchema)
+                })
             },
             auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseExercises
+        }
+    });
+
+    // server.route({
+    //     method: 'GET',
+    //     path: '/courses/{courseId}/exercise/{exerciseId}',
+    //     config: {
+    //         description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
+    //         validate: {
+    //             params: {
+    //                 courseId: Joi.number(),
+    //                 exerciseId : Joi.number()
+    //             }
+    //         },
+    //         response: {
+    //             schema: exerciseSchema
+    //         },
+    //         auth: 'jwt',
+    //         tags: ['api'],
+    //         handler: courseController.getExerciseById
+    //     }
+    // });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/{courseId}/exercise/getBySlug',
+        config: {
+            description: 'Get complete details of the exercise with the given slug. Does not return child exercises.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                },
+                query: {
+                    slug: Joi.string().description('write exercise slug here')
+                }
+            },
+            // response: {
+            //     schema: exerciseSchema
+            // },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.getExerciseBySlug
         }
     });
 
@@ -90,7 +107,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
-                    "notes": Joi.string().default("# Notes Title ## Not sub-title Some content. \n More.")
+                    "notes": Joi.string()
+                             .default("# Notes Title ## Not sub-title Some content. \n More.")
+                             .description("Notes in markdown.")
                 })
             },
             auth: 'jwt',
@@ -110,7 +129,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-                schema: enrolledOrFacilitatingCourseSchema.description("`enrolled` flag is true now.")
+                schema: {
+                    "enrolled": Joi.bool()
+                }
             },
             auth: 'jwt',
             tags: ['api'],

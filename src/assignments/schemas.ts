@@ -1,23 +1,39 @@
 import * as Joi from "joi";
 
-export const exerciseSubmissionPayload:Joi.ObjectSchema = Joi.object({
-    manualDone: Joi.bool(),
-    files: Joi.array().items(Joi.string().uri())
-          .description("List of URLs of submitted files"),
-    notes: Joi.string(),
-    userId: Joi.number()
-            .description("ID of the user who made the submission.")
-}).without('manualDone', ['files', 'notes']);
-
-export const exerciseSubmission:Joi.ObjectSchema = exerciseSubmissionPayload.keys({
+export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
     id: Joi.number(),
-    submittedAt: Joi.date().timestamp()
+    exerciseId: Joi.number(),
+    userId: Joi.number(),
+    submittedAt: Joi.date(),
+    submitterNotes: Joi.string().allow(null),
+    files: Joi.array().items(Joi.string().uri()).allow(null),
+    notesReviewer: Joi.string().allow(null),
+    state: Joi.string(),
+    completed: Joi.bool(),
+    completedAt: Joi.date().allow(null),
+    // Reviewer Details
+    reviwerName: Joi.string().allow(null),
+    reviwerId: Joi.number().allow(null),
+    reviewerProfilePicture: Joi.string().uri().allow(null),
+    isReviewerFacilitator: Joi.bool().allow(null),
+    // Submitter Details
+    submitterName: Joi.string(),
+    submitterId: Joi.number(),
+    submitterProfilePicture: Joi.string().uri(),
+    isSubmitterFacilitator: Joi.bool()
 });
 
-export const peerReview:Joi.ObjectSchema = Joi.object({
-    id: Joi.number(),
-    reviewerId: Joi.number(),
-    submissionId: Joi.number(),
-    approved: Joi.bool(),
-    notes: Joi.string()
+export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
+    exerciseContent: Joi.string(),
+    parentExerciseId: Joi.number().allow(null),
+    courseId: Joi.number(),
+    exerciseName: Joi.string(), 
+    exerciseSlug: Joi.string(),
+    exerciseSequenceNum: Joi.number(),
+    reviewType: Joi.string(),
+});
+
+export const postSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
+    completed: Joi.bool(),
+    state: Joi.string(), 
 });

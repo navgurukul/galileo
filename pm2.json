@@ -1,14 +1,14 @@
 {
     "apps": [{
-        "exec_mode": "cluster",
-		"instances" : 4,
+        "exec_mode": "fork",
+        "instances": 4,
         "script": "./build/src/index.js",
-        "name": "type-node",
+        "name": "saral-node-app",
         "interpreter": "node",
         "env": {
-            "NODE_ENV": "dev"
+            "NODE_ENV": "prod"
         },
-        "out_file": "C:\\Logs\\pm2\\type-node.log",
-        "error_file": "C:\\Logs\\pm2\\type-node-err.log"
+        "out_file": "/logs/saral-node-app.log",
+        "error_file": "/logs/saral-node-app-err.log"
     }]
 }
