@@ -11,5 +11,3 @@ _Agle part par jaane se pehle, in jaroori concepts ko dhyaan se padhe. Yeh conce
 -**Head**  Tag [en](http://www.html-5-tutorial.com/head-tag.htm), [hi](https://docs.google.com/document/d/1xDqx_EKODy1bo_t0urMwzlfpP_8nUwbgaiJfyZV1_50/edit#heading=h.6zg5lk71ocoo)
 
 -**Body**  Tag [en](http://www.html-5-tutorial.com/body-tag.htm), [hi](https://docs.google.com/document/u/1/d/1P5h7AJNLpo2QsUeYMKydljWomEoPGsLJdkhHYck-R5s/edit?usp=drive_web)
-
-

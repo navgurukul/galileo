@@ -34,7 +34,7 @@ This is the most crucial and a non-compromisable step. Every day learning should
 ### Maintain a diary
 This is your personal space to write in somewhat more detail about the day - how did the things go, how can they be made better, are you not able to focus, if you aren’t able to focus - why you aren’t able to focus, and so on.
 
-### Mentor Slots 
+### Mentor Slots
 ### Weekly community meetings
 
 ## Hard Work
