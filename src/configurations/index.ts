@@ -3,12 +3,12 @@ import * as path from "path";
 
 //Read Configurations
 const configs = new nconf.Provider({
-  env: true,
-  argv: true,
-  store: {
-    type: 'file',
-    file: path.join(__dirname, `./config.${process.env.NODE_ENV || "dev"}.json`)
-  }
+    env: true,
+    argv: true,
+    store: {
+        type: 'file',
+        file: path.join(__dirname, `./config.${process.env.NODE_ENV || "dev"}.json`)
+    }
 });
 
 export interface IServerConfigurations {
@@ -30,10 +30,21 @@ export interface IServerConfigurations {
 }
 
 export interface IDataConfiguration {
-    connectionString: string;
+    client: string;
     connection: {
-        typeCast: object;
+        database: string;
+        host: string;
+        user: string;
+        password: string;
+        requestTimeout: number;
+        connectionTimeout: number;
+        acquireConnectionTimeout: number;
     };
+    pool: {
+        min: number;
+        max: number;
+    };
+    models: Array<string>;
 }
 
 export function getDatabaseConfig(): IDataConfiguration {
