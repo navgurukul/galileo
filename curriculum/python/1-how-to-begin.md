@@ -1,5 +1,5 @@
 ```ngMeta
-name: Iss course ko kaise use karein?
+name: Kaise shuru karein?
 completionMethod: manual
 ```
 

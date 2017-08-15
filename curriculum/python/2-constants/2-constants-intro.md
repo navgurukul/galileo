@@ -1,5 +1,5 @@
 ```ngMeta
-name: Constants and Variables
+name: Constants
 completionMethod: manual
 ```
 
