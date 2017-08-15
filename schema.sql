@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.18, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.17, for osx10.12 (x86_64)
 --
 -- Host: localhost    Database: davinci
 -- ------------------------------------------------------
--- Server version	5.7.18
+-- Server version	5.7.17
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,7 +14,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
 --
 -- Current Database: `davinci`
 --
@@ -22,7 +21,6 @@
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `davinci` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `davinci`;
-
 --
 -- Table structure for table `batches`
 --
@@ -42,11 +40,6 @@ CREATE TABLE `batches` (
   CONSTRAINT `batches_ibfk_2` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `batches`
---
-
 
 --
 -- Table structure for table `course_enrolments`
@@ -69,12 +62,9 @@ CREATE TABLE `course_enrolments` (
   CONSTRAINT `course_enrolments_ibfk_1` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `course_enrolments_ibfk_2` FOREIGN KEY (`studentId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `course_enrolments_ibfk_3` FOREIGN KEY (`batchId`) REFERENCES `batches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `course_enrolments`
---
 --
 -- Table structure for table `courses`
 --
@@ -87,16 +77,13 @@ CREATE TABLE `courses` (
   `type` enum('html','js','python') DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `logo` varchar(45) DEFAULT NULL,
-  `notes` varchar(500) DEFAULT NULL,
+  `notes` varchar(10000) DEFAULT NULL,
   `daysToComplete` int(11) DEFAULT NULL,
   `shortDescription` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `courses`
---
 --
 -- Table structure for table `exercises`
 --
@@ -112,17 +99,13 @@ CREATE TABLE `exercises` (
   `slug` varchar(100) NOT NULL DEFAULT '',
   `sequenceNum` float unsigned DEFAULT NULL,
   `reviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
-  `content` varchar(1500) DEFAULT NULL,
+  `content` longtext,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug_UNIQUE` (`slug`),
   KEY `course_id` (`courseId`),
   CONSTRAINT `exercises_ibfk_2` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `exercises`
---
 
 --
 -- Table structure for table `notes`
@@ -138,12 +121,8 @@ CREATE TABLE `notes` (
   `text` varchar(500) NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `notes`
---
 
 --
 -- Table structure for table `submissions`
@@ -166,16 +145,14 @@ CREATE TABLE `submissions` (
   `completed` tinyint(1) DEFAULT NULL,
   `completedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
+  KEY `assignmentId` (`exerciseId`),
   KEY `userId` (`userId`),
   KEY `submissions_ibfk_3_idx` (`peerReviewerId`),
+  CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`exerciseId`) REFERENCES `exercises` (`id`),
   CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users` (`id`),
   CONSTRAINT `submissions_ibfk_3` FOREIGN KEY (`peerReviewerId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `submissions`
---
 
 --
 -- Table structure for table `users`
@@ -196,16 +173,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `googleUserId` (`googleUserId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
--- LOCK TABLES `users` WRITE;
--- /*!40000 ALTER TABLE `users` DISABLE KEYS */;
--- INSERT INTO `users` VALUES (25,'vidur@navgurukul.org','Vidur Singla','https://lh6.googleusercontent.com/-i0cxOwNKHaQ/AAAAAAAAAAI/AAAAAAAAAAA/AAyYBF6i1xAO0yKHdewJhtJuFb7zzMAcjg/s96-c/photo.jpg','102582810280612846890',0),(27,'r@navgurukul.org','Rishabh Verma','https://lh5.googleusercontent.com/-Mr_Z6bx1yjk/AAAAAAAAAAI/AAAAAAAAAAA/AAyYBF74pAbbi8CTUc_rkkSl-xQnzPgqhg/s96-c/photo.jpg','113305747267561678691',0),(28,'a@navgurukul.org','Abhishek Gupta','https://lh5.googleusercontent.com/-da_bdadasx1yjk/AAAAAAAAAAI/AAAAAAAAAAA/AAyYBF74pAbbi8CTUc_rkkSl-xQnzPgqhg/s96-c/photo.jpg','376128574264892344234',1);
--- /*!40000 ALTER TABLE `users` ENABLE KEYS */;
--- UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -216,4 +183,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-06-30 13:35:28
+-- Dump completed on 2017-08-16  0:04:15
