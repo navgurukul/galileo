@@ -1,5 +1,6 @@
 # HTML Introduction 
-- HTML yaani **Hyper Text Markup Language** website banane ki shuruaat hoti hai. Website mei jo bhi content ya phir jyadatar samaan HTML ki form mei likha hota hai.
+
+- HTML yaani **Hyper Text Markup Language** website banane ki shuruaat hoti hai. Website mei jo bhi content ya phir jyadatar content HTML ki form mei likha hota hai.
 
 - Yeh concepts aage ke liye bahut Jaruri hai. Shuru mei thodi dikkat hogi, par dheere dheere aap kaafi tezi se badh paoge.
 
@@ -8,4 +9,3 @@
 _Kisi bhi assignment ko kisi se pooch kar nahi karna._
 
 _Isse aap aage toh badh jaooge, par aapko aage chal kar pareshaani hogi jab mushkil concepts aane shuru honge._
-

@@ -1,8 +1,15 @@
-## Here is the Holy Grail for the HTML/CSS Course
+## HTML Introduction
 
-1. Sometimes HTML/CSS don't even understand their own logic.
-2. Programmers don't understand their logic too a lot of times.
+#### English mei resources
 
-Here I would write *some* more shit about HTML/CSS. Just filling up space in the MD file.
+- [-https://www.khanacademy.org/computing/computer-programming/html-css](https://www.khanacademy.org/computing/computer-programming/html-css)
 
-`value - the allowed value which can be of any type and will be matched against the validated value before applying any other rules. value can be an array of values, or multiple values can be passed as individual arguments. value supports` 
+- [-www.w3schools.com/html](http://www.w3schools.com/html)
+
+
+#### Hindi mei resources
+
+- [-https://www.udemy.com/create-website-from-scratch-in-urdu-hindi](https://www.udemy.com/create-website-from-scratch-in-urdu-hindi/)
+
+
+Aap apne aap bhi search karke results use kar sakte hai. Internet par bahut resources hai jo aapke liye behetar ho sakte hai.
