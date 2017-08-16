@@ -4,7 +4,7 @@ completionMethod: peer
 ```
 
 # Part 0
-Aapko [**iss**](https://abhishekgupta92.github.io/equality0/index.html) aur [**isse**](https://abhishekgupta92.github.io/equality0/kindness.html) website ka clone banana hain. Pehle page ka naam **“index.html”** rakhe. Aur dusre page ka **“kindness.html”**. Aapko second page me video daalni hai jiske liye niche diye code ka use karein.
+Aapko [**iss**](https://abhishekgupta92.github.io/equality0/index.html) aur [**isse**](https://abhishekgupta92.github.io/equality0/kindness.html) website ka clone banana hain. Pehle page ka naam **"index.html"** rakhe. Aur dusre page ka **"kindness.html"**. Aapko second page me video daalni hai jiske liye niche diye code ka use karein.
 
 ```html
 <iframe width="560" height="315" src="https://www.youtube.com/embed/nwAYpLVyeFU" frameborder="0" allowfullscreen></iframe>

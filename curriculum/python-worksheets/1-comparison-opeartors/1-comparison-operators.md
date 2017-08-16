@@ -5,16 +5,16 @@ completionMethod: peer
 
 # Comparison Signs (<, > , <=, >=, ==)
 
-- Jab hume kabhi check karna hota hai ki kya ek number dusre number se bada hai. Tab hum “`>`” aur “`<`” use karte hai. Jaise, agar aapko check karna hai ki kya `50 100` se bada hai? To hum yeh likhenge `50>100`. Iska jawab “sahi” ya “galat” mein aata hai. Aur `50>100` ka jawab 
-“galat” ayega.
+- Jab hume kabhi check karna hota hai ki kya ek number dusre number se bada hai. Tab hum "`>`" aur "`<`" use karte hai. Jaise, agar aapko check karna hai ki kya `50 100` se bada hai? To hum yeh likhenge `50>100`. Iska jawab "sahi" ya "galat" mein aata hai. Aur `50>100` ka jawab 
+"galat" ayega.
 
 - Eg, kya `100 200` se bada hai?
-`>` “galat” `100 200` se bada nahi hai:
+`>` "galat" `100 200` se bada nahi hai:
 Isko hum aise likh sakte hai:
 `>` `100>200`
 
 - Eg, kya `3 4` se chota hai?
-`>` “haan” `3 4` se chota hai.
+`>` "haan" `3 4` se chota hai.
 Isko hum aise likh sakte hai:
 `>` `3<4`
 
@@ -60,5 +60,5 @@ holidays`>20`
 Oopar wali statement kya question puch rahi hai?
 `>`Kya ____  ____ se jyada hai?
  
-- 10)Agar yeh statement--holidays`>20--` ”sahi” hogi tab kya hoga?Penalty deni hogi ya nahi?
+- 10)Agar yeh statement--holidays`>20--` "sahi" hogi tab kya hoga?Penalty deni hogi ya nahi?
 `>`
