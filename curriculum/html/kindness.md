@@ -1,3 +1,0 @@
-# Kindness
-Project II
-

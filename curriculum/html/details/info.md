@@ -1,7 +1,7 @@
 ```ngMeta
-name: Become a HTML/CSS Ninja
+name: Introduction to HTML
 type: html
 daysToComplete: 20
-shortDescription: Build any web page under the sun after taking up this course :)
+shortDescription: Learn how to use HTML to build simple web pages :)
 logo: http://google.com/logo.png
 ```
