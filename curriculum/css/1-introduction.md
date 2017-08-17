@@ -1,5 +1,5 @@
 ```ngMeta
-name: HTML Introduction
+name: CSS Introduction
 completionMethod: manual
 ```
 

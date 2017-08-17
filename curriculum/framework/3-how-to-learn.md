@@ -1,3 +1,8 @@
+```ngMeta
+name: How to Learn?
+completionMethod: automatic
+```
+
 # How to Learn?
 
 We have been learning since the moment we were born, all throughout our life. We learn from what we see, what we hear, and most importantly what we do. Yet, when we move to more specialised forms of learning, e.g. Software Engineering, learning appears to be a little complicated. A lot of complication is a part of how we teach, how learning doesn’t use the context properly, etc. Yet learning a skill like Software Engineering requires more - hard work, discipline, commitment, seriousness, etc.
