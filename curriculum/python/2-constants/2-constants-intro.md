@@ -7,7 +7,7 @@ completionMethod: manual
 
 # Constants kya hote hain?
 
-Numbers, letters, aur strings ko **“CONSTANTS”** kaha jata hai, kyuki unki value change nahi hoti. Jin ki value change hoti hai unko variables kehte hain. Hum log pehle constants ke bare mein padhenge.
+Numbers, letters, aur strings ko **"CONSTANTS"** kaha jata hai, kyuki unki value change nahi hoti. Jin ki value change hoti hai unko variables kehte hain. Hum log pehle constants ke bare mein padhenge.
 
 ## Constant matlab jo badalta nahi hai
 

@@ -5,7 +5,7 @@ completionMethod: facilitator
 
 # flowcharts-loop
 
-- Agar aapko bola jaye ki ek **flowchart** banao jo **5 baar** “Navgurukul” print kare. Tab aap aisa kuch karenge
+- Agar aapko bola jaye ki ek **flowchart** banao jo **5 baar** "Navgurukul" print kare. Tab aap aisa kuch karenge
 
 - ![5 time print](https://storage.cloud.google.com/ng-curriculum-images/python-flowcharts/loop-worksheet/4-intro.png)
 

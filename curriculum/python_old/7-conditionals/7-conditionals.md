@@ -4,7 +4,7 @@ completionMethod: manual
 ```
 # Conditionals
 
-Programming karte hue hume “condition” likhne ki jaroorat padti hai.  
+Programming karte hue hume "condition" likhne ki jaroorat padti hai.  
 
 * jaise hum kissi ke interests ke hisaab se, usse koi course join karate hai.
 * jaise hum samay ke hisaab se, time table use karte hai.

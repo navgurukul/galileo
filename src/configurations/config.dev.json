@@ -36,7 +36,9 @@
             "assignmentsBucket": "ng-user-assignments"
         },
         "facilitatorEmails": [
-            "vidur@navgurukul.org"
+            "vidur@navgurukul.org",
+            "r@navgurukul.org",
+            "a@navgurukul.org"
         ],
         "defaultBatchId": 1
     }
