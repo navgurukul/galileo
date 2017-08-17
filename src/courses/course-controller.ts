@@ -20,7 +20,7 @@ export default class CourseController {
     }
 
     public getCoursesList(request: Hapi.Request, reply: Hapi.IReply) {
-
+        console.log('it started');
         let facilitatingCourses = [];
         let enrolledCourses = [];
         let availableCourses = [];
@@ -101,6 +101,7 @@ export default class CourseController {
                 });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
+        console.log('it ended');            
             return reply({
                 "enrolledCourses": enrolledCourses,
                 "facilitatingCourses": facilitatingCourses,
@@ -111,7 +112,6 @@ export default class CourseController {
     }
 
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
-
         let exercises = [];
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
             + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';

@@ -69,9 +69,19 @@ export default class UserController {
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
+<<<<<<< HEAD
+        return reply({
+            id: 5675,
+            name: "Rahul",
+            email: "rahul16@navgurukul.org",
+            profilePic: "http://google.com/rahul_pic.png",
+            batchId: "123",
+            role: 'facilitator'
+=======
 
         database.select('*').from('users').where('id', '=', request.params.userId).then(function (rows) {
             return reply(rows[0]);
+>>>>>>> f4eaec8c16f150fab25f8e234adf90ae88fd0856
         });
 
     }
