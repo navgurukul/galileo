@@ -5,47 +5,18 @@ import * as Joi from "joi";
 import database from './index';
 
 /**
- * 1. Get the course name as an argument.
- * 2. Look for the directory of the given course name or throw an error.
- * 3. Look for the ngmeta tag in the course_name/info.md file and validate it for the following:
- *      a. name is present
- *      b. type is `html`, `css`, `python`
- *      c. daysToComplete is a number
- *      d. shortDescription is a string.
- * 4. The directory structure of the exercises will look something like this:
- *      html/
- *          details/
- *              info.md
- *              notes.md
- *          1-what-is-python.md
- *          2-syntax-intro/
- *              2-syntax-intro.md
- *              2.1-variable-names.md
- *              2.2-if-else.md
- *              2.3-something-else.md
- *          3-bockly-intro.md
- *          4-if-else-statements.md
- *          5-booleans.md
- *          6-loops/
- *              6-loops.md
- *              6.1-loopy-ti-loop.md
- *              6.2-loopology.md 
- *      javascript/
- *      python/
- *      english/
- *      flask_backend/
- * 4. Check if a html/details/notes.md exists and just add the notes directly from there into the course or throw and error.
- * 5. Check if a html/details/info.md exists and add the info into the course object or throw an error.`
- * 6. Get a list of all files and strip of the numbers and check if they are sequential integers or throw an error.
- *    Do this for nested stuff too.
- * 7. Validate every exercise *.md file for the following things in `ngMeta` or throw an error:
- *      a. `name` should be there.
- *      b. `completionMethod` should be there and will be something out of 'manual','peer','facilitator','automatic'
- * 8. Remove the ```ngMeta``` from string and generate a list of objects.
- * 9. First add the course details and then add the details of every exercise.
+ ********************
+ ** Updation Logic **
+ ********************
+ * 
+ * 1. When there is a same file and the submission format has changed the related files will be deleted and re-created.
+ * 2. When a file has been deleted, then delete it from the DB.
+ * 3. When the submission format has not changed, then we can only update the content and be good with it.
+ * 4. Change the order according to the new order.
+ * 
  */
 
-console.log( colors.green.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
+console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
 console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
 
 // Helper method to throw an error with the given text and exit the script
@@ -59,6 +30,7 @@ let showErrorAndExit = function(message:string) {
 let courseDir, // Path of the course directory relative to this file
     courseData = {}, // Course data which will be put into the DB eventually
     exercises = [], // All exercises 
+    allSlugs = [], // All slugs will be stored here
     courseId;
 
 // Joi Schemas
@@ -115,7 +87,6 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
             } else {
                 // Check if the file name ends with '.md'
                 if (!file.endsWith('.md')) {
-                    console.log(file);
                     next();
                     return;
                 }
@@ -137,8 +108,6 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
     exercises.sort(function(a, b) {
         return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
     });
-    console.log(exercises);
-    console.log('--------------------------');
     return exercises;
 };
 
@@ -296,14 +265,55 @@ let getAllExercises = function(exercises) {
             info['childExercises'] = childExercisesInfo;
         }
         exerciseInfos.push(info);
+        allSlugs.push(info['slug']);
     }
     return exerciseInfos;
 };
 
-let addExercises = function(exercises, courseId, promiseObj?) {
+let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
+    let query = database('exercises')
+    .select('id')
+    .where({ 'slug': exerciseInfo['slug'] })
+    .then( (rows) => {
+        // a exercise with same slug exists
+        if (rows.length > 0) {
+            let dbReviewType = rows[0].reviewType;
+            return database('exercises')
+            .where({ 'id': rows[0].id })
+            .update(exerciseInfo)
+            .then( () => {
+                return Promise.resolve(rows[0].id);
+            })
+            .then( (exerciseId) => {
+                // if the review type has changed then we will need to delete the submissions too
+                if(dbReviewType != exerciseInfo['reviewType']) {
+                    return database('submissions')
+                        .where({'exerciseId': rows[0].id})
+                        .delete()
+                        .then( () => {
+                            return Promise.resolve(exerciseId);
+                        });
+                } else {
+                    return Promise.resolve(exerciseId);
+                }
+            })
+        }
+        // an exercise with the same slug does not exist 
+        else {
+            return database('exercises')
+            .insert(exerciseInfo)
+            .then( (rows) => {
+                return Promise.resolve(rows[0])
+            })
+        }
+    })
+    return query;
+}
+
+let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
     for (let i = 0; i < exercises.length; i++) {
-        let courseInsertObj = {
+        let exerciseObj = {
             courseId: courseId,
             name: exercises[i]['name'],
             slug: exercises[i]['slug'],
@@ -311,65 +321,143 @@ let addExercises = function(exercises, courseId, promiseObj?) {
             reviewType: exercises[i]['completionMethod'],
             content: exercises[i]['content']
         };
-        let insertQ;
+
+        let query;
         if (!promiseObj) {
-            insertQ = database('exercises').insert(courseInsertObj).then( (rows) => {
-                return Promise.resolve(rows[0]);
-            });
+            query = _generateExerciseAddOrUpdateQuery(exerciseObj);            
         } else {
             promiseObj.then( (exerciseId) => {
-                courseInsertObj['parentExerciseId'] = exerciseId;
-                return database('exercises').insert(courseInsertObj);
+                exerciseObj['parentExerciseId'] = exerciseId;
+                query = _generateExerciseAddOrUpdateQuery(exerciseObj);
+                return query;
             });
         }
 
         if (exercises[i].childExercises && exercises[i].childExercises.length > 0){
-            addExercises(exercises[i].childExercises, courseId, insertQ);
+            addOrUpdateExercises(exercises[i].childExercises, courseId, query);
         }
 
-        exInsertQs.push(insertQ);
+        exInsertQs.push(query);
         
     }
     return exInsertQs;
 };
 
-let addCourseAndExercises = function() {
-    database('courses')
-    .insert({
-        'type': courseData['info']['type'],
-        'name': courseData['info']['name'],
-        'logo': courseData['info']['logo'],
-        'shortDescription': courseData['info']['shortDescription'],
-        'daysToComplete': courseData['info']['daysToComplete'],
-        'notes': courseData['notes'],
-    }).then((rows) => {
-        courseId = rows[0];
-        return Promise.resolve(courseId);
+let addOrUpdateCourse = function() {
+    return database('courses')
+    .select('*')
+    .where({ 'type': courseData['info']['type'], 'name': courseData['info']['name'] })
+    .then( (rows) => {
+        if (rows.length > 0) {
+            return Promise.resolve(rows[0].id);
+        } else {
+            return Promise.resolve(null)
+        }
     }).then( (courseId) => {
-        console.log( addExercises(exercises, courseId) );
-        // Promise.all(exInsertQs).then( () => {
-        //     console.log("Ho gaya");
-        // }).catch( (err) => {
-        //     console.log(err);
-        // }); 
+        if (courseId == null) {
+            return database('courses')
+            .insert({
+                'type': courseData['info']['type'],
+                'name': courseData['info']['name'],
+                'logo': courseData['info']['logo'],
+                'shortDescription': courseData['info']['shortDescription'],
+                'daysToComplete': courseData['info']['daysToComplete'],
+                'notes': courseData['notes'],
+            })
+            .then( (rows) => {
+                return Promise.resolve(rows[0]);
+            })
+        } else {
+            return database('courses')
+            .update({ // Not updating `type` and `name` as assuming they won't change
+                'logo': courseData['info']['logo'],
+                'shortDescription': courseData['info']['shortDescription'],
+                'daysToComplete': courseData['info']['daysToComplete'],
+                'notes': courseData['notes'],
+            })
+            .then( () => {
+                return Promise.resolve(courseId);
+            })
+        }
+    })
+}
+
+let deleteExercises = function(courseId) {
+    database('exercises')
+    .select('slug')
+    .where({ 'courseId': courseId })
+    .then( (rows) => {
+        let slugs = [];
+        for (let i=0; i<rows.length; i++) {
+            slugs.push(rows[i]['slug']);
+        }
+        return Promise.resolve(slugs);
+    })
+    .then( (dbSlugs) => {
+        // get the slugs which exist in the DB but not in the slug list we have
+        // those ones need to be deleted
+        let slugDiff = dbSlugs.filter(function(x) { return allSlugs.indexOf(x) < 0 })
+        // delete the exercises with the slugs where the slugs are in slug diff
+        let deleteQueries = [];
+        for (let i=0; i<slugDiff.length; i++) {
+            deleteQueries.push(
+                database('exercises')
+                .select('id')
+                .where({'slug': slugDiff[i]})
+                .then( (rows) => {
+                    let exId = rows[0].id;
+                    return database('submissions')
+                    .where({'exerciseId': exId})
+                    .delete()
+                    .then( () => {
+                        console.log("Did it come here?");
+                        return database('exercises')
+                        .where({'slug': slugDiff[i]})
+                        .delete()
+                    })
+                })
+            );
+        }
+        return Promise.all(deleteQueries).then( () => {
+            return Promise.resolve(true);
+        })
     });
-};
+}
 
-
+// Check if the --courseDir parameter is correct
 validateCourseDirParam()
 .then( () => {
+    // Check if the details/notes.md file is correct
     return validateCourseNotes();
 }).then( (courseNotes) => {
+    // Add the notes in the courseData object which will be used to add the course
     courseData['notes'] = courseNotes;
     return Promise.resolve();
 }).then( () => {
+    // Check if the details/info.md file is correct 
     return validateCourseInfo();
 }).then( () => {
+    // Get a list of files and validate their sequence numbers
     exercises = getCurriculumExerciseFiles(courseDir);
     validateSequenceNumber(exercises);
+    // Get the exercise content from the files
     exercises = getAllExercises(exercises);
-    console.log(exercises);
-    addCourseAndExercises();
-}).catch( (err) => {
+    // console.log(exercises);
+    // Add or update the course
+    return addOrUpdateCourse();
+}).then( (courseId) => {
+    // delete any exercises if they exist in the DB and not in the curriculum
+    deleteExercises(courseId);
+    return Promise.resolve(courseId);
+}).then( (courseId) => {
+    // add or update the exercises in the DB
+    let promises = addOrUpdateExercises(exercises, courseId);
+    Promise.all(promises);
+}).then( () => {
+    // say your goodbyes :)
+    console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
+    console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
+}).catch( (err) => {    
+    // Throw an error in case of one.
     console.log(err);
 });
