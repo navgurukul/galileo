@@ -3,6 +3,7 @@ import * as fs from "fs-extra";
 import * as marked from "marked";
 import * as Joi from "joi";
 import database from './index';
+import * as GoogleCloudStorage from "@google-cloud/storage";
 
 /**
  ********************
@@ -46,6 +47,62 @@ let exerciseInfoSchema =  Joi.object({
     name: Joi.string().required(),
     completionMethod: Joi.string().allow('manual', 'peer', 'facilitator', 'automatic')
 });
+
+// Helper function to generate UIDs
+function generateUID() {
+    // I generate the UID from two parts here 
+    // to ensure the random number provide enough bits.
+    let firstPart = ((Math.random() * 46656) | 0).toString(36);
+    let secondPart = ((Math.random() * 46656) | 0).toString(36);
+    firstPart = ("000" + firstPart).slice(-3);
+    secondPart = ("000" + secondPart).slice(-3);
+    return firstPart + secondPart;
+}
+
+
+// Given the markdown of an image this returns the path of the image on Google Cloud Storage
+function parseAndUploadImage(imageText: string, sequenceNum: string, path: string) {
+    
+    // get relative image path and image name
+    let temp1 = imageText.split(']')[1];
+    let imagePath = temp1.slice(1, -1);
+    let temp3 = imagePath.split('/');
+    let imageName = temp3[temp3.length - 1];
+
+    // remove exercise name from path
+    let temp2 = path.split('/');
+    temp2.pop();
+
+    // use relative path and path in temp2 get the complete path relative to seed-courses.ts
+    let semiPath = temp2.join('/');
+    let completePath = semiPath + '/' + imagePath;
+
+    // initialise gcs
+    let gcs = GoogleCloudStorage({
+        projectId: 'navgurukul-159107',
+        keyFilename: __dirname + '/' + 'configurations/ng-gcloud-key.json'
+    });
+
+    // upload image
+    let bucket = gcs.bucket('ng-curriculum-images');
+    let localReadStream = fs.createReadStream(completePath);
+    let dir = courseData['info']['name' ] + '/' + sequenceNum;
+    let name = generateUID() + '.' + imageName;
+    let filePath = dir + '/' + name;
+    return new Promise((resolve, reject) => {
+        let remoteWriteStream = bucket.file(filePath).createWriteStream();
+        let stream =    localReadStream.pipe(remoteWriteStream);
+
+        stream.on('finish', () => {
+            return resolve({
+                relativePath: imagePath,
+                gcsLink: "https://storage.googleapis.com/ng-curriculum-images/" + filePath,
+                imageMD: imageText,
+            });
+        });
+    });
+
+}
 
 // Get the nested list of all the exercises
 let getCurriculumExerciseFiles = function(dir: string, callType?: string){
@@ -253,6 +310,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
     exInfo['content'] = data;
     exInfo['sequenceNum'] = sequenceNum;
+    exInfo['path'] = path;
     return exInfo;
 };
 
@@ -424,6 +482,15 @@ let deleteExercises = function(courseId) {
     });
 }
 
+// Updates the content with the links of images which have been uploaded to the Google Cloud    
+function updateContentWithImageLinks(images: any[], content: string): string {
+    let updateContent = content;
+    images.forEach(image => {
+        updateContent = updateContent.replace(image.relativePath, image.gcsLink);
+    });
+    return updateContent;
+}
+
 // Check if the --courseDir parameter is correct
 validateCourseDirParam()
 .then( () => {
@@ -442,10 +509,28 @@ validateCourseDirParam()
     validateSequenceNumber(exercises);
     // Get the exercise content from the files
     exercises = getAllExercises(exercises);
-    // console.log(exercises);
+    return Promise.resolve(exercises);
+}).then( (exercises) => {
+    // Upload the images to GCS before updating/adding stuff to the DBs
+    let exPromises = [];
+    for (let i = 0; i < exercises.length; i++) {
+        let uploadPromises = [];
+        let exInfo = exercises[i];
+        let images = exInfo['content'].match(/!\[(.*?)\]\((.*?)\)/g);
+        for (let j = 0; j < images.length; j++) {
+            uploadPromises.push( parseAndUploadImage(images[j], '1.3', exInfo['path']) );
+        }
+        exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
+            exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
+        }) );
+    }
+    return Promise.all(exPromises).then( () => {
+        return Promise.resolve();
+    })
+}).then( () => {
     // Add or update the course
     return addOrUpdateCourse();
-}).then( (courseId) => {
+} ).then( (courseId) => {
     // delete any exercises if they exist in the DB and not in the curriculum
     deleteExercises(courseId);
     return Promise.resolve(courseId);
