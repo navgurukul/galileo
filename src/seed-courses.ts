@@ -517,9 +517,11 @@ validateCourseDirParam()
         let uploadPromises = [];
         let exInfo = exercises[i];
         let images = exInfo['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-        for (let j = 0; j < images.length; j++) {
-            uploadPromises.push( parseAndUploadImage(images[j], '1.3', exInfo['path']) );
-        }
+	if (images!=null) {
+        	for (let j = 0; j < images.length; j++) {
+            		uploadPromises.push( parseAndUploadImage(images[j], '1.3', exInfo['path']) );
+        	}
+	}
         exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
             exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
         }) );
