@@ -344,7 +344,7 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
             })
             .then( (exerciseId) => {
                 // if the review type has changed then we will need to delete the submissions too
-                if(dbReviewType != exerciseInfo['reviewType']) {
+                if(dbReviewType !== exerciseInfo['reviewType']) {
                     return database('submissions')
                         .where({'exerciseId': rows[0].id})
                         .delete()
@@ -354,19 +354,19 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
                 } else {
                     return Promise.resolve(exerciseId);
                 }
-            })
+            });
         }
         // an exercise with the same slug does not exist 
         else {
             return database('exercises')
             .insert(exerciseInfo)
             .then( (rows) => {
-                return Promise.resolve(rows[0])
-            })
+                return Promise.resolve(rows[0]);
+            });
         }
-    })
+    });
     return query;
-}
+};
 
 let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
@@ -409,7 +409,7 @@ let addOrUpdateCourse = function() {
         if (rows.length > 0) {
             return Promise.resolve(rows[0].id);
         } else {
-            return Promise.resolve(null)
+            return Promise.resolve(null);
         }
     }).then( (courseId) => {
         if (courseId == null) {
@@ -424,7 +424,7 @@ let addOrUpdateCourse = function() {
             })
             .then( (rows) => {
                 return Promise.resolve(rows[0]);
-            })
+            });
         } else {
             return database('courses')
             .update({ // Not updating `type` and `name` as assuming they won't change
@@ -435,10 +435,10 @@ let addOrUpdateCourse = function() {
             })
             .then( () => {
                 return Promise.resolve(courseId);
-            })
+            });
         }
-    })
-}
+    });
+};
 
 let deleteExercises = function(courseId) {
     database('exercises')
@@ -454,7 +454,7 @@ let deleteExercises = function(courseId) {
     .then( (dbSlugs) => {
         // get the slugs which exist in the DB but not in the slug list we have
         // those ones need to be deleted
-        let slugDiff = dbSlugs.filter(function(x) { return allSlugs.indexOf(x) < 0 })
+        let slugDiff = dbSlugs.filter(function(x) { return allSlugs.indexOf(x) < 0; });
         // delete the exercises with the slugs where the slugs are in slug diff
         let deleteQueries = [];
         for (let i=0; i<slugDiff.length; i++) {
@@ -471,16 +471,16 @@ let deleteExercises = function(courseId) {
                         console.log("Did it come here?");
                         return database('exercises')
                         .where({'slug': slugDiff[i]})
-                        .delete()
-                    })
+                        .delete();
+                    });
                 })
             );
         }
         return Promise.all(deleteQueries).then( () => {
             return Promise.resolve(true);
-        })
+        });
     });
-}
+};
 
 // Updates the content with the links of images which have been uploaded to the Google Cloud    
 function updateContentWithImageLinks(images: any[], content: string): string {
@@ -528,7 +528,7 @@ validateCourseDirParam()
     }
     return Promise.all(exPromises).then( () => {
         return Promise.resolve();
-    })
+    });
 }).then( () => {
     // Add or update the course
     return addOrUpdateCourse();
