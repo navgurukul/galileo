@@ -102,7 +102,7 @@ export default class ReportController {
 
                 //  Convert the dictionary of exercises into an array to return
                 let _exercises = [];
-                for (let i in exercisesList) {
+                for (let i of Object.keys(exercisesList)) {
                     _exercises.push(exercisesList[i]);
                 }
                 // Sort the exercises on basis of sequence numbers

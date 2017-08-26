@@ -1,6 +1,6 @@
 ```ngMeta
 name: Nested Tables
-completionMethod: manual
+completionMethod: peer
 ```
 
 # Nested Tables
