@@ -7,7 +7,7 @@ const configs = new nconf.Provider({
   argv: true,
   store: {
     type: 'file',
-    file: path.join(__dirname, `./config.${process.env.NODE_ENV || "dev"}.json`)
+      file: path.join(__dirname, `./config.${process.env.GALILEO_ENV}.json`)
   }
 });
 
@@ -36,11 +36,20 @@ export interface IDataConfiguration {
     };
 }
 
+export function checkConfigEnvironment(): void {
+    if (!!configs.get("database") === false) {
+        console.error('Check GALILEO_ENV variable');
+        process.exit();
+    }
+}
+
 export function getDatabaseConfig(): IDataConfiguration {
+    checkConfigEnvironment();
     console.log("Node Environment: ", process.env.NODE_ENV);
     return configs.get("database");
 }
 
 export function getServerConfigs(): IServerConfigurations {
+    checkConfigEnvironment();
     return configs.get("server");
 }

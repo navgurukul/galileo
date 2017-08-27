@@ -3,8 +3,8 @@ import * as Boom from "boom";
 import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 
-import database from "../";
-import { IServerConfigurations } from "../configurations";
+import database from "../../";
+import {IServerConfigurations} from "../../configurations";
 
 
 export default class ReportController {
@@ -25,7 +25,7 @@ export default class ReportController {
          * This code is uber fucked. I am too sleepy and just
          * putting up a working version out there. Will get to
          * refactoring it soon :)
-        ********************************************************/
+         ********************************************************/
 
         let usersList;
         let exercisesList = {};
@@ -45,7 +45,7 @@ export default class ReportController {
         let exercisesQuery =
             database('exercises')
                 .select('id', 'parentExerciseId', 'name', 'slug', 'sequenceNum', 'reviewType', 'content')
-                .where({ 'courseId': request.params.courseId })
+                .where({'courseId': request.params.courseId})
                 .orderBy('sequenceNum', 'asc')
                 .then((rows) => {
                     for (let i = 0; i < rows.length; i++) {
@@ -57,10 +57,10 @@ export default class ReportController {
         Promise.all([userQuery, exercisesQuery]).then(() => {
             return database('submissions')
                 .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
-                'submissions.submitterNotes', 'submissions.files', 'submissions.state',
-                'submissions.completed', 'submissions.completedAt')
+                    'submissions.submitterNotes', 'submissions.files', 'submissions.state',
+                    'submissions.completed', 'submissions.completedAt')
                 .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
-                .where({ 'exercises.courseId': request.params.courseId })
+                .where({'exercises.courseId': request.params.courseId})
                 .then((rows) => {
                     return Promise.resolve(rows);
                 });
@@ -90,7 +90,7 @@ export default class ReportController {
                     else {
                         let storedSubState = subStateOrder.indexOf(storedSubmission.state);
                         let attempts = exercisesList[submission.exerciseId]['completionDetails']
-                        [submission.userId]['attempts'] + 1;
+                            [submission.userId]['attempts'] + 1;
                         // Replace the stored submission with the current submission if
                         // the stored one is of a lesser level
                         if (storedSubState < curSubState) {
@@ -141,8 +141,8 @@ export default class ReportController {
         let submissionsList = [];
         database('submissions')
             .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
-            'submissions.submitterNotes', 'submissions.files', 'submissions.state',
-            'submissions.completed', 'submissions.completedAt', 'exercises.name')
+                'submissions.submitterNotes', 'submissions.files', 'submissions.state',
+                'submissions.completed', 'submissions.completedAt', 'exercises.name')
             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
             .where({
                 'exercises.courseId': request.params.courseId,

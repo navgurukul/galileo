@@ -5,4 +5,4 @@
 // //     Routes(server, configs, database);
 // // }
 
-export { User, IUser } from './user';
+export {UserModel, IUser} from './user-model';

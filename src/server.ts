@@ -2,11 +2,10 @@ import * as Hapi from "hapi";
 import { IPlugin } from "./plugins/interfaces";
 import { IServerConfigurations } from "./configurations";
 
-import * as Users from "./users";
-import * as Courses from "./courses";
-import * as Assignments from "./assignments";
-import * as Reports from "./reports";
-
+import * as Users from "./controllers/users";
+import * as Courses from "./controllers/courses";
+import * as Assignments from "./controllers/assignments";
+import * as Reports from "./controllers/reports";
 
 export function init(configs: IServerConfigurations, database: any): Promise<Hapi.Server> {
     return new Promise<Hapi.Server>(resolve => {
@@ -16,10 +15,10 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         server.connection({
             port: port,
             routes: {
-                 cors: {
+                cors: {
                     "headers": ["Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"]
-                 },
-                 log: true
+                },
+                log: true
             }
         });
         // server.ext('onPreResponse', corsHeaders);
@@ -41,7 +40,7 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
 
         // Register all the routes once all plugins have been initialized
         Promise.all(pluginPromises).then(() => {
-            Users.init(server,  configs, database);
+            Users.init(server, configs, database);
             Courses.init(server, configs, database);
             Assignments.init(server, configs, database);
             Reports.init(server, configs, database);

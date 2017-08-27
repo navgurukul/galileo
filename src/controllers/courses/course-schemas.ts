@@ -1,6 +1,6 @@
 import * as Joi from "joi";
 
-export const courseSchema:Joi.ObjectSchema = Joi.object({
+export const courseSchema: Joi.ObjectSchema = Joi.object({
     id: Joi.number(),
     name: Joi.string(),
     type: Joi.string(),
@@ -8,12 +8,12 @@ export const courseSchema:Joi.ObjectSchema = Joi.object({
     shortDescription: Joi.string()
 });
 
-export const facilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
+export const facilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     batch_name: Joi.string(),
     batchId: Joi.number()
 });
 
-export const enrolledCourseSchema:Joi.ObjectSchema = courseSchema.keys({
+export const enrolledCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     totalExercises: Joi.number(),
     completedSubmissions: Joi.number(),
     enrolledAt: Joi.date(),
@@ -28,15 +28,15 @@ export const enrolledCourseSchema:Joi.ObjectSchema = courseSchema.keys({
     })
 });
 
-export const enrolledOrFacilitatingCourseSchema:Joi.ObjectSchema = courseSchema.keys({
+export const enrolledOrFacilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     enrolled: Joi.bool().allow(null),
     enrolledBatch: Joi.bool(),
     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
-                     .description("IDs of batches for whom the user is a facilitator.")
+        .description("IDs of batches for whom the user is a facilitator.")
 });
 
 
-let _exerciseSchema:Joi.ObjectSchema = Joi.object({
+let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     // Exercise Specific
     id: Joi.number(),
     parentExerciseId: Joi.number().allow(null),
@@ -51,4 +51,4 @@ let _exerciseSchema:Joi.ObjectSchema = Joi.object({
     submissionId: Joi.number().allow(null),
     submissionCompleteAt: Joi.date().allow(null)
 }).unknown();
-export const exerciseSchema = _exerciseSchema.keys({ childExercises: Joi.array().items(_exerciseSchema) });
+export const exerciseSchema = _exerciseSchema.keys({childExercises: Joi.array().items(_exerciseSchema)});

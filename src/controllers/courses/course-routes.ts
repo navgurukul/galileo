@@ -1,10 +1,10 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import { IServerConfigurations } from "../configurations";
+import {IServerConfigurations} from "../../configurations";
 import * as Boom from "boom";
 
 import CourseController from "./course-controller";
-import { courseSchema, facilitatingCourseSchema, enrolledCourseSchema, exerciseSchema } from "./schemas";
+import {courseSchema, facilitatingCourseSchema, enrolledCourseSchema, exerciseSchema} from "./course-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -108,8 +108,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: Joi.object({
                     "notes": Joi.string()
-                             .default("# Notes Title ## Not sub-title Some content. \n More.")
-                             .description("Notes in markdown.")
+                        .default("# Notes Title ## Not sub-title Some content. \n More.")
+                        .description("Notes in markdown.")
                 })
             },
             auth: 'jwt',
