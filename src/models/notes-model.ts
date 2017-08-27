@@ -14,13 +14,15 @@ export class NotesModel extends DBTable {
     }
 
     public getUserNotes(userId) {
-        this.database.select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
+        console.log( this.database.select('notes.id', 'notes.text', 'notes.createdAt', 'users.name').join('users', 'notes.facilitator', 'users.id').where({ 'notes.student': userId }).toSQL() );
+        return this.database.select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
+            .from(this.tableName)
             .join('users', 'notes.facilitator', 'users.id')
             .where({
                 'notes.student': userId
             })
             .then((rows) => {
-                return {data: rows};
+                return rows;
             });
     }
 }

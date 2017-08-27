@@ -22,8 +22,7 @@ export default class DBTable {
             });
     }
 
-    public findMany(whereClause, columnsList?): Promise<any> {
-        console.log(columnsList);
+    public findMany(whereClause, columnsList?: Array<String>): Promise<any> {
         //Checking whether we need specific columns or not
         let dbInstance;
         if (columnsList && columnsList.length > 0) {
@@ -36,7 +35,6 @@ export default class DBTable {
             .from(this.tableName)
             .where(whereClause)
             .then(function (rows) {
-                console.log(rows);
                 if (!rows) {
                     return Promise.resolve(null);
                 } else {
@@ -58,7 +56,6 @@ export default class DBTable {
                 }
             })
             .then((prevPromise) => {
-                console.log('isReturnObj' + isReturnObj);
                 if (isReturnObj) {
                     return this.findOne(whereClause);
                 } else {
@@ -94,8 +91,16 @@ export default class DBTable {
         return this.database(this.tableName)
             .where('id', id)
             .del()
-            .then((rows, count) => {
-                return {success: true};
+            .then((count) => {
+                // TODO: Don't know if we should return false in case no rows are affected.
+                if (count <= 0) {
+                    return Promise.resolve(false);
+                } else {
+                    return Promise.resolve(true);
+                }
+            })
+            .catch((err) => {
+                return Promise.resolve(false);
             });
     }
 }

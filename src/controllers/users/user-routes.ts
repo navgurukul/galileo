@@ -97,7 +97,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: {
-                    id: Joi.number().required()
+                    status: Joi.bool().required()
                 }
             },
             plugins: {
@@ -149,7 +149,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
-                    success: Joi.bool().required()
+                    status: Joi.bool().required()
                 })
             },
             tags: ['api'],

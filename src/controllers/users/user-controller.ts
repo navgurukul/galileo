@@ -57,17 +57,23 @@ export default class UserController {
 
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
         let note = {'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId};
-        return this.userModel.insert(note)
+        return this.notesModel.insert(note)
             .then((status) => {
-                return reply({status: status});
+                return reply({ status: status });
             });
     }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        return this.notesModel.getUserNotes(request.params.userId);
+        return this.notesModel.getUserNotes(request.params.userId)
+            .then( (rows) => {
+                return reply({ data: rows })
+            });
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-        return this.notesModel.del(request.params.noteId);
+        return this.notesModel.del(request.params.noteId)
+            .then( (status) => {
+                return reply({ status: status })
+            });
     }
 }
