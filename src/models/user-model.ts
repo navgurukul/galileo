@@ -30,7 +30,6 @@ export class UserModel extends DBTable {
             this.configs.jwtSecret,
             {expiresIn: this.configs.jwtExpiration}
         );
-        console.log(token);
         return token;
     }
 }

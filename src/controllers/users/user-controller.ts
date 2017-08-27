@@ -4,6 +4,7 @@ import * as GoogleAuth from "google-auth-library";
 import database from "../../";
 import {IServerConfigurations} from "../../configurations";
 import {UserModel} from "../../models/user-model";
+import {NotesModel} from "../../models/notes-model";
 
 
 export default class UserController {
@@ -11,11 +12,13 @@ export default class UserController {
     private configs: IServerConfigurations;
     private database: any;
     private userModel: UserModel;
+    private notesModel: NotesModel;
 
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
         this.userModel = new UserModel(this.configs);
+        this.notesModel = new NotesModel(this.configs);
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
@@ -42,7 +45,6 @@ export default class UserController {
                     });
                 });
         });
-
     }
 
     public getUserInfo(request: Hapi.Request, reply: Hapi.IReply) {
@@ -55,26 +57,17 @@ export default class UserController {
 
     public postUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
         let note = {'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId};
-        database.insert(note).into('notes')
-            .then((id) => {
-                return reply({id: id[0]});
+        return this.userModel.insert(note)
+            .then((status) => {
+                return reply({status: status});
             });
     }
 
     public getUserNotes(request: Hapi.Request, reply: Hapi.IReply) {
-        database('notes').select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
-            .join('users', 'notes.facilitator', 'users.id')
-            .where({
-                'notes.student': request.params.userId
-            })
-            .then((rows) => {
-                return reply({data: rows});
-            });
+        return this.notesModel.getUserNotes(request.params.userId);
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-        database('notes').where('id', request.params.noteId).del().then((rows, count) => {
-            return reply({success: true});
-        });
+        return this.notesModel.del(request.params.noteId);
     }
 }
