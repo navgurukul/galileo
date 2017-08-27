@@ -1,5 +1,4 @@
 import * as Hapi from "hapi";
-import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 
 import database from "../../";
@@ -16,7 +15,7 @@ export default class UserController {
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
-        this.userModel = new UserModel();
+        this.userModel = new UserModel(this.configs);
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
@@ -37,44 +36,11 @@ export default class UserController {
             };
             return this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                 .then((user) => {
-                    // Return the signed token & the user object
-                    let token = Jwt.sign({email: user.email, id: user.id}, "secret", {expiresIn: "24h"});
                     return reply({
                         "user": user,
-                        "jwt": token
+                        "jwt": this.userModel.getJWTToken(user)
                     });
                 });
-
-            // database('users').select()
-            //     .where('email', googleAuthPayload['email'])
-            //     .then((rows) => {
-            //         // If a user does not exist then create a user and return the ID.
-            //         if (rows.length === 0) {
-            //             // Check if the user needs to be created as a facilitator
-            //
-            //             return database('users').insert({}).then((response) => {
-            //                 // return Promise.resolve({"hello": "123"});
-            //                 return database('users').select().where('email', googleAuthPayload['email']).then((rows) => {
-            //                     let user = rows[0];
-            //                     return Promise.resolve(user);
-            //                 });
-            //             });
-            //         }
-            //         // If the user already exists
-            //         else {
-            //             let user = rows[0];
-            //             return Promise.resolve(user);
-            //         }
-            //     })
-            //     .then((user) => {
-            //             // Return the signed token & the user object
-            //             let token = Jwt.sign({email: user.email, id: user.id}, "secret", {expiresIn: "24h"});
-            //             return reply({
-            //                 "user": user,
-            //                 "jwt": token
-            //             });
-            //         }
-            //     );
         });
 
     }
@@ -107,11 +73,8 @@ export default class UserController {
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-
         database('notes').where('id', request.params.noteId).del().then((rows, count) => {
             return reply({success: true});
         });
-
     }
-
 }

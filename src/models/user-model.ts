@@ -1,9 +1,9 @@
 //ignore this
-
 // import * as Mongoose from "mongoose";
 import database from '../index';
 import DBTable from './dbtable';
-import * as Bcrypt from "bcryptjs";
+import * as Jwt from "jsonwebtoken";
+import {IServerConfigurations} from "../configurations/index";
 
 export interface IUser {
     name: string;
@@ -16,7 +16,21 @@ export interface IUser {
 }
 
 export class UserModel extends DBTable {
-    constructor() {
+    configs: any;
+
+    constructor(configs: IServerConfigurations) {
         super(database, "users");
+        console.log(configs);
+        this.configs = configs;
+    }
+
+    public getJWTToken(user) {
+        let token = Jwt.sign(
+            {email: user.email, id: user.id},
+            this.configs.jwtSecret,
+            {expiresIn: this.configs.jwtExpiration}
+        );
+        console.log(token);
+        return token;
     }
 }

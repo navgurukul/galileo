@@ -1,16 +1,19 @@
 export default class DBTable {
-    public tableName: string;
+
     public database: any;
+    public tableName: any;
 
     constructor(database: any, tableName: string) {
-        this.database = database;
         this.tableName = tableName;
+        this.database = database;
     }
 
     public findOne(whereClause): Promise<any> {
-        return this.database.select('*').from(this.tableName)
+        return this.database.select()
+            .from(this.tableName)
             .where(whereClause)
             .then(function (rows) {
+                console.log(rows);
                 if (!rows) {
                     return Promise.resolve(null);
                 } else {
@@ -20,8 +23,8 @@ export default class DBTable {
     }
 
     public upsert(obj: any, whereClause: any, isReturnObj = false): Promise<any> {
-        return this.database(this.tableName)
-            .select()
+        return this.database.select()
+            .from(this.tableName)
             .where(whereClause)
             .then((rows) => {
                 console.log('rows length:' + rows.length);
@@ -32,6 +35,7 @@ export default class DBTable {
                 }
             })
             .then((prevPromise) => {
+                console.log('isReturnObj' + isReturnObj);
                 if (isReturnObj) {
                     return this.findOne(whereClause);
                 } else {
@@ -41,8 +45,7 @@ export default class DBTable {
     }
 
     public update(obj: any, whereClause: any) {
-        console.log(this.database.update(obj).where(whereClause).toSQL());
-        return this.database.update(obj)
+        return this.database(this.tableName).update(obj)
             .where(whereClause)
             .then(
                 (numRows) => {
@@ -52,7 +55,7 @@ export default class DBTable {
     }
 
     public insert(obj: any): Promise<any> {
-        return this.database.insert(obj)
+        return this.database(this.tableName).insert(obj)
             .then((id) => {
                 return Promise.resolve(true);
             });

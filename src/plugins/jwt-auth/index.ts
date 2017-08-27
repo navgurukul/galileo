@@ -23,7 +23,7 @@ export default (): IPlugin => {
                     } else {
                         server.auth.strategy('jwt', 'jwt', false,
                             {
-                                key: "secret",
+                                key: serverConfig.jwtSecret,
                                 validateFunc: validateUser,
                                 verifyOptions: { algorithms: ['HS256'] }
                             });
