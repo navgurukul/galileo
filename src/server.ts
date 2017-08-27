@@ -1,15 +1,15 @@
 import * as Hapi from "hapi";
-import { IPlugin } from "./plugins/interfaces";
-import { IServerConfigurations } from "./configurations";
+import {IPlugin} from "./plugins/interfaces";
+import {IServerConfigurations} from "./configurations";
 
 import * as Users from "./controllers/users";
 import * as Courses from "./controllers/courses";
 import * as Assignments from "./controllers/assignments";
 import * as Reports from "./controllers/reports";
 
-export function init(configs: IServerConfigurations, database: any): Promise<Hapi.Server> {
+export function init(serverConfigs: IServerConfigurations, databaseConfig: any): Promise<Hapi.Server> {
     return new Promise<Hapi.Server>(resolve => {
-        const port = process.env.port || configs.port;
+        const port = process.env.port || serverConfigs.port;
         const server = new Hapi.Server();
 
         server.connection({
@@ -24,10 +24,10 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
         // server.ext('onPreResponse', corsHeaders);
 
         //  Setup Hapi Plugins
-        const plugins: Array<string> = configs.plugins;
+        const plugins: Array<string> = serverConfigs.plugins;
         const pluginOptions = {
-            database: database,
-            serverConfigs: configs
+            database: databaseConfig,
+            serverConfigs: serverConfigs
         };
 
         let pluginPromises = [];
@@ -40,10 +40,10 @@ export function init(configs: IServerConfigurations, database: any): Promise<Hap
 
         // Register all the routes once all plugins have been initialized
         Promise.all(pluginPromises).then(() => {
-            Users.init(server, configs, database);
-            Courses.init(server, configs, database);
-            Assignments.init(server, configs, database);
-            Reports.init(server, configs, database);
+            Users.init(server, serverConfigs, databaseConfig);
+            Courses.init(server, serverConfigs, databaseConfig);
+            Assignments.init(server, serverConfigs, databaseConfig);
+            Reports.init(server, serverConfigs, databaseConfig);
             resolve(server);
         });
 
