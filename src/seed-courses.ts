@@ -404,7 +404,7 @@ let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
 let addOrUpdateCourse = function() {
     return database('courses')
     .select('*')
-    .where({ 'type': courseData['info']['type'], 'name': courseData['info']['name'] })
+    .where({ 'name': courseData['info']['name'] })
     .then( (rows) => {
         if (rows.length > 0) {
             return Promise.resolve(rows[0].id);
