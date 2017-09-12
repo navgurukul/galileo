@@ -119,4 +119,5 @@ typings/
 # dotenv environment variables file
 .env
 
-
+migrations
+!migrations/migration_1.sql

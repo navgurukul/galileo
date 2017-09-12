@@ -1,10 +1,9 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import {IServerConfigurations} from "../../configurations";
-import * as Boom from "boom";
 
 import CourseController from "./course-controller";
-import {courseSchema, facilitatingCourseSchema, enrolledCourseSchema, exerciseSchema} from "./course-schemas";
+import {courseSchema, enrolledCourseSchema, exerciseSchema, facilitatingCourseSchema} from "./course-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -52,26 +51,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: courseController.getCourseExercises
         }
     });
-
-    // server.route({
-    //     method: 'GET',
-    //     path: '/courses/{courseId}/exercise/{exerciseId}',
-    //     config: {
-    //         description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
-    //         validate: {
-    //             params: {
-    //                 courseId: Joi.number(),
-    //                 exerciseId : Joi.number()
-    //             }
-    //         },
-    //         response: {
-    //             schema: exerciseSchema
-    //         },
-    //         auth: 'jwt',
-    //         tags: ['api'],
-    //         handler: courseController.getExerciseById
-    //     }
-    // });
 
     server.route({
         method: 'GET',
