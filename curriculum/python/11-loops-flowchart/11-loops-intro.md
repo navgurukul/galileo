@@ -3,11 +3,6 @@ name: What are loops?
 completionMethod: manual
 ```
 
-```ngMeta
-name: flowcharts-loop
-completionMethod: facilitator
-```
-
 # What are loops?
 
 Agar aapko bola jaye ki ek **flowchart** banao jo **5 baar** "Navgurukul" print kare. Tab aap aisa kuch karenge.
