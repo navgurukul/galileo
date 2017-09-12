@@ -9,11 +9,11 @@ Agar aapko bola jaye ki ek **flowchart** banao jo **5 baar** "Navgurukul" print 
 
 ![5 time print](assets/theory_images/11-image1.png)
 
-Socho agar aapko 1000 baar kuch print karna hai ya koi bhi same kaam bar bar karna hai? Tab kya aap **baar baar** print statement likhoge? 
+Socho agar aapko 1000 baar kuch print karna hai ya koi bhi same kaam bar bar karna hai? Tab kya aap **baar baar** print statement likhoge? Basically jab bhi hum ek kaam ko baar baar ek hi dhang se karte hain usko iteration kehte hain aur yeh karne mein loops humari help karte hain.
 
 Aise kaam karne ke liye hum **loop** ka use karte hai. **Loop** se aise kaam karna easy ho jata hai. Chalo ab dekhte hai ki loop kaise likhte hai. Aur loop kaise chalta hai. Neeche diye flowchart ko ek baar pehle khud samjhne ki koshish karna. Aisa ho sakta hai ki aap isse khud hi samajh jaye.
 
-Agar humne loops ke saath karna hai toh hum aisa flowchart banayenge. 
+Agar humne loops ke saath karna hai toh hum aisa flowchart banayenge.
 
 ![use loop ](assets/theory_images/11-image2.png)
 
