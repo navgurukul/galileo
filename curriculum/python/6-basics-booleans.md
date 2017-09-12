@@ -34,11 +34,11 @@ Jab bhi humein computer se question puchne hote hain, toh humnein kuch special t
 Python shell mein inn sab operators ke saath khel ke dekho. Aur ache se samajh aayega.
 
 ```python
-4 < 5
+4 < 5 # True
 ```
 
 ```python
-56 == 45
+56 == 45 # False
 ```
 
 Python shell mein inn operators ka use karoge toh woh apne aap inka boolean javab dikha dega.
