@@ -7,7 +7,7 @@ completionMethod: manual
 
 Agar aapko bola jaye ki ek **flowchart** banao jo **5 baar** "Navgurukul" print kare. Tab aap aisa kuch karenge.
 
-![5 time print](assets/theory_images/11-image1.png)
+![5 time print](assets/theory_images/12-image1.png)
 
 Socho agar aapko 1000 baar kuch print karna hai ya koi bhi same kaam bar bar karna hai? Tab kya aap **baar baar** print statement likhoge? Basically jab bhi hum ek kaam ko baar baar ek hi dhang se karte hain usko iteration kehte hain aur yeh karne mein loops humari help karte hain.
 
@@ -15,7 +15,7 @@ Aise kaam karne ke liye hum **loop** ka use karte hai. **Loop** se aise kaam kar
 
 Agar humne loops ke saath karna hai toh hum aisa flowchart banayenge.
 
-![use loop ](assets/theory_images/11-image2.png)
+![use loop ](assets/theory_images/12-image2.png)
 
 Yeh flowchart neeche diye gaye steps ke hisaab se kaam karta hai:
 

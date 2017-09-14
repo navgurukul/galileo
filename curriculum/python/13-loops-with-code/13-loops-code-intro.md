@@ -9,7 +9,7 @@ Abhi tak humne loops ke flowcharts banane seekhein hain. Lekin flowcharts toh si
 
 Loops samajhte hue humne yeh flowchart banaya tha. Ab hum iss flowchart ka code likhna seekhte hain.
 
-![use loop ](assets/theory_images/12-image1.png)
+![use loop ](assets/theory_images/13-image1.png)
 
 Iss flowchart ka code kuch aise likha jayega:
 
