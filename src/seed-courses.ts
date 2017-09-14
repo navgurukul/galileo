@@ -534,7 +534,6 @@ validateCourseDirParam()
         if (exInfo['childExercises'] != null) {
             let uploadChildPromises = [];
             for (let j = 0; j < exInfo['childExercises'].length; j++) {
-                console.log("Yeh hua!!");
                 let exInfoChild = exInfo['childExercises'][j];
                 let images = exInfoChild['content'].match(/!\[(.*?)\]\((.*?)\)/g);
                 if (images!=null) {
