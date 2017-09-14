@@ -330,7 +330,7 @@ let getAllExercises = function(exercises) {
 
 let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     let query = database('exercises')
-    .select('id')
+    .select('id', 'reviewType')
     .where({ 'slug': exerciseInfo['slug'] })
     .then( (rows) => {
         // a exercise with same slug exists
@@ -552,7 +552,7 @@ validateCourseDirParam()
     }
     return Promise.all(exPromises).then( () => {
         return Promise.all(exChildPromises).then( () => {
-            console.log("Now i know shit!!");
+            console.log("All images have been uploaded :)");
             return Promise.resolve();
         } )
         // return Promise.resolve();
