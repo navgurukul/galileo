@@ -5,7 +5,7 @@ completionMethod: manual
 
 # What is debugging?
 
-![whatsapp-ticks](assets/debugging-intro.jpg)
+![debugging-intro](assets/debugging-intro.jpg)
 
 
 Abhi tak humne sirf code likhna seekha hai. Bahot baar jab hum codelikh rahe honge toh humari galti ki vajah se humara code chalega nahi. Ya hume dusron ke likhe hue code ke saath bhi kaam karna padega. Inn cases mein hume code ke andar ki galtiyon ko sahi karna hota hai. Iss process ko debugging kehte hain. Neeche diye gaye coe ko chalao:
