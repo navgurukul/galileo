@@ -1,11 +1,11 @@
-import * as Hapi from "hapi";
-import {IPlugin} from "./plugins/interfaces";
-import {IServerConfigurations} from "./configurations";
+import * as Hapi from 'hapi';
+import { IServerConfigurations } from './configurations';
+import * as Assignments from './controllers/assignments';
+import * as Courses from './controllers/courses';
+import * as Reports from './controllers/reports';
 
-import * as Users from "./controllers/users";
-import * as Courses from "./controllers/courses";
-import * as Assignments from "./controllers/assignments";
-import * as Reports from "./controllers/reports";
+import * as Users from './controllers/users';
+import { IPlugin } from './plugins/interfaces';
 
 export function init(serverConfigs: IServerConfigurations, databaseConfig: any): Promise<Hapi.Server> {
     return new Promise<Hapi.Server>(resolve => {
@@ -16,7 +16,7 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
             port: port,
             routes: {
                 cors: {
-                    "headers": ["Accept", "Authorization", "Content-Type", "If-None-Match", "Accept-language"]
+                    'headers': ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'Accept-language']
                 },
                 log: true
             }
@@ -33,7 +33,7 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
         let pluginPromises = [];
 
         plugins.forEach((pluginName: string) => {
-            var plugin: IPlugin = (require("./plugins/" + pluginName)).default();
+            let plugin: IPlugin = (require('./plugins/' + pluginName)).default();
             console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
@@ -46,6 +46,5 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
             Reports.init(server, serverConfigs, databaseConfig);
             resolve(server);
         });
-
     });
-};
+}

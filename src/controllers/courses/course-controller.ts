@@ -1,9 +1,9 @@
-import * as Hapi from "hapi";
-import * as Boom from "boom";
-import * as knex from "knex";
+import * as Boom from 'boom';
+import * as Hapi from 'hapi';
+import * as knex from 'knex';
 
-import database from "../../";
-import {IServerConfigurations} from "../../configurations/index";
+import database from '../../';
+import { IServerConfigurations } from '../../configurations/index';
 
 
 export default class CourseController {
@@ -88,26 +88,28 @@ export default class CourseController {
 
         let availableQ =
             database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
-                .where('courses.id', 'not in',
-                    database('courses').distinct().select('courses.id').join('batches', function () {
+                .where('courses.id', 'not in', database('courses').distinct()
+                    .select('courses.id')
+                    .join('batches', function () {
                         this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
                     })
-                        .union(function () {
-                            this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
-                                this.on('courses.id', '=', 'course_enrolments.courseId')
-                                    .andOn('course_enrolments.studentId', '=', request.userId);
-                            });
-                        })
-                ).then((rows) => {
-                availableCourses = rows;
-                return Promise.resolve();
-            });
+                    .union(function () {
+                        this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
+                            this.on('courses.id', '=', 'course_enrolments.courseId')
+                                .andOn('course_enrolments.studentId', '=', request.userId);
+                        });
+                    })
+                )
+                .then((rows) => {
+                    availableCourses = rows;
+                    return Promise.resolve();
+                });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
             return reply({
-                "enrolledCourses": enrolledCourses,
-                "facilitatingCourses": facilitatingCourses,
-                "availableCourses": availableCourses
+                'enrolledCourses': enrolledCourses,
+                'facilitatingCourses': facilitatingCourses,
+                'availableCourses': availableCourses
             });
         });
 
@@ -142,7 +144,6 @@ export default class CourseController {
                 }
                 return reply({data: exercises});
             });
-
     }
 
     public getExerciseById(request: Hapi.Request, reply: Hapi.IReply) {
@@ -185,23 +186,21 @@ export default class CourseController {
     }
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
-
         database('courses').select('notes').where('id', request.params.courseId).then(function (rows) {
             let notes = rows[0].notes;
-            return reply({"notes": notes});
+            return reply({'notes': notes});
         });
-
     }
 
     public enrollInCourse(request: Hapi.Request, reply: Hapi.IReply) {
-
-        database('course_enrolments').select('*').where({
-            'studentId': request.userId,
-            'courseId': request.params.courseId
-        })
+        database('course_enrolments').select('*')
+            .where({
+                'studentId': request.userId,
+                'courseId': request.params.courseId
+            })
             .then((rows) => {
                 if (rows.length > 0) {
-                    reply(Boom.expectationFailed("An enrolment against the user ID already exists."));
+                    reply(Boom.expectationFailed('An enrolment against the user ID already exists.'));
                     return Promise.resolve({alreadyEnrolled: true});
                 } else {
                     return Promise.resolve({alreadyEnrolled: false});
@@ -209,13 +208,14 @@ export default class CourseController {
             })
             .then((response) => {
                 if (response.alreadyEnrolled === false) {
-                    database('batches').select('batches.id as batchId').where({'courseId': request.params.courseId})
+                    database('batches').select('batches.id as batchId')
+                        .where({'courseId': request.params.courseId})
                         .then((rows) => {
                             if (rows.length > 0) {
                                 return Promise.resolve(rows[0]);
                             } else {
-                                reply(Boom.expectationFailed("The course with the given Id doesn't exists" +
-                                    "or there is no facilitator for the course"));
+                                reply(Boom.expectationFailed('The course with the given Id doesn\'t exists' +
+                                    'or there is no facilitator for the course'));
                             }
                         })
                         .then((batchId) => {
@@ -225,7 +225,7 @@ export default class CourseController {
                                 batchId: batchId['batchId']
                             }).then((response) => {
                                 return reply({
-                                    "enrolled": true,
+                                    'enrolled': true,
                                 });
                             });
                         });

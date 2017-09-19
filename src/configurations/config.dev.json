@@ -32,10 +32,11 @@
     },
     "googleCloud": {
       "projectId": "navgurukul-159107",
-      "keyFilename": "configurations/ng-gcloud-key.json",
+      "keyFilename": "../configurations/ng-gcloud-key.json",
       "assignmentsBucket": "ng-user-assignments"
     },
     "facilitatorEmails": [
+      "abhishek.fire7@gmail.com",
       "vidur@navgurukul.org",
       "r@navgurukul.org",
       "a@navgurukul.org"
