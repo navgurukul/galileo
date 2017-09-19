@@ -15,7 +15,7 @@ print "Yeh ek aur line print hoyegi"
 print 2 + 5
 i = 0
 while i < 100:
-    print "Main baar baar print hounga :)
+    print "Main baar baar print hounga :)"
 ```
 
 Iss tareeke se pure course mein code likha hoga. Iss code ko aapko chalake dekhna padega. Isko chalane ke liye aapko Terminal naam ka application
