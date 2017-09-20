@@ -2,7 +2,7 @@
 name: Ui Router
 completionMethod: automatic
 ```
-# Part I… Ui Router
+# Part I Ui Router
 
 - Abhi tak aapne jitni bhi angular apps banayi, unmei sirf **ek page** tha. 
 

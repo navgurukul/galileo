@@ -56,5 +56,5 @@ if time == "morning":
 elif time == "evening":
     print "Let's go out for a coffee."
 else:
-    print "Mujhe samajh nahi aaya aapne kya input daala."s
+    print "Mujhe samajh nahi aaya aapne kya input daala."
 ```

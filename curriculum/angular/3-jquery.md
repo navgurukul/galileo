@@ -3,7 +3,7 @@ name: Some Recap
 completionMethod: facilitator
 ```
 
-# Some Recap …
+# Some Recap 
 - Jquery ka **click event** yaad hai? Hum pehle **jquery** use kar kar [yeh](https://vidur149.github.io/angular/counter-jquery/) assignment banayenge.
 
 - Iss assignment ko karne ke baad aap assignment ka _[angular solution](https://vidur149.github.io/angular/counter/)_ dekho. _[Iss](https://github.com/vidur149/vidur149.github.io/tree/master/angular/counter)_ repo par jaa kar **index.html** aur **app.js** ka code dekho. Abhi aapko yeh code jyada samajh nhi aayega. Magar angular ki app mei 3 main cheezien hoti hai.

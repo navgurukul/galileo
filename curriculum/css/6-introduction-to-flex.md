@@ -7,8 +7,8 @@ completionMethod: manual
 
 Page ka layout banane ke liye hum **display flex** ka use karte hai. Hum alag-alag tarah ke layout bana sakte hai. Jaise neeche di gayi images mein colored boxes flex items hai.
 
-![Layout 1](flex-layout-1.png)
-![Layout 2](flex-layout-2.png)
+![Layout 1](images/flex-layout-1.png)
+![Layout 2](images/flex-layout-2.png)
 
 Ab hum flex ko use karna seekhenge. Flex mein 2 cheezein bahut important hoti hai. Yeh naam baar baar aayenge, toh inhe acche se samajh le:
 

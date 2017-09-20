@@ -308,9 +308,9 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo  = parseNgMetaText(tokens[0]['text']);
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
     exInfo['slug'] = path.replace(courseDir + '/', '').replace('.md', '');
-    exInfo['content'] = data;
     exInfo['sequenceNum'] = sequenceNum;
     exInfo['path'] = path;
+    exInfo['content'] = data;
     return exInfo;
 };
 
@@ -330,7 +330,7 @@ let getAllExercises = function(exercises) {
 
 let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     let query = database('exercises')
-    .select('id')
+    .select('id', 'reviewType')
     .where({ 'slug': exerciseInfo['slug'] })
     .then( (rows) => {
         // a exercise with same slug exists
@@ -404,7 +404,7 @@ let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
 let addOrUpdateCourse = function() {
     return database('courses')
     .select('*')
-    .where({ 'type': courseData['info']['type'], 'name': courseData['info']['name'] })
+    .where({ 'name': courseData['info']['name'] })
     .then( (rows) => {
         if (rows.length > 0) {
             return Promise.resolve(rows[0].id);
@@ -510,24 +510,52 @@ validateCourseDirParam()
     // Get the exercise content from the files
     exercises = getAllExercises(exercises);
     return Promise.resolve(exercises);
-}).then( (exercises) => {
-    // Upload the images to GCS before updating/adding stuff to the DBs
+}).then( () => {
+
+    //TODO: This is a hackish solution to get shit done. Needs to be re-factored later on.
+    //Rishabh is responsible for this mess.
+
+    // Upload the images to GCS before updating/adding stuff to the DBss
     let exPromises = [];
+    let exChildPromises = [];
     for (let i = 0; i < exercises.length; i++) {
         let uploadPromises = [];
         let exInfo = exercises[i];
         let images = exInfo['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-	if (images!=null) {
-        	for (let j = 0; j < images.length; j++) {
-            		uploadPromises.push( parseAndUploadImage(images[j], '1.3', exInfo['path']) );
-        	}
-	}
+        if (images!=null) {
+            for (let j = 0; j < images.length; j++) {
+                uploadPromises.push( parseAndUploadImage(images[j], exInfo['sequenceNum'], exInfo['path']) );
+            }
+        }
         exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
             exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
         }) );
+        
+        if (exInfo['childExercises'] != null) {
+            let uploadChildPromises = [];
+            for (let j = 0; j < exInfo['childExercises'].length; j++) {
+                let exInfoChild = exInfo['childExercises'][j];
+                let images = exInfoChild['content'].match(/!\[(.*?)\]\((.*?)\)/g);
+                if (images!=null) {
+                    for (let h = 0; h < images.length; h++) {
+                        uploadChildPromises.push( parseAndUploadImage(images[h], exInfo['sequenceNum'] + '/' + exInfoChild['sequenceNum'], exInfo['path']) );
+                    }
+                    exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
+                        exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['childExercises'][j]['content']);
+                    }) );
+                }
+            }
+        }
+
+        
+
     }
     return Promise.all(exPromises).then( () => {
-        return Promise.resolve();
+        return Promise.all(exChildPromises).then( () => {
+            console.log("All images have been uploaded :)");
+            return Promise.resolve();
+        } )
+        // return Promise.resolve();
     });
 }).then( () => {
     // Add or update the course
