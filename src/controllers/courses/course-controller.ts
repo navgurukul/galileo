@@ -1,11 +1,9 @@
-import * as Hapi from "hapi";
-import * as Boom from "boom";
-import * as Jwt from "jsonwebtoken";
-import * as Joi from "joi";
-import * as knex from "knex";
+import * as Boom from 'boom';
+import * as Hapi from 'hapi';
+import * as knex from 'knex';
 
-import database from "../";
-import { IServerConfigurations } from "../configurations";
+import database from '../../';
+import { IServerConfigurations } from '../../configurations/index';
 
 
 export default class CourseController {
@@ -27,13 +25,12 @@ export default class CourseController {
 
         let enrolledQ =
             database('course_enrolments')
-
                 .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
-                'courses.shortDescription',
-                database.raw('ANY_VALUE(course_enrolments.enrolledAt) as enrolledAt'),
-                database.raw('ANY_VALUE(course_enrolments.batchId) as batchId'),
-                database.raw('COUNT(exercises.id) as totalExercises'),
-                database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
+                    'courses.shortDescription',
+                    database.raw('ANY_VALUE(course_enrolments.enrolledAt) as enrolledAt'),
+                    database.raw('ANY_VALUE(course_enrolments.batchId) as batchId'),
+                    database.raw('COUNT(exercises.id) as totalExercises'),
+                    database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
                 .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
                 .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
                 .leftJoin('submissions', function () {
@@ -41,7 +38,7 @@ export default class CourseController {
                         .andOn('submissions.exerciseId', '=', 'exercises.id')
                         .andOn('submissions.completed', '=', 1);
                 })
-                .where({ 'course_enrolments.studentId': request.userId })
+                .where({'course_enrolments.studentId': request.userId})
                 .groupBy('exercises.courseId')
                 .then((rows) => {
                     // console.log(rows);
@@ -55,7 +52,10 @@ export default class CourseController {
                                 .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
                                 .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
                                 .innerJoin('courses', 'courses.id', 'exercises.courseId')
-                                .where({ 'exercises.courseId': enrolledCourses[i].id, 'submissions.userId': request.userId })
+                                .where({
+                                    'exercises.courseId': enrolledCourses[i].id,
+                                    'submissions.userId': request.userId
+                                })
                                 .orderBy('submissions.submittedAt', 'desc')
                                 .limit(1)
                                 .then((rows) => {
@@ -76,7 +76,7 @@ export default class CourseController {
         let facilitatingQ =
             database('courses')
                 .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
-                'batches.name as batch_name', 'batches.id as batchId')
+                    'batches.name as batch_name', 'batches.id as batchId')
                 .join('batches', function () {
                     this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
                 })
@@ -88,26 +88,28 @@ export default class CourseController {
 
         let availableQ =
             database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
-                .where('courses.id', 'not in',
-                database('courses').distinct().select('courses.id').join('batches', function () {
-                    this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
-                })
+                .where('courses.id', 'not in', database('courses').distinct()
+                    .select('courses.id')
+                    .join('batches', function () {
+                        this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
+                    })
                     .union(function () {
                         this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
                             this.on('courses.id', '=', 'course_enrolments.courseId')
                                 .andOn('course_enrolments.studentId', '=', request.userId);
                         });
                     })
-                ).then((rows) => {
+                )
+                .then((rows) => {
                     availableCourses = rows;
                     return Promise.resolve();
                 });
 
         Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
             return reply({
-                "enrolledCourses": enrolledCourses,
-                "facilitatingCourses": facilitatingCourses,
-                "availableCourses": availableCourses
+                'enrolledCourses': enrolledCourses,
+                'facilitatingCourses': facilitatingCourses,
+                'availableCourses': availableCourses
             });
         });
 
@@ -120,14 +122,14 @@ export default class CourseController {
             + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-            'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
-            'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+                'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
+                'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
                     knex.raw(xyz)
                 ).on('submissions.userId', '=', request.userId);
             })
-            .where({ 'exercises.courseId': request.params.courseId })
+            .where({'exercises.courseId': request.params.courseId})
             .orderBy('exercises.sequenceNum', 'asc')
             .then((rows) => {
                 for (let i = 0; i < rows.length; i++) {
@@ -140,23 +142,22 @@ export default class CourseController {
                         exercises.push(exercise);
                     }
                 }
-                return reply({ data: exercises });
+                return reply({data: exercises});
             });
-
     }
 
     public getExerciseById(request: Hapi.Request, reply: Hapi.IReply) {
 
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-            'exercises.reviewType', 'exercises.content',
-            'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
+                'exercises.reviewType', 'exercises.content',
+                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
                     database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
                 );
             })
-            .where({ 'exercises.id': request.params.exerciseId })
+            .where({'exercises.id': request.params.exerciseId})
             .then((rows) => {
                 let exercise = rows[0];
                 return reply(exercise);
@@ -169,14 +170,14 @@ export default class CourseController {
             'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-            'exercises.reviewType', 'exercises.content',
-            'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
+                'exercises.reviewType', 'exercises.content',
+                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
                     database.raw(xyz)
                 );
             })
-            .where({ 'exercises.slug': request.query.slug })
+            .where({'exercises.slug': request.query.slug})
             .then((rows) => {
                 let exercise = rows[0];
                 return reply(exercise);
@@ -185,34 +186,36 @@ export default class CourseController {
     }
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
-
         database('courses').select('notes').where('id', request.params.courseId).then(function (rows) {
             let notes = rows[0].notes;
-            return reply({ "notes": notes });
+            return reply({'notes': notes});
         });
-
     }
 
     public enrollInCourse(request: Hapi.Request, reply: Hapi.IReply) {
-
-        database('course_enrolments').select('*').where({ 'studentId': request.userId, 'courseId': request.params.courseId })
+        database('course_enrolments').select('*')
+            .where({
+                'studentId': request.userId,
+                'courseId': request.params.courseId
+            })
             .then((rows) => {
                 if (rows.length > 0) {
-                    reply(Boom.expectationFailed("An enrolment against the user ID already exists."));
-                    return Promise.resolve({ alreadyEnrolled: true });
+                    reply(Boom.expectationFailed('An enrolment against the user ID already exists.'));
+                    return Promise.resolve({alreadyEnrolled: true});
                 } else {
-                    return Promise.resolve({ alreadyEnrolled: false });
+                    return Promise.resolve({alreadyEnrolled: false});
                 }
             })
             .then((response) => {
                 if (response.alreadyEnrolled === false) {
-                    database('batches').select('batches.id as batchId').where({ 'courseId': request.params.courseId })
+                    database('batches').select('batches.id as batchId')
+                        .where({'courseId': request.params.courseId})
                         .then((rows) => {
                             if (rows.length > 0) {
                                 return Promise.resolve(rows[0]);
                             } else {
-                                reply(Boom.expectationFailed("The course with the given Id doesn't exists" +
-                                    "or there is no facilitator for the course"));
+                                reply(Boom.expectationFailed('The course with the given Id doesn\'t exists' +
+                                    'or there is no facilitator for the course'));
                             }
                         })
                         .then((batchId) => {
@@ -222,12 +225,11 @@ export default class CourseController {
                                 batchId: batchId['batchId']
                             }).then((response) => {
                                 return reply({
-                                    "enrolled": true,
+                                    'enrolled': true,
                                 });
                             });
                         });
                 }
             });
     }
-
 }

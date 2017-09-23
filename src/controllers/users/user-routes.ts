@@ -1,10 +1,9 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import { IServerConfigurations } from "../configurations";
-import * as Boom from "boom";
+import {IServerConfigurations} from "../../configurations";
 
 import UserController from "./user-controller";
-import { userSchema, noteSchema } from "./schemas";
+import {noteSchema, userSchema} from "./user-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -19,16 +18,16 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 payload: Joi.object({
                     idToken: Joi.string().required()
-                             .description("Short lived access token provided by google web-sign in.")
-                             .default("aaa.bbb.ccc")
+                        .description("Short lived access token provided by google web-sign in.")
+                        .default("aaa.bbb.ccc")
                 })
             },
             response: {
                 schema: Joi.object({
                     "user": userSchema,
                     "jwt": Joi.string().required()
-                           .default("xxx.yyy.zzz")
-                           .description("Will authenticate all the future requests.")
+                        .default("xxx.yyy.zzz")
+                        .description("Will authenticate all the future requests.")
                 })
             },
             plugins: {
@@ -98,7 +97,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: {
-                    id: Joi.number().required()
+                    status: Joi.bool().required()
                 }
             },
             plugins: {
@@ -145,12 +144,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 params: {
                     userId: Joi.number().required(),
-                    noteId:Joi.number().required(),
+                    noteId: Joi.number().required(),
                 }
             },
             response: {
                 schema: Joi.object({
-                    success: Joi.bool().required()
+                    status: Joi.bool().required()
                 })
             },
             tags: ['api'],

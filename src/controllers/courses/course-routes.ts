@@ -1,10 +1,9 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import { IServerConfigurations } from "../configurations";
-import * as Boom from "boom";
+import {IServerConfigurations} from "../../configurations";
 
 import CourseController from "./course-controller";
-import { courseSchema, facilitatingCourseSchema, enrolledCourseSchema, exerciseSchema } from "./schemas";
+import {courseSchema, enrolledCourseSchema, exerciseSchema, facilitatingCourseSchema} from "./course-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -53,26 +52,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
-    // server.route({
-    //     method: 'GET',
-    //     path: '/courses/{courseId}/exercise/{exerciseId}',
-    //     config: {
-    //         description: 'Get complete details of the exercise with the given ID. Does not return child exercises.',
-    //         validate: {
-    //             params: {
-    //                 courseId: Joi.number(),
-    //                 exerciseId : Joi.number()
-    //             }
-    //         },
-    //         response: {
-    //             schema: exerciseSchema
-    //         },
-    //         auth: 'jwt',
-    //         tags: ['api'],
-    //         handler: courseController.getExerciseById
-    //     }
-    // });
-
     server.route({
         method: 'GET',
         path: '/courses/{courseId}/exercise/getBySlug',
@@ -108,8 +87,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: Joi.object({
                     "notes": Joi.string()
-                             .default("# Notes Title ## Not sub-title Some content. \n More.")
-                             .description("Notes in markdown.")
+                        .default("# Notes Title ## Not sub-title Some content. \n More.")
+                        .description("Notes in markdown.")
                 })
             },
             auth: 'jwt',

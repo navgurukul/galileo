@@ -74,6 +74,7 @@
     "gulp-tslint": "^4.3.4",
     "mocha": "^3.0.0",
     "nodemon": "^1.10.2",
+    "ts-node": "^3.3.0",
     "tslint": "^3.13.0",
     "typescript": "^2.0.3"
   },
