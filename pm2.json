@@ -6,7 +6,7 @@
         "name": "saral-node-app",
         "interpreter": "node",
         "env": {
-            "NODE_ENV": "prod"
+            "GALILEO_ENV": "prod"
         },
         "out_file": "/logs/saral-node-app.log",
         "error_file": "/logs/saral-node-app-err.log"
