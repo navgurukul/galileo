@@ -121,3 +121,5 @@ typings/
 
 migrations
 !migrations/migration_1.sql
+
+curriculum
