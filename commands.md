@@ -6,3 +6,4 @@ mysql -u username -p davinci < schema.sqL
 
 # Run server with auto reload
 gulp develop watch
+
