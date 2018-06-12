@@ -27,7 +27,6 @@ export default class CourseController {
         let availableQ;
         
         if (request.headers.authorization == undefined ){
-            console.log("not authenticate");
             availableQ =
                 database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
                     .where('courses.id', 'not in', database('courses').distinct()
@@ -53,8 +52,6 @@ export default class CourseController {
             });
 
         } else if (request.headers.authorization != ""){
-            console.log("request.headers.authorization ",request.headers.authorization)
-            console.log("authenticate");
             enrolledQ =
                 database('course_enrolments')
                     .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
