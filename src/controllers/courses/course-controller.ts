@@ -18,100 +18,133 @@ export default class CourseController {
     }
 
     public getCoursesList(request: Hapi.Request, reply: Hapi.IReply) {
-
         let facilitatingCourses = [];
         let enrolledCourses = [];
         let availableCourses = [];
 
-        let enrolledQ =
-            database('course_enrolments')
-                .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
-                    'courses.shortDescription',
-                    database.raw('ANY_VALUE(course_enrolments.enrolledAt) as enrolledAt'),
-                    database.raw('ANY_VALUE(course_enrolments.batchId) as batchId'),
-                    database.raw('COUNT(exercises.id) as totalExercises'),
-                    database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
-                .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
-                .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
-                .leftJoin('submissions', function () {
-                    this.on('submissions.userId', '=', request.userId)
-                        .andOn('submissions.exerciseId', '=', 'exercises.id')
-                        .andOn('submissions.completed', '=', 1);
-                })
-                .where({'course_enrolments.studentId': request.userId})
-                .groupBy('exercises.courseId')
-                .then((rows) => {
-                    // console.log(rows);
-                    enrolledCourses = rows;
-                    let lastSubmissionQueries = [];
-                    for (let i = 0; i < enrolledCourses.length; i++) {
-                        let oneDay = 24 * 60 * 60 * 1000;
-                        enrolledCourses[i].daysSinceEnrolled = Math.abs(+new Date() - enrolledCourses[i].enrolledAt) / oneDay;
-                        lastSubmissionQueries.push(
-                            database('submissions')
-                                .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
-                                .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
-                                .innerJoin('courses', 'courses.id', 'exercises.courseId')
-                                .where({
-                                    'exercises.courseId': enrolledCourses[i].id,
-                                    'submissions.userId': request.userId
-                                })
-                                .orderBy('submissions.submittedAt', 'desc')
-                                .limit(1)
-                                .then((rows) => {
-                                    if (rows.length < 1) {
-                                        enrolledCourses[i].lastSubmission = {};
-                                    } else {
-                                        enrolledCourses[i].lastSubmission = rows[0];
-                                    }
-                                    return Promise.resolve();
-                                })
-                        );
-                    }
-                    return Promise.all(lastSubmissionQueries).then(() => {
+        let enrolledQ;
+        let facilitatingQ;
+        let availableQ;
+        
+        if (request.headers.authorization == undefined ){
+            console.log("not authenticate");
+            availableQ =
+                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                    .where('courses.id', 'not in', database('courses').distinct()
+                        .select('courses.id')
+                        .join('batches', function () {
+                            this.on('courses.id', '=', 'batches.courseId');
+                        })
+                        .union(function () {
+                            this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
+                                this.on('courses.id', '=', 'course_enrolments.courseId');
+                            });
+                        })
+                    )
+                    .then((rows) => {
+                        availableCourses = rows;
                         return Promise.resolve();
                     });
+
+            Promise.all([availableQ]).then(() => {
+                return reply({
+                    'availableCourses': availableCourses
                 });
-
-        let facilitatingQ =
-            database('courses')
-                .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
-                    'batches.name as batch_name', 'batches.id as batchId')
-                .join('batches', function () {
-                    this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
-                })
-                .then((rows) => {
-                    facilitatingCourses = rows;
-                    return Promise.resolve();
-                });
-
-
-        let availableQ =
-            database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
-                .where('courses.id', 'not in', database('courses').distinct()
-                    .select('courses.id')
-                    .join('batches', function () {
-                        this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
-                    })
-                    .union(function () {
-                        this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
-                            this.on('courses.id', '=', 'course_enrolments.courseId')
-                                .andOn('course_enrolments.studentId', '=', request.userId);
-                        });
-                    })
-                )
-                .then((rows) => {
-                    availableCourses = rows;
-                    return Promise.resolve();
-                });
-
-        Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
-            return reply({
-                'enrolledCourses': enrolledCourses,
-                'facilitatingCourses': facilitatingCourses,
-                'availableCourses': availableCourses
             });
-        });
+
+        } else if (request.headers.authorization != ""){
+            console.log("request.headers.authorization ",request.headers.authorization)
+            console.log("authenticate");
+            enrolledQ =
+                database('course_enrolments')
+                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
+                        'courses.shortDescription',
+                        database.raw('ANY_VALUE(course_enrolments.enrolledAt) as enrolledAt'),
+                        database.raw('ANY_VALUE(course_enrolments.batchId) as batchId'),
+                        database.raw('COUNT(exercises.id) as totalExercises'),
+                        database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
+                    .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
+                    .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
+                    .leftJoin('submissions', function () {
+                        this.on('submissions.userId', '=', request.userId)
+                            .andOn('submissions.exerciseId', '=', 'exercises.id')
+                            .andOn('submissions.completed', '=', 1);
+                    })
+                    .where({'course_enrolments.studentId': request.userId})
+                    .groupBy('exercises.courseId')
+                    .then((rows) => {
+                        // console.log(rows);
+                        enrolledCourses = rows;
+                        let lastSubmissionQueries = [];
+                        for (let i = 0; i < enrolledCourses.length; i++) {
+                            let oneDay = 24 * 60 * 60 * 1000;
+                            enrolledCourses[i].daysSinceEnrolled = Math.abs(+new Date() - enrolledCourses[i].enrolledAt) / oneDay;
+                            lastSubmissionQueries.push(
+                                database('submissions')
+                                    .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
+                                    .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
+                                    .innerJoin('courses', 'courses.id', 'exercises.courseId')
+                                    .where({
+                                        'exercises.courseId': enrolledCourses[i].id,
+                                        'submissions.userId': request.userId
+                                    })
+                                    .orderBy('submissions.submittedAt', 'desc')
+                                    .limit(1)
+                                    .then((rows) => {
+                                        if (rows.length < 1) {
+                                            enrolledCourses[i].lastSubmission = {};
+                                        } else {
+                                            enrolledCourses[i].lastSubmission = rows[0];
+                                        }
+                                        return Promise.resolve();
+                                    })
+                            );
+                        }
+                        return Promise.all(lastSubmissionQueries).then(() => {
+                            return Promise.resolve();
+                        });
+                    });
+
+            facilitatingQ =
+                database('courses')
+                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
+                        'batches.name as batch_name', 'batches.id as batchId')
+                    .join('batches', function () {
+                        this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
+                    })
+                    .then((rows) => {
+                        facilitatingCourses = rows;
+                        return Promise.resolve();
+                    });
+
+            availableQ =
+                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                    .where('courses.id', 'not in', database('courses').distinct()
+                        .select('courses.id')
+                        .join('batches', function () {
+                            this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
+                        })
+                        .union(function () {
+                            this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
+                                this.on('courses.id', '=', 'course_enrolments.courseId')
+                                    .andOn('course_enrolments.studentId', '=', request.userId);
+                            });
+                        })
+                    )
+                    .then((rows) => {
+                        availableCourses = rows;
+                        return Promise.resolve();
+                    });
+
+            Promise.all([facilitatingQ, enrolledQ, availableQ]).then(() => {
+                return reply({
+                    'enrolledCourses': enrolledCourses,
+                    'facilitatingCourses': facilitatingCourses,
+                    'availableCourses': availableCourses
+                });
+            });
+            
+        }
 
     }
 

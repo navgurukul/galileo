@@ -25,7 +25,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "availableCourses": Joi.array().items(courseSchema)
                 })
             },
-            auth: 'jwt',
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
             tags: ['api'],
             handler: courseController.getCoursesList
         }
