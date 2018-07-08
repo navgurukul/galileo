@@ -89,6 +89,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     let dir = courseData['info']['name' ] + '/' + sequenceNum;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
+    filePath = filePath.replace(/ /g, "__");
     return new Promise((resolve, reject) => {
         let remoteWriteStream = bucket.file(filePath).createWriteStream();
         let stream =    localReadStream.pipe(remoteWriteStream);
