@@ -1,3 +1,4 @@
+yarn.lock
 build/
 src/plugins/bell/index.ts 
 src/configurations/config.prod.json
