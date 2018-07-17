@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for osx10.12 (x86_64)
 --
--- Host: localhost    Database: davinci
+-- Host: localhost    Database: hisaab
 -- ------------------------------------------------------
 -- Server version	5.7.17
 
@@ -15,12 +15,12 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 --
--- Current Database: `davinci`
+-- Current Database: `hisaab`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `davinci` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `hisaab` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
-USE `davinci`;
+USE `hisaab`;
 --
 -- Table structure for table `batches`
 --

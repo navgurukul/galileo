@@ -1,5 +1,7 @@
 build/
-
+src/plugins/bell/index.ts 
+src/configurations/config.prod.json
+rc/configurations/config*
 src/configurations/config.local.json
 .DS_Store
 

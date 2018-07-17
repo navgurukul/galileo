@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^1.0.0",
+    "@types/node": "^10.5.2",
     "ajv": "5.2.0",
     "bcryptjs": "2.4.3",
     "bell": "8.5.0",
