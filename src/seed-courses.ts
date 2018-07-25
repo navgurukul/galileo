@@ -4,6 +4,7 @@ import * as marked from "marked";
 import * as Joi from "joi";
 import database from './index';
 import * as GoogleCloudStorage from "@google-cloud/storage";
+import * as process from 'process'
 
 /**
  ********************
@@ -77,6 +78,41 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     let semiPath = temp2.join('/');
     let completePath = semiPath + '/' + imagePath;
 
+    var AWS = require('aws-sdk');
+    var s3 = new AWS.S3();
+    var myBucket = 'saralng';
+    
+    let localReadStream = fs.createReadStream(completePath);
+    let dir = courseData['info']['name' ] + '/' + sequenceNum;
+    let name = generateUID() + '.' + imageName;
+    let filePath = dir + '/' + name;
+    filePath = filePath.replace(/ /g, "__");
+    
+    fs.readFile(completePath, 'utf8', function (err,data) {
+        if (err) {
+           return console.log(err);
+        }
+
+    	var params = {Bucket: myBucket, Key: filePath, Body: data};
+    	s3.putObject(params, function(err, data) {
+         if (err) {
+             console.log(err)
+         } else {
+            return new Promise((resolve, reject) => {
+	    resolve({
+                relativePath: imagePath,
+                gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
+                imageMD: imageText,
+            });
+            });
+             console.log("Successfully uploaded data to myBucket/myKey");
+         }
+        });
+    });
+
+ 
+    /*
+
     // initialise gcs
     let gcs = GoogleCloudStorage({
         projectId: 'navgurukul-159107',
@@ -103,6 +139,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
         });
     });
 
+    */
 }
 
 // Get the nested list of all the exercises
@@ -487,6 +524,7 @@ let deleteExercises = function(courseId) {
 function updateContentWithImageLinks(images: any[], content: string): string {
     let updateContent = content;
     images.forEach(image => {
+        // TODO need o be updated from gcloud tto amazon
         updateContent = updateContent.replace(image.relativePath, image.gcsLink);
     });
     return updateContent;
