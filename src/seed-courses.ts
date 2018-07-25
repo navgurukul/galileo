@@ -539,10 +539,12 @@ validateCourseDirParam()
                 let images = exInfoChild['content'].match(/!\[(.*?)\]\((.*?)\)/g);
                 if (images!=null) {
                     for (let h = 0; h < images.length; h++) {
-                        uploadChildPromises.push( parseAndUploadImage(images[h], exInfo['sequenceNum'] + '/' + exInfoChild['sequenceNum'], exInfo['path']) );
+                        let img = parseAndUploadImage(images[h], exInfo['sequenceNum'] + '/' + exInfoChild['sequenceNum'], exInfo['path']);
+                        uploadChildPromises.push( img );
                     }
                     exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
-                        exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['childExercises'][j]['content']);
+                        let content = exercises[i]['childExercises'][j]['content'];
+                        exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, content);
                     }) );
                 }
             }
@@ -555,7 +557,7 @@ validateCourseDirParam()
         return Promise.all(exChildPromises).then( () => {
             console.log("All images have been uploaded :)");
             return Promise.resolve();
-        } )
+        });
         // return Promise.resolve();
     });
 }).then( () => {

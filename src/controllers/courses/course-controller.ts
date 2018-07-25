@@ -26,7 +26,7 @@ export default class CourseController {
         let facilitatingQ;
         let availableQ;
         
-        if (request.headers.authorization == undefined ){
+        if (request.headers.authorization === undefined ){
             availableQ =
                 database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
                     .where('courses.id', 'not in', database('courses').distinct()
@@ -51,13 +51,13 @@ export default class CourseController {
                 });
             });
 
-        } else if (request.headers.authorization != ""){
+        } else if (request.headers.authorization !== ""){
             enrolledQ =
                 database('course_enrolments')
                     .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
                         'courses.shortDescription',
-                        database.raw('ANY_VALUE(course_enrolments.enrolledAt) as enrolledAt'),
-                        database.raw('ANY_VALUE(course_enrolments.batchId) as batchId'),
+                        database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
+                        database.raw('MIN(course_enrolments.batchId) as batchId'),
                         database.raw('COUNT(exercises.id) as totalExercises'),
                         database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
                     .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
