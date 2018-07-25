@@ -162,7 +162,7 @@ export default class CourseController {
                     knex.raw(xyz)
                 ).on('submissions.userId', '=', 1);
             })
-            .where({'exercises.courseId': 12})
+            .where({'exercises.courseId': parseInt(request.params.courseId)})
             .orderBy('exercises.sequenceNum', 'asc');
 
         query.then((rows) => {
