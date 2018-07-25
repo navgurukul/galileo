@@ -49,6 +49,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "data": Joi.array().items(exerciseSchema)
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseExercises
         }
