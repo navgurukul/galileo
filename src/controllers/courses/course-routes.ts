@@ -71,6 +71,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             // response: {
             //     schema: exerciseSchema
             // },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getExerciseBySlug
         }

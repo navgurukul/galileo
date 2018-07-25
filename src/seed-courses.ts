@@ -99,13 +99,13 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
              console.log(err)
          } else {
             return new Promise((resolve, reject) => {
-	    resolve({
-                relativePath: imagePath,
-                gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
-                imageMD: imageText,
+        	    resolve({
+                        relativePath: imagePath,
+                        gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
+                        imageMD: imageText,
+                    });
+                console.log("Successfully uploaded data to myBucket/myKey");
             });
-            });
-             console.log("Successfully uploaded data to myBucket/myKey");
          }
         });
     });

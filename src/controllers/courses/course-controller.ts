@@ -147,33 +147,42 @@ export default class CourseController {
 
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
+        console.log("COURSE ID: USER ID", request.params.courseId, " : ", request.userId);
+
         let exercises = [];
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
-            + 'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
-        database('exercises')
+            + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
+
+        let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
                 'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
                 'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
                     knex.raw(xyz)
-                ).on('submissions.userId', '=', request.userId);
+                ).on('submissions.userId', '=', 1);
             })
-            .where({'exercises.courseId': request.params.courseId})
-            .orderBy('exercises.sequenceNum', 'asc')
-            .then((rows) => {
-                for (let i = 0; i < rows.length; i++) {
-                    let exercise = rows[i];
-                    if (exercise.sequenceNum % 1 !== 0) {
-                        let parentIndex = Number(String(exercise.sequenceNum).split('.')[0]) - 1;
-                        exercises[parentIndex].childExercises.push(exercise);
-                    } else {
-                        exercise.childExercises = [];
-                        exercises.push(exercise);
-                    }
+            .where({'exercises.courseId': 12})
+            .orderBy('exercises.sequenceNum', 'asc');
+
+        query.then((rows) => {
+            for (let i = 0; i < rows.length; i++) {
+                // let exercise = {};
+                // Object.keys(rows[i]).forEach(function(key) {
+                //      exercise[ key ] = rows[i][ key ];
+                // }); 
+
+                let exercise = rows[i];
+                if (!Number.isInteger(exercise.sequenceNum)) {
+                    let parentIndex = parseInt(exercise.sequenceNum) - 1;
+                    exercises[parentIndex].childExercises.push(exercise);
+                } else {
+                    exercise.childExercises = [];
+                    exercises.push(exercise);
                 }
-                return reply({data: exercises});
-            });
+            }
+            return reply({data: exercises});
+        });
     }
 
     public getExerciseById(request: Hapi.Request, reply: Hapi.IReply) {
@@ -196,9 +205,12 @@ export default class CourseController {
     }
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
+        // console.log("SLUG: USER ID", request.query.slug, " : ", request.userId);
+
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
             'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
-        database('exercises')
+
+        let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
                 'exercises.reviewType', 'exercises.content',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
@@ -207,11 +219,15 @@ export default class CourseController {
                     database.raw(xyz)
                 );
             })
-            .where({'exercises.slug': request.query.slug})
-            .then((rows) => {
-                let exercise = rows[0];
-                return reply(exercise);
-            });
+            .where({'exercises.slug': request.query.slug});
+
+        // console.log(query.toSQL());
+
+        query.then((rows) => {
+            let exercise = rows[0];
+            console.log(exercise);
+            return reply(exercise);
+        });
         // return 'het';
     }
 
