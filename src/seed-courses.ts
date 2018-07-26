@@ -92,13 +92,21 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     filePath = filePath.replace(/ /g, "__");
     
     return new Promise((resolve, reject) => {
-        fs.readFile(completePath, 'utf8', function (err,data) {
+        fs.readFile(completePath, function (err,data) {
             if (err) {
                return console.log(err);
             }
+            console.log(completePath);
 
-        	var params = {Bucket: myBucket, Key: filePath, Body: data};
-        	s3.putObject(params, function(err, data) {
+let extn = completePath.split('.').pop();
+let contentType = 'application/octet-stream';
+if (extn == 'html') contentType = "text/html";
+if (extn == 'css') contentType = "text/css";
+if (extn == 'js') contentType = "application/javascript";
+if (extn == 'png' || extn == 'jpg' || extn == 'gif') contentType = "image/" + extn;
+
+        	var params = {Bucket: myBucket, Key: filePath, Body: data, ContentType: contentType};
+        	s3.upload(params, function(err, data) {
                 if (err) {
                     console.log("error in s3 upload", err);
                     // return new Promise((resolve, reject) => {
@@ -108,7 +116,6 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
                     //     });
                     // });    
                 } else {
-                        console.log("parseAndUploadImage", imagePath, "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath, imageText);
 
                         return resolve({
                                 relativePath: imagePath,
@@ -116,7 +123,6 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
                                 imageMD: imageText,
                             });
 
-                        // console.log("parseAndUploadImage: Successfully uploaded data to " + myBucket + " / " + filePath);
                 }
             });
         });
@@ -540,7 +546,6 @@ function updateContentWithImageLinks(images: any[], content: string): string {
     images.forEach(image => {
         // TODO need o be updated from gcloud tto amazon
         updateContent = updateContent.replace(image.relativePath, image.gcsLink);
-        console.log("in updateContentWithImageLinks", updateContent, image);
     });
 
     return updateContent;
@@ -584,8 +589,6 @@ validateCourseDirParam()
         }
 
         exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
-            console.log('now pushing all images');
-
             exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
         }) );
         
@@ -600,7 +603,6 @@ validateCourseDirParam()
                         uploadChildPromises.push( img );
                     }
                     exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
-                        console.log('now pushing all images');
                         let content = exercises[i]['childExercises'][j]['content'];
                         exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, content);
                     }) );
@@ -611,7 +613,6 @@ validateCourseDirParam()
 
     return Promise.all(exPromises).then( () => {
         return Promise.all(exChildPromises).then( () => {
-            console.log("All images have been uploaded :)");
             return Promise.resolve();
         });
         // return Promise.resolve();
