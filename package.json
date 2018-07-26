@@ -23,8 +23,9 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^1.0.0",
-    "@types/node": "^10.5.2",
+    "@types/node": "^10.5.3",
     "ajv": "5.2.0",
+    "aws-sdk": "^2.281.1",
     "bcryptjs": "2.4.3",
     "bell": "8.5.0",
     "boom": "3.2.2",

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": [
-      "es6"
+      "es6", "dom"
     ],
     "outDir": "build",
     "target": "es6",
@@ -12,8 +12,8 @@
     "suppressImplicitAnyIndexErrors": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "typeRoots": [
-    ]
+    "types" : [ "node" ],
+    "typeRoots": [ "./node_modules/types" ]
   },
   "include": [
     "src/**/**.ts",
