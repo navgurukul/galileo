@@ -88,26 +88,36 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     let filePath = dir + '/' + name;
     filePath = filePath.replace(/ /g, "__");
     
-    fs.readFile(completePath, 'utf8', function (err,data) {
-        if (err) {
-           return console.log(err);
-        }
+    return new Promise((resolve, reject) => {
+        fs.readFile(completePath, 'utf8', function (err,data) {
+            if (err) {
+               return console.log(err);
+            }
 
-    	var params = {Bucket: myBucket, Key: filePath, Body: data};
-    	s3.putObject(params, function(err, data) {
-         if (err) {
-             console.log(err)
-         } else {
-            return new Promise((resolve, reject) => {
-        	    resolve({
-                        relativePath: imagePath,
-                        gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
-                        imageMD: imageText,
-                    });
-                console.log("Successfully uploaded data to myBucket/myKey");
+        	var params = {Bucket: myBucket, Key: filePath, Body: data};
+        	s3.putObject(params, function(err, data) {
+                if (err) {
+                    console.log("error in s3 upload", err);
+                    // return new Promise((resolve, reject) => {
+                    //     resolve({
+                    //         relativePath: "",
+                    //         gcsL
+                    //     });
+                    // });    
+                } else {
+                        console.log("parseAndUploadImage", imagePath, "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath, imageText);
+
+                        return resolve({
+                                relativePath: imagePath,
+                                gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
+                                imageMD: imageText,
+                            });
+
+                        // console.log("parseAndUploadImage: Successfully uploaded data to " + myBucket + " / " + filePath);
+                }
             });
-         }
         });
+
     });
 
  
@@ -307,15 +317,15 @@ let validateCourseDirParam = function() {
 
 
 // Validate and return notes.md contents
-let validateCourseNotes = function() {
-    let courseNotesFile = courseDir + '/details/notes.md';
-    return fs.readFile(courseNotesFile, 'utf-8').then( (data) => {
-        return Promise.resolve(data);
-    }).catch( (err) => {
-        console.log(err);
-        showErrorAndExit("`details/notes.md` does not exist.");
-    });
-};
+// let validateCourseNotes = function() {
+    // let courseNotesFile = courseDir + '/details/notes.md';
+    // return fs.readFile(courseNotesFile, 'utf-8').then( (data) => {
+    //     return Promise.resolve(data);
+    // }).catch( (err) => {
+    //     console.log(err);
+    //     showErrorAndExit("`details/notes.md` does not exist.");
+    // });
+// };
 
 // Validate and return the course info
 let validateCourseInfo = function() {
@@ -458,7 +468,7 @@ let addOrUpdateCourse = function() {
                 'logo': courseData['info']['logo'],
                 'shortDescription': courseData['info']['shortDescription'],
                 'daysToComplete': courseData['info']['daysToComplete'],
-                'notes': courseData['notes'],
+                // 'notes': courseData['notes'],
             })
             .then( (rows) => {
                 return Promise.resolve(rows[0]);
@@ -469,7 +479,7 @@ let addOrUpdateCourse = function() {
                 'logo': courseData['info']['logo'],
                 'shortDescription': courseData['info']['shortDescription'],
                 'daysToComplete': courseData['info']['daysToComplete'],
-                'notes': courseData['notes'],
+                // 'notes': courseData['notes'],
             })
             .then( () => {
                 return Promise.resolve(courseId);
@@ -523,10 +533,13 @@ let deleteExercises = function(courseId) {
 // Updates the content with the links of images which have been uploaded to the Google Cloud    
 function updateContentWithImageLinks(images: any[], content: string): string {
     let updateContent = content;
+
     images.forEach(image => {
         // TODO need o be updated from gcloud tto amazon
         updateContent = updateContent.replace(image.relativePath, image.gcsLink);
+        console.log("in updateContentWithImageLinks", updateContent, image);
     });
+
     return updateContent;
 }
 
@@ -534,12 +547,12 @@ function updateContentWithImageLinks(images: any[], content: string): string {
 validateCourseDirParam()
 .then( () => {
     // Check if the details/notes.md file is correct
-    return validateCourseNotes();
-}).then( (courseNotes) => {
+    // return validateCourseNotes();
+// }).then( (courseNotes) => {
     // Add the notes in the courseData object which will be used to add the course
-    courseData['notes'] = courseNotes;
-    return Promise.resolve();
-}).then( () => {
+    // courseData['notes'] = courseNotes;
+    // return Promise.resolve();
+// }).then( () => {
     // Check if the details/info.md file is correct 
     return validateCourseInfo();
 }).then( () => {
@@ -566,7 +579,10 @@ validateCourseDirParam()
                 uploadPromises.push( parseAndUploadImage(images[j], exInfo['sequenceNum'], exInfo['path']) );
             }
         }
+
         exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
+            console.log('now pushing all images');
+
             exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
         }) );
         
@@ -581,16 +597,15 @@ validateCourseDirParam()
                         uploadChildPromises.push( img );
                     }
                     exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
+                        console.log('now pushing all images');
                         let content = exercises[i]['childExercises'][j]['content'];
                         exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, content);
                     }) );
                 }
             }
         }
-
-        
-
     }
+
     return Promise.all(exPromises).then( () => {
         return Promise.all(exChildPromises).then( () => {
             console.log("All images have been uploaded :)");
