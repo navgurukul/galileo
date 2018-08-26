@@ -11,14 +11,11 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "types" : [ "node" ],
-    "typeRoots": [ "./node_modules/types" ]
+    "experimentalDecorators": true
   },
   "include": [
     "src/**/**.ts",
-    "test/**/**.ts",
-    "typings/index.d.ts"
+    "test/**/**.ts"
   ],
   "exclude": [
     "node_modules"

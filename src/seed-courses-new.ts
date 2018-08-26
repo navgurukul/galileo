@@ -7,7 +7,7 @@ import * as marked from "marked";
 import * as Joi from "joi";
 import database from './index';
 import * as GoogleCloudStorage from "@google-cloud/storage";
-import * as process from 'process'
+import * as process from 'process';
 
 /**
  ********************
@@ -36,6 +36,9 @@ let courseDir, // Path of the course directory relative to this file
     courseData = {}, // Course data which will be put into the DB eventually
     exercises = [], // All exercises 
     allSlugs = [], // All slugs will be stored here
+    sequenceNumbers = {},
+    revSeqNumbers = {},
+    toReadFiles = [],
     courseId;
 
 // Joi Schemas
@@ -93,39 +96,35 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     
     return new Promise((resolve, reject) => {
         fs.readFile(completePath, function (err,data) {
-            if (err) {
-               return console.log(err);
-            }
+          if (err) {
+             return console.log(err);
+          }
 
-let extn = completePath.split('.').pop();
-let contentType = 'application/octet-stream';
-if (extn == 'html') contentType = "text/html";
-if (extn == 'css') contentType = "text/css";
-if (extn == 'js') contentType = "application/javascript";
-if (extn == 'png' || extn == 'jpg' || extn == 'gif') contentType = "image/" + extn;
+          let extn = completePath.split('.').pop();
+          let contentType = 'application/octet-stream';
+          if (extn === 'html') {
+              contentType = "text/html";
+          } else if (extn === 'css') {
+              contentType = "text/css";
+          } else if (extn === 'js') {
+              contentType = "application/javascript";
+          } else if (extn === 'png' || extn === 'jpg' || extn === 'gif') {
+              contentType = "image/" + extn;
+          }
 
         	var params = {Bucket: myBucket, Key: filePath, Body: data, ContentType: contentType};
         	s3.upload(params, function(err, data) {
                 if (err) {
                     console.log("error in s3 upload", err);
-                    // return new Promise((resolve, reject) => {
-                    //     resolve({
-                    //         relativePath: "",
-                    //         gcsL
-                    //     });
-                    // });    
                 } else {
-
-                        return resolve({
-                                relativePath: imagePath,
-                                gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
-                                imageMD: imageText,
-                            });
-
+                    return resolve({
+                        relativePath: imagePath,
+                        gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath, 
+                        imageMD: imageText,
+                    });
                 }
             });
         });
-
     });
 
  
@@ -160,67 +159,85 @@ if (extn == 'png' || extn == 'jpg' || extn == 'gif') contentType = "image/" + ex
     */
 }
 
+let getSequenceNumbers = function(dir: string, callType?: string) {
+    let fileName = "index.md";
+    let data = fs.readFileSync(dir + "/index.md");
+    let tokens = marked.lexer(data.toString());
+    let seqNumbers = {};
+    let l1 = 0;
+    let l2 = 0;
+    let inside = false;
+
+    for (let i=1; i<tokens.length-1; i++) {
+        if (tokens[i]["type"]==="list_start") {
+            inside=true;
+            l2=0;
+        } else if (tokens[i]["type"]==="text") {
+            toReadFiles.push(tokens[i]["text"]);
+            if (inside) {
+                if (l2===0) {
+                    seqNumbers[revSeqNumbers[l1]["name"]+"/"+tokens[i]["text"]] = l1*1000;
+                    revSeqNumbers[l1]["children"]={0: {"name": tokens[i]["text"]+""}};
+                } else {
+                    seqNumbers[revSeqNumbers[l1]["name"]+"/"+tokens[i]["text"]] = l1*1000+l2;
+                    revSeqNumbers[l1]["children"][l2]={"name": tokens[i]["text"]+""};
+                }
+                l2++;
+            }
+            if (!inside) {
+                l1++;
+                seqNumbers[tokens[i]["text"]] = l1*1000;
+                revSeqNumbers[l1] = {"name" : tokens[i]["text"]};
+            }
+       } else if (tokens[i]["type"]==="list_end") {
+            inside=false;
+       }
+    }
+
+    return seqNumbers;
+};
+
 // Get the nested list of all the exercises
 let getCurriculumExerciseFiles = function(dir: string, callType?: string){
-    
     let files = [];
     let exercises = [];
     // let exercises = [];
-    files = fs.readdirSync(dir);
-    let i = 0;
-    let next = function() {
-        let file = files[i++];
-        if (!file) {
-            return;
-        }
-        // If the file name does not start with the pattern 'number-' where number is a string or integer skip it
-        let regExMatch = file.match(/^[0-9]+([.][0-9]+)?-/g);
-        if (!regExMatch || regExMatch.length < 1) {
-            next();
-            return;
-        }
-        let sequenceNum = regExMatch[0].split('-')[0];
-        file = dir + '/' + file;
-
-        try {
-            let fileStat = fs.statSync(file);
-            if (fileStat && fileStat.isDirectory()) {
-                exercises.push({
+    for (const i of Object.keys(revSeqNumbers)) {
+        let mFile = revSeqNumbers[i]["name"];
+        let sequenceNum = sequenceNumbers[mFile];
+        mFile = dir + "/" + mFile;
+        if (!revSeqNumbers[i]["children"]) {
+            exercises.push({
+                type: 'exercise',
+                path: mFile,
+                sequenceNum: Number(sequenceNum),
+                childExercises: []
+            });
+        } else {
+            let childExercises = [];
+            for (const j of Object.keys(revSeqNumbers[i]["children"])) {
+                let file = revSeqNumbers[i]["children"][j]["name"];
+                sequenceNum = sequenceNumbers[revSeqNumbers[i]["name"]+"/"+file];
+                childExercises.push({
                     type: 'exercise',
-                    path: file,
+                    path: mFile+"/"+file,
                     sequenceNum: Number(sequenceNum),
                     childExercises: []
                 });
-                let childResults = getCurriculumExerciseFiles(file, "recursive");
-                let parentExercise = childResults.splice(0, 1)[0];
-                exercises[exercises.length-1]['path'] = parentExercise.path;
-                exercises[exercises.length-1]['childExercises'] = childResults;
-                next();
-                return;
-            } else {
-                // Check if the file name ends with '.md'
-                if (!file.endsWith('.md')) {
-                    next();
-                    return;
-                }
-                // Push the exercise in the list of exercises
-                exercises.push({
-                    type: 'exercise',
-                    path: file,
-                    sequenceNum: Number(sequenceNum),
-                    childExercises: []
-                });
-                next();
             }
-            next();
-        } catch (err) {
-            console.log(err);
+
+            exercises.push({
+                type: 'exercise',
+                path: mFile+"/"+ revSeqNumbers[i]["children"][0]["name"],
+                sequenceNum: Number(sequenceNum),
+                childExercises: childExercises
+            });
         }
-    };
-    next();
+    } 
     exercises.sort(function(a, b) {
         return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
     });
+
     return exercises;
 };
 
@@ -553,19 +570,13 @@ function updateContentWithImageLinks(images: any[], content: string): string {
 // Check if the --courseDir parameter is correct
 validateCourseDirParam()
 .then( () => {
-    // Check if the details/notes.md file is correct
-    // return validateCourseNotes();
-// }).then( (courseNotes) => {
-    // Add the notes in the courseData object which will be used to add the course
-    // courseData['notes'] = courseNotes;
-    // return Promise.resolve();
-// }).then( () => {
     // Check if the details/info.md file is correct 
     return validateCourseInfo();
 }).then( () => {
     // Get a list of files and validate their sequence numbers
+    sequenceNumbers = getSequenceNumbers(courseDir);
     exercises = getCurriculumExerciseFiles(courseDir);
-    validateSequenceNumber(exercises);
+    // validateSequenceNumber(exercises);
     // Get the exercise content from the files
     exercises = getAllExercises(exercises);
     return Promise.resolve(exercises);

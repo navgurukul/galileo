@@ -147,8 +147,6 @@ export default class CourseController {
 
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
-        console.log("COURSE ID: USER ID", request.params.courseId, " : ", request.userId);
-
         let exercises = [];
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
             + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
@@ -166,19 +164,27 @@ export default class CourseController {
             .orderBy('exercises.sequenceNum', 'asc');
 
         query.then((rows) => {
+            let exercise = rows[0];
             for (let i = 0; i < rows.length; i++) {
-                // let exercise = {};
-                // Object.keys(rows[i]).forEach(function(key) {
-                //      exercise[ key ] = rows[i][ key ];
-                // }); 
-
-                let exercise = rows[i];
-                if (!Number.isInteger(exercise.sequenceNum)) {
-                    let parentIndex = parseInt(exercise.sequenceNum) - 1;
-                    exercises[parentIndex].childExercises.push(exercise);
+               if (parseInt(exercise.sequenceNum) < 100) {
+                    console.log("yaha");
+                    exercise = rows[i];
+                    if (!Number.isInteger(exercise.sequenceNum)) {
+                        let parentIndex = parseInt(exercise.sequenceNum) - 1;
+                        exercises[parentIndex].childExercises.push(exercise);
+                    } else {
+                        exercise.childExercises = [];
+                        exercises.push(exercise);
+                    }
                 } else {
-                    exercise.childExercises = [];
-                    exercises.push(exercise);
+                   exercise = rows[i];
+                   if (parseInt(exercise.sequenceNum)%100 > 0) {
+                      let parentIndex = Math.floor( parseInt(exercise.sequenceNum) / 1000 - 1);
+                      exercises[parentIndex].childExercises.push(exercise);
+                   } else {
+                      exercise.childExercises = [];
+                      exercises.push(exercise);
+                   }
                 }
             }
             return reply({data: exercises});
