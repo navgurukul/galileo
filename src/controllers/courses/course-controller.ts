@@ -165,6 +165,7 @@ export default class CourseController {
 
         query.then((rows) => {
             let exercise = rows[0];
+            console.log(rows);
             for (let i = 0; i < rows.length; i++) {
                if (parseInt(exercise.sequenceNum) < 100) {
                     console.log("yaha");
@@ -178,6 +179,7 @@ export default class CourseController {
                     }
                 } else {
                    exercise = rows[i];
+                   console.log(exercise.sequenceNum + " vahan");
                    if (parseInt(exercise.sequenceNum)%100 > 0) {
                       let parentIndex = Math.floor( parseInt(exercise.sequenceNum) / 1000 - 1);
                       exercises[parentIndex].childExercises.push(exercise);
