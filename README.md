@@ -7,6 +7,13 @@ Made using hapi.js, the repository use mysql database.
 * *npm install -g typings* (required for setup)
 * *npm run setup* (install nuget packages & typings)
 
+**Configuration**
+* export GALILEO='dev'
+* cp src/configurations/sample-config.json src/configuration/config.dev.json
+* Edit the contents of src/configurations/config.dev.json to suit your configuration
+* git clone https://github.com/navgurukul/newton
+* mv newton curriculum
+
 **Run**
 * *gulp build* (build ts files)
 * *gulp tslint* (run tslint)
