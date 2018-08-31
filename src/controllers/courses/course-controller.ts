@@ -160,18 +160,18 @@ export default class CourseController {
                     knex.raw(xyz)
                 ).on('submissions.userId', '=', 1);
             })
-            .where({'exercises.courseId': parseInt(request.params.courseId)})
+            .where({'exercises.courseId': parseInt(request.params.courseId, 10)})
             .orderBy('exercises.sequenceNum', 'asc');
 
         query.then((rows) => {
             let exercise = rows[0];
             console.log(rows);
             for (let i = 0; i < rows.length; i++) {
-               if (parseInt(exercise.sequenceNum) < 100) {
+               if (parseInt(exercise.sequenceNum, 10) < 100) {
                     console.log("yaha");
                     exercise = rows[i];
                     if (!Number.isInteger(exercise.sequenceNum)) {
-                        let parentIndex = parseInt(exercise.sequenceNum) - 1;
+                        let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
                         exercises[parentIndex].childExercises.push(exercise);
                     } else {
                         exercise.childExercises = [];
@@ -180,8 +180,8 @@ export default class CourseController {
                 } else {
                    exercise = rows[i];
                    console.log(exercise.sequenceNum + " vahan");
-                   if (parseInt(exercise.sequenceNum)%100 > 0) {
-                      let parentIndex = Math.floor( parseInt(exercise.sequenceNum) / 1000 - 1);
+                   if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
+                      let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
                       exercises[parentIndex].childExercises.push(exercise);
                    } else {
                       exercise.childExercises = [];
