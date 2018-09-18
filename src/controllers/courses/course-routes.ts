@@ -3,7 +3,7 @@ import * as Joi from "joi";
 import {IServerConfigurations} from "../../configurations";
 
 import CourseController from "./course-controller";
-import {courseSchema, enrolledCourseSchema, exerciseSchema, facilitatingCourseSchema} from "./course-schemas";
+import {courseSchema, enrolledCourseSchema, exerciseSchema, facilitatingCourseSchema, topicSchema} from "./course-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
