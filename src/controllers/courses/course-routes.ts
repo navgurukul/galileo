@@ -36,6 +36,26 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/courses/{courseId}/topics',
+        config: {
+            description: 'Get complete list of topics in the course',
+            validate: {
+                params: {
+                    courseId: Joi.number().required()
+                }
+            },
+            response: {
+                schema: Joi.object({
+                    "data": Joi.array().items(topicSchema)
+                })
+            },
+            tags: ['api'],
+            handler: courseController.getCourseTopics
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/courses/{courseId}/exercises',
         config: {
             description: 'Get complete list of exercises in the course',

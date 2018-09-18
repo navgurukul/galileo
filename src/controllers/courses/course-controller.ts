@@ -145,6 +145,66 @@ export default class CourseController {
 
     }
 
+    public getCourseTopics(request: Hapi.Request, reply: Hapi.IReply) {
+
+        let exercises = [];
+        let courseId = parseInt(request.params.courseId, 10);
+
+        let query = database('exercises')
+                    .select('exercises.id', 'exercises.name')
+                    .where({"exercises.courseId": courseId})
+                    .andWhere({"exercises.parentExerciseId": null})
+                    .orderBy("exercises.sequenceNum", "asc");
+
+        query.then((rows) => {
+            return reply({data: rows});
+        });
+
+        // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
+        //     + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
+
+        // let query = database('exercises')
+        //     .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+        //         'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
+        //         'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+        //     .leftJoin('submissions', function () {
+        //         this.on('submissions.id', '=',
+        //             knex.raw(xyz)
+        //         ).on('submissions.userId', '=', 1);
+        //     })
+        //     .where({'exercises.courseId': })
+        //     .orderBy('exercises.sequenceNum', 'asc');
+
+        // query.then((rows) => {
+        //     let exercise = rows[0];
+        //     console.log(rows);
+        //     for (let i = 0; i < rows.length; i++) {
+        //        if (parseInt(exercise.sequenceNum, 10) < 100) {
+        //             console.log("yaha");
+        //             exercise = rows[i];
+        //             if (!Number.isInteger(exercise.sequenceNum)) {
+        //                 let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
+        //                 exercises[parentIndex].childExercises.push(exercise);
+        //             } else {
+        //                 exercise.childExercises = [];
+        //                 exercises.push(exercise);
+        //             }
+        //         } else {
+        //            exercise = rows[i];
+        //            console.log(exercise.sequenceNum + " vahan");
+        //            if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
+        //               let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
+        //               exercises[parentIndex].childExercises.push(exercise);
+        //            } else {
+        //               exercise.childExercises = [];
+        //               exercises.push(exercise);
+        //            }
+        //         }
+        //     }
+        //     return reply({data: exercises});
+        // });
+    }
+
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];

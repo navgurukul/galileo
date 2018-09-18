@@ -8,6 +8,11 @@ export const courseSchema: Joi.ObjectSchema = Joi.object({
     shortDescription: Joi.string()
 });
 
+export const topicSchema: Joi.ObjectSchema = Joi.object({
+    id: Joi.number(),
+    name: Joi.string()
+});
+
 export const facilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     batch_name: Joi.string(),
     batchId: Joi.number()
