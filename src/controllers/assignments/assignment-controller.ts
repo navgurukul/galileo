@@ -1,6 +1,6 @@
 import * as Hapi from 'hapi';
 import * as Boom from "boom";
-import * as GoogleCloudStorage from "@google-cloud/storage";
+// import * as GoogleCloudStorage from "@google-cloud/storage";
 
 import database from "../../";
 import {IServerConfigurations} from "../../configurations/index";
@@ -156,40 +156,41 @@ export default class AssignmentController {
     }
 
     public uploadExerciseAssignment(request: Hapi.request, reply: Hapi.IReply) {
+        // NEEd to be rewritten for s3: TODO
 
-        let gcs = GoogleCloudStorage({
-            projectId: this.configs.googleCloud.projectId,
-            keyFilename: __dirname + '/../' + this.configs.googleCloud.keyFilename
-        });
+        // let gcs = GoogleCloudStorage({
+        //     projectId: this.configs.googleCloud.projectId,
+        //     keyFilename: __dirname + '/../' + this.configs.googleCloud.keyFilename
+        // });
 
-        let bucket = gcs.bucket(this.configs.googleCloud.assignmentsBucket);
+        // let bucket = gcs.bucket(this.configs.googleCloud.assignmentsBucket);
 
-        var fileData = request.payload.file;
-        if (fileData) {
-            let dir = request.userId + '/' + request.params.courseId + '/' + request.params.exerciseId;
-            let name = generateUID() + '.' + fileData.hapi.filename;
-            let filePath = dir + '/' + name;
-            let file = bucket.file(filePath);
+        // var fileData = request.payload.file;
+        // if (fileData) {
+        //     let dir = request.userId + '/' + request.params.courseId + '/' + request.params.exerciseId;
+        //     let name = generateUID() + '.' + fileData.hapi.filename;
+        //     let filePath = dir + '/' + name;
+        //     let file = bucket.file(filePath);
 
-            let stream = file.createWriteStream({
-                metadata: {
-                    contentType: fileData.hapi.headers['content-type']
-                }
-            });
+        //     let stream = file.createWriteStream({
+        //         metadata: {
+        //             contentType: fileData.hapi.headers['content-type']
+        //         }
+        //     });
 
-            stream.on('error', (err) => {
-                console.log(err);
-                return reply(Boom.badImplementation("There was some problem uploading the file. Please try again."));
-            });
-            stream.on('finish', () => {
-                return reply({
-                    "success": true,
-                    "filePath": "https://storage.googleapis.com/" + this.configs.googleCloud.assignmentsBucket + '/' + filePath
-                });
-            });
+        //     stream.on('error', (err) => {
+        //         console.log(err);
+        //         return reply(Boom.badImplementation("There was some problem uploading the file. Please try again."));
+        //     });
+        //     stream.on('finish', () => {
+        //         return reply({
+        //             "success": true,
+        //             "filePath": "https://storage.googleapis.com/" + this.configs.googleCloud.assignmentsBucket + '/' + filePath
+        //         });
+        //     });
 
-            stream.end(fileData._data);
-        }
+        //     stream.end(fileData._data);
+        // }
     }
 
     public getExerciseSubmissions(request: Hapi.Request, reply: Hapi.IReply) {

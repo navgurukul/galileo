@@ -6,7 +6,7 @@ import * as fs from "fs-extra";
 import * as marked from "marked";
 import * as Joi from "joi";
 import database from './index';
-import * as GoogleCloudStorage from "@google-cloud/storage";
+// import * as GoogleCloudStorage from "@google-cloud/storage";
 import * as process from 'process';
 
 /**

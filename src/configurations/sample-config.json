@@ -29,11 +29,6 @@
          "clientId":"googleAppClientId",
          "clientSecret":"googleAppClientSecret"
       },
-      "googleCloud":{
-         "projectId":"not_needed_now_TODO",
-         "keyFilename":"not_needed_now_TODO",
-         "assignmentsBucket":"not_needed_now_TODO"
-      },
       "facilitatorEmails":[
       ],
       "defaultBatchId":1
