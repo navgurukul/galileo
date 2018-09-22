@@ -642,6 +642,8 @@ validateCourseDirParam()
     setTimeout(function() {
 	process.exit();
     }, 10000);
+}).finally(function() {
+    database.destroy();
 }).catch( (err) => {    
     // Throw an error in case of one.
     console.log(err);
