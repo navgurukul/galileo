@@ -640,10 +640,9 @@ validateCourseDirParam()
     console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
     console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
     setTimeout(function() {
-	process.exit();
+        database.destroy();
+    	process.exit();
     }, 10000);
-}).finally(function() {
-    database.destroy();
 }).catch( (err) => {    
     // Throw an error in case of one.
     console.log(err);
