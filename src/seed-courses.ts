@@ -379,7 +379,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     }
     exInfo  = parseNgMetaText(tokens[0]['text']);
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
-    exInfo['slug'] = path.replace('/', '__').replace('.md', '');
+    exInfo['slug'] = path.replace('curriculum/','').replace('/', '__').replace('.md', '');
     exInfo['sequenceNum'] = sequenceNum;
     exInfo['path'] = path;
     exInfo['content'] = data;
