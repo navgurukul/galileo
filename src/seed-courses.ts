@@ -21,8 +21,8 @@ import * as process from 'process';
  * 
  */
 
-console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
-console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
+//console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
+//console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
 
 // Helper method to throw an error with the given text and exit the script
 let showErrorAndExit = function(message:string) {
@@ -637,8 +637,8 @@ validateCourseDirParam()
     Promise.all(promises);
 }).then(() => {
     // say your goodbyes :)
-    console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
-    console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
+    // console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
+    // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
     // setTimeout(function() {
         database.destroy();
     	  process.exit();
