@@ -34,7 +34,7 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
 
         plugins.forEach((pluginName: string) => {
             let plugin: IPlugin = (require('./plugins/' + pluginName)).default();
-            console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
+            //console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
 

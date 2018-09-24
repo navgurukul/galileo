@@ -624,26 +624,26 @@ validateCourseDirParam()
         });
         // return Promise.resolve();
     });
-}).then( () => {
+}).then(() => {
     // Add or update the course
     return addOrUpdateCourse();
-} ).then( (courseId) => {
+} ).then((courseId) => {
     // delete any exercises if they exist in the DB and not in the curriculum
     deleteExercises(courseId);
     return Promise.resolve(courseId);
-}).then( (courseId) => {
+}).then((courseId) => {
     // add or update the exercises in the DB
     let promises = addOrUpdateExercises(exercises, courseId);
     Promise.all(promises);
-}).then( () => {
+}).then(() => {
     // say your goodbyes :)
     console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
     console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
-    setTimeout(function() {
+    // setTimeout(function() {
         database.destroy();
-    	process.exit();
-    }, 10000);
-}).catch( (err) => {    
+    	  process.exit();
+    // }, 3000); // waiting for no obvious reason; otherwise code breaks
+}).catch((err) => {    
     // Throw an error in case of one.
     console.log(err);
 });

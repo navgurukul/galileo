@@ -20,7 +20,6 @@ export class UserModel extends DBTable {
 
     constructor(configs: IServerConfigurations) {
         super(database, "users");
-        console.log(configs);
         this.configs = configs;
     }
 
