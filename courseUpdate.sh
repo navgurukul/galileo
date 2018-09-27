@@ -1,6 +1,7 @@
 # TO BE RUN FROM ROOT DIRECTORY
 
-echo "UPDATING COURSE "$1
+echo "COURSE : "$1" UPDATED"
+echo "(Unless Error Message is attached here.)"
 
 #cd /home/galileo
 

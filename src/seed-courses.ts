@@ -169,6 +169,8 @@ let getSequenceNumbers = function(dir: string, callType?: string) {
     let inside = false;
 
     for (let i=1; i<tokens.length-1; i++) {
+        tokens[i]["text"] = tokens[i]["text"] ? tokens[i]["text"].trim() : undefined;
+
         if (tokens[i]["type"]==="list_start") {
             inside=true;
             l2=0;
@@ -639,11 +641,12 @@ validateCourseDirParam()
     // say your goodbyes :)
     // console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
     // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
-    // setTimeout(function() {
+    setTimeout(function() {
         database.destroy();
     	  process.exit();
-    // }, 3000); // waiting for no obvious reason; otherwise code breaks
+    }, 3000); // waiting for no obvious reason; otherwise code breaks
 }).catch((err) => {    
     // Throw an error in case of one.
     console.log(err);
+    process.exit();
 });
