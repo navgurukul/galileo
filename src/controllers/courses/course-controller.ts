@@ -225,7 +225,6 @@ export default class CourseController {
 
         query.then((rows) => {
             let exercise = rows[0];
-            console.log(rows);
             for (let i = 0; i < rows.length; i++) {
                if (parseInt(exercise.sequenceNum, 10) < 100) {
                     console.log("yaha");
@@ -239,7 +238,6 @@ export default class CourseController {
                     }
                 } else {
                    exercise = rows[i];
-                   console.log(exercise.sequenceNum + " vahan");
                    if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
                       let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
                       exercises[parentIndex].childExercises.push(exercise);
@@ -273,7 +271,6 @@ export default class CourseController {
     }
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
-        // console.log("SLUG: USER ID", request.query.slug, " : ", request.userId);
 
         let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
             'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
@@ -296,7 +293,6 @@ export default class CourseController {
             console.log(exercise);
             return reply(exercise);
         });
-        // return 'het';
     }
 
     public getCourseNotes(request: Hapi.Request, reply: Hapi.IReply) {
