@@ -1,10 +1,14 @@
+`I have never met a man so ignorant that I couldn't learn something from him. ~ Galileo`
+
 # galileo
-Made using hapi.js, the repository use mysql database.
+Made using hapi.js, the repository uses mysql database.
 
 ## How to Run?
 
 **Installation**
 
+* *npm install -g gulp@3.9.0*
+* *npm install -g typescript*
 * *npm install -g typings* (required for setup)
 * *npm install yarn* (required for installing dev-dependencies)
 * *yarn install* (install dependencies and dev-dependencies from package.json)
@@ -17,10 +21,15 @@ Made using hapi.js, the repository use mysql database.
 * git clone https://github.com/navgurukul/newton
 * mv newton curriculum
 
+**DB SETUP**
+* Create a database, add the access credentials of the database to your `config` file
+* Import schema.sql to import the database schema
+* `bash courseUpdate.sh all` to import all the courses to your local database
+
 **Run**
-* *node_modules/gulp/bin/gulp.js build* (build ts files)
-* *node_modules/gulp/bin/gulp.js tslint* (run tslint)
-* *node_modules/gulp/bin/gulp.js watch* (watch ts files)
+* *gulp build* (build ts files)
+* *gulp tslint* (run tslint)
+* *gulp watch* (watch ts files)
 * *npm run start* (start the application)
 * *npm run watch* (restart the application when files change)
 
@@ -39,5 +48,3 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 3. After being merged into dev, we will deploy it to staging environment.
 
 *We will make sure to have frequent merges from `dev` into `master` and release stuff into production*
-
-`I have never met a man so ignorant that I couldn't learn something from him. ~ Galileo`
