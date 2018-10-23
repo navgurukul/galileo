@@ -165,3 +165,60 @@ export const getAllExercises = function(exercises) {
     }
     return exerciseInfos;
 };
+
+let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
+  let uploadPromises = [];
+  let images = exercise['content'].match(/!\[(.*?)\]\((.*?)\)/g);
+  if (images!=null) {
+    for (let j = 0; j < images.length; j++) {
+      let sequenceNum;
+      if (parentSequenceNum){
+        sequenceNum = parentSequenceNum + '/' + exercise['sequenceNum'];
+      }
+      else{
+        sequenceNum = exercise['sequenceNum'];
+      }
+      let img =  parseAndUploadImage(images[j], sequenceNum, exercise['path'], iIndex, jIndex);
+
+      uploadPromises.push( img );
+    }
+  }
+  return Promise.all(uploadPromises);
+}
+
+
+export const uploadImagesAndUpdateContent = () => {
+      let exPromises = [];
+      let exChildPromises = [];
+      for (var i = 0; i < globals.exercises.length; i++){
+        let exercise = globals.exercises[i];
+        exPromises.push( _uploadContentImages(exercise, i).then( ( uploadedImages ) => {
+          if(uploadedImages.length){
+
+            let iIndex, content;
+            iIndex = uploadedImages[0].iIndex;
+            content = exercise['content'];
+            globals.exercises[iIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
+          };
+        }));
+        let childExercises = exercise['childExercises'];
+        if (childExercises){
+          for (var j = 0; j < childExercises.length; j++){
+
+            exChildPromises.push( _uploadContentImages(childExercises[j], i, exercise['sequenceNum'], j).then( ( uploadedImages ) => {
+              if(uploadedImages.length){
+                let iIndex, jIndex, content;
+                iIndex = uploadedImages[0].iIndex;
+                jIndex = uploadedImages[0].jIndex;
+                content = childExercises[jIndex]['content'];
+                globals.exercises[iIndex]['childExercises'][jIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
+              };
+            }));
+          };
+        };
+      };
+      return {
+        exPromises,
+        exChildPromises
+      }
+}

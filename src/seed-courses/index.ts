@@ -11,32 +11,14 @@ import * as process from 'process';
 
 var globals = require('./globals');
 
-import { getSequenceNumbers, getCurriculumExerciseFiles, getAllExercises } from './helpers';
+import { getSequenceNumbers, getCurriculumExerciseFiles, getAllExercises, uploadImagesAndUpdateContent } from './helpers';
 import { updateContentWithImageLinks, generateUID } from './utils';
-import { parseAndUploadImage } from './s3';
+
 import { validateSequenceNumber, validateCourseDirParam, validateCourseInfo } from './validators';
 import { addOrUpdateExercises, addOrUpdateCourse, deleteExercises } from './database';
 import { exerciseInfoSchema, courseInfoSchema } from './schema';
 
-const uploadAndUpdateImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
-        let uploadPromises = [];
-        let images = exercise['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-        if (images!=null) {
-            for (let j = 0; j < images.length; j++) {
-                let sequenceNum;
-                if (parentSequenceNum){
-                    sequenceNum = parentSequenceNum + '/' + exercise['sequenceNum'];
-                }
-                else{
-                    sequenceNum = exercise['sequenceNum'];
-                }
-                let img =  parseAndUploadImage(images[j], sequenceNum, exercise['path'], iIndex, jIndex);
 
-                uploadPromises.push( img );
-            }
-        }
-      return Promise.all(uploadPromises);
-}
  /********************
  ** Updation Logic **
  ********************
@@ -68,72 +50,7 @@ validateCourseDirParam()
         //TODO: This is a hackish solution to get shit done. Needs to be re-factored later on.
         //Rishabh is responsible for this mess.
 
-        //
-        let exPromises = [];
-        let exChildPromises = [];
-        for (var i = 0; i < globals.exercises.length; i++){
-            let exercise = globals.exercises[i];
-            exPromises.push( uploadAndUpdateImages(exercise, i).then( ( uploadedImages ) => {
-              if(uploadedImages.length){
-
-                  let iIndex, content; 
-                  iIndex = uploadedImages[0].iIndex;
-                  content = exercise['content'];
-                  globals.exercises[iIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
-              };
-            }));
-            let childExercises = exercise['childExercises'];
-            if (childExercises){
-              for (var j = 0; j < childExercises.length; j++){
-
-                exChildPromises.push( uploadAndUpdateImages(childExercises[j], i, exercise['sequenceNum'], j).then( ( uploadedImages ) => {
-                  if(uploadedImages.length){
-                    let iIndex, jIndex, content;
-                    iIndex = uploadedImages[0].iIndex;
-                    jIndex = uploadedImages[0].jIndex;
-                    content = childExercises[jIndex]['content'];
-                    globals.exercises[iIndex]['childExercises'][jIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
-                  };
-                }));
-              };
-            };
-        };
-
-        // // Upload the images to GCS before updating/adding stuff to the DBss
-        // let exPromises = [];
-        // let exChildPromises = [];
-        // for (let i = 0; i < globals.exercises.length; i++) {
-        //     let uploadPromises = [];
-        //     let exInfo = globals.exercises[i];
-        //     let images = exInfo['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-        //     if (images!=null) {
-        //         for (let j = 0; j < images.length; j++) {
-        //             let img =  parseAndUploadImage(images[j], exInfo['sequenceNum'], exInfo['path']);
-        //             uploadPromises.push( img );
-        //           }
-        //           exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
-        //             globals.exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, globals.exercises[i]['content']);
-        //           }) );
-        //         }
-        //
-        //     if (exInfo['childExercises'] != null) {
-        //         let uploadChildPromises = [];
-        //         for (let j = 0; j < exInfo['childExercises'].length; j++) {
-        //             let exInfoChild = exInfo['childExercises'][j];
-        //             let images = exInfoChild['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-        //             if (images!=null) {
-        //                 for (let h = 0; h < images.length; h++) {
-        //                     let img = parseAndUploadImage(images[h], exInfo['sequenceNum'] + '/' + exInfoChild['sequenceNum'], exInfo['path']);
-        //                     uploadChildPromises.push( img );
-        //                 }
-        //                 exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
-        //                     let content = globals.exercises[i]['childExercises'][j]['content'];
-        //                     globals.exercises[i]['childExercises'][j]['content'] = updateContentWithImageLinks(uploadedImages, content);
-        //                 }) );
-        //             }
-        //         }
-        //     }
-        // }
+        const {exPromises, exChildPromises} = uploadImagesAndUpdateContent();
 
         return Promise.all(exPromises).then( () => {
             return Promise.all(exChildPromises).then( () => {

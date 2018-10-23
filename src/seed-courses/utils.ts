@@ -5,6 +5,7 @@ declare var module: any;
 import * as colors from "colors";
 import * as process from 'process';
 
+import { parseAndUploadImage } from './s3';
 
 // Helper function to generate UIDs
 export function generateUID():string {
@@ -27,7 +28,6 @@ export function updateContentWithImageLinks(images: any[], content: string): str
 
     return updateContent;
 }
-
 
 export const showErrorAndExit = function(message:string) {
     console.log( colors.red.bold(message) );
