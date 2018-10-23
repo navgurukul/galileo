@@ -13,18 +13,19 @@ import * as process from 'process';
  ********************
  ** Updation Logic **
  ********************
- * 
+ *
  * 1. When there is a same file and the submission format has changed the related files will be deleted and re-created.
  * 2. When a file has been deleted, then delete it from the DB.
  * 3. When the submission format has not changed, then we can only update the content and be good with it.
  * 4. Change the order according to the new order.
- * 
+ *
  */
 
 //console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
 //console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
 
 // Helper method to throw an error with the given text and exit the script
+
 let showErrorAndExit = function(message:string) {
     console.log( colors.red.bold(message) );
     console.log( colors.red("Fix the above error and re-run this script.") );
@@ -34,7 +35,7 @@ let showErrorAndExit = function(message:string) {
 // Globals
 let courseDir, // Path of the course directory relative to this file
     courseData = {}, // Course data which will be put into the DB eventually
-    exercises = [], // All exercises 
+    exercises = [], // All exercises
     allSlugs = [], // All slugs will be stored here
     sequenceNumbers = {},
     revSeqNumbers = {},
@@ -56,8 +57,9 @@ let exerciseInfoSchema =  Joi.object({
 });
 
 // Helper function to generate UIDs
+
 function generateUID() {
-    // I generate the UID from two parts here 
+    // I generate the UID from two parts here
     // to ensure the random number provide enough bits.
     let firstPart = ((Math.random() * 46656) | 0).toString(36);
     let secondPart = ((Math.random() * 46656) | 0).toString(36);
@@ -66,10 +68,10 @@ function generateUID() {
     return firstPart + secondPart;
 }
 
-
 // Given the markdown of an image this returns the path of the image on Google Cloud Storage
+
 function parseAndUploadImage(imageText: string, sequenceNum: string, path: string) {
-    
+
     // get relative image path and image name
     let temp1 = imageText.split(']')[1];
     let imagePath = temp1.slice(1, -1);
@@ -87,13 +89,13 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     var AWS = require('aws-sdk');
     var s3 = new AWS.S3();
     var myBucket = 'saralng';
-    
+
     let localReadStream = fs.createReadStream(completePath);
     let dir = courseData['info']['name' ] + '/' + sequenceNum;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
     filePath = filePath.replace(/ /g, "__");
-    
+
     return new Promise((resolve, reject) => {
         fs.readFile(completePath, function (err,data) {
           if (err) {
@@ -119,7 +121,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
                 } else {
                     return resolve({
                         relativePath: imagePath,
-                        gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath, 
+                        gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,
                         imageMD: imageText,
                     });
                 }
@@ -127,15 +129,13 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
         });
     });
 
- 
-    /*
 
+    /*
     // initialise gcs
     let gcs = GoogleCloudStorage({
         projectId: 'navgurukul-159107',
         keyFilename: __dirname + '/' + 'configurations/ng-gcloud-key.json'
     });
-
     // upload image
     let bucket = gcs.bucket('ng-curriculum-images');
     let localReadStream = fs.createReadStream(completePath);
@@ -146,7 +146,6 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     return new Promise((resolve, reject) => {
         let remoteWriteStream = bucket.file(filePath).createWriteStream();
         let stream =    localReadStream.pipe(remoteWriteStream);
-
         stream.on('finish', () => {
             return resolve({
                 relativePath: imagePath,
@@ -155,7 +154,6 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
             });
         });
     });
-
     */
 }
 
@@ -199,6 +197,7 @@ let getSequenceNumbers = function(dir: string, callType?: string) {
 };
 
 // Get the nested list of all the exercises
+
 let getCurriculumExerciseFiles = function(dir: string, callType?: string){
     let files = [];
     let exercises = [];
@@ -234,7 +233,7 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
                 childExercises: childExercises
             });
         }
-    } 
+    }
     exercises.sort(function(a, b) {
         return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
     });
@@ -246,6 +245,7 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
 // This doesn't need to be the real order, but the next logical sequence number.
 // Eg. if 1.2 is given this will give 1.3.
 //     if 1 is given this will give 2
+
 let _nextSeqNum = function (sequenceNum) {
     let num = String(sequenceNum);
     let tokens = num.split('.');
@@ -259,6 +259,7 @@ let _nextSeqNum = function (sequenceNum) {
 
 // Validate if sequence numbers are in a proper sequence.
 // If they are not this will automatically end the script and show the error.
+
 let validateSequenceNumber = function(exercises, depthLevel?) {
     if (!depthLevel) {
         depthLevel = 0;
@@ -294,8 +295,9 @@ daysToComplete: 20
 shortDescription: Build any web page under the sun after taking up this course :)
 ```
 */
-// This assumes that every line under the triple tilde (```) will be a valid key/value pair. 
+// This assumes that every line under the triple tilde (```) will be a valid key/value pair.
 // If it is not, it returns null for the whole block.
+
 let parseNgMetaText = function(text: string) {
     let lines = text.split('\n');
     let parsed = {};
@@ -315,9 +317,11 @@ let parseNgMetaText = function(text: string) {
         parsed[ lineKey ] = lineValue;
     });
     return parsed;
-}; 
+};
+
 
 // Validate the course directory given in the parameters
+
 let validateCourseDirParam = function() {
 
     // Parse the process to look for `courseDir`
@@ -354,6 +358,7 @@ let validateCourseDirParam = function() {
 // };
 
 // Validate and return the course info
+
 let validateCourseInfo = function() {
     let courseInfoFile = courseDir + '/details/info.md';
     return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
@@ -369,9 +374,10 @@ let validateCourseInfo = function() {
 };
 
 // Validate and return the content and meta information of an exercise on the given path
-let _getExerciseInfo = function(path, sequenceNum) { 
+
+let _getExerciseInfo = function(path, sequenceNum) {
     let exInfo = {};
-    let data = fs.readFileSync(path, 'utf-8'); 
+    let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
@@ -429,7 +435,7 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
                 }
             });
         }
-        // an exercise with the same slug does not exist 
+        // an exercise with the same slug does not exist
         else {
             return database('exercises')
             .insert(exerciseInfo)
@@ -455,7 +461,7 @@ let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
 
         let query;
         if (!promiseObj) {
-            query = _generateExerciseAddOrUpdateQuery(exerciseObj);            
+            query = _generateExerciseAddOrUpdateQuery(exerciseObj);
         } else {
             promiseObj.then( (exerciseId) => {
                 exerciseObj['parentExerciseId'] = exerciseId;
@@ -469,7 +475,7 @@ let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
         }
 
         exInsertQs.push(query);
-        
+
     }
     return exInsertQs;
 };
@@ -554,7 +560,8 @@ let deleteExercises = function(courseId) {
     });
 };
 
-// Updates the content with the links of images which have been uploaded to the Google Cloud    
+// Updates the content with the links of images which have been uploaded to the Google Cloud
+
 function updateContentWithImageLinks(images: any[], content: string): string {
     let updateContent = content;
 
@@ -567,9 +574,10 @@ function updateContentWithImageLinks(images: any[], content: string): string {
 }
 
 // Check if the --courseDir parameter is correct
+
 validateCourseDirParam()
 .then( () => {
-    // Check if the details/info.md file is correct 
+    // Check if the details/info.md file is correct
     return validateCourseInfo();
 }).then( () => {
     // Get a list of files and validate their sequence numbers
@@ -600,7 +608,7 @@ validateCourseDirParam()
         exPromises.push( Promise.all(uploadPromises).then( (uploadedImages) => {
             exercises[i]['content'] = updateContentWithImageLinks(uploadedImages, exercises[i]['content']);
         }) );
-        
+
         if (exInfo['childExercises'] != null) {
             let uploadChildPromises = [];
             for (let j = 0; j < exInfo['childExercises'].length; j++) {
@@ -639,13 +647,13 @@ validateCourseDirParam()
     Promise.all(promises);
 }).then(() => {
     // say your goodbyes :)
-    // console.log( colors.green("The requested course has been seeded/updated into the DB.") );    
+    // console.log( colors.green("The requested course has been seeded/updated into the DB.") );
     // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
     setTimeout(function() {
         database.destroy();
     	  process.exit();
     }, 3000); // waiting for no obvious reason; otherwise code breaks
-}).catch((err) => {    
+}).catch((err) => {
     // Throw an error in case of one.
     console.log(err);
     process.exit();

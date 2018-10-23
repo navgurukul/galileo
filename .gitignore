@@ -1,7 +1,7 @@
 .vscode
 yarn.lock
 build/
-src/plugins/bell/index.ts 
+src/plugins/bell/index.ts
 src/configurations/config.prod.json
 src/configurations/config*
 src/configurations/config.local.json
