@@ -7,7 +7,7 @@ import {IServerConfigurations} from "../../configurations/index";
 
 // Helper function to generate UIDs
 function generateUID() {
-    // I generate the UID from two parts here 
+    // I generate the UID from two parts here
     // to ensure the random number provide enough bits.
     let firstPart = ((Math.random() * 46656) | 0).toString(36);
     let secondPart = ((Math.random() * 46656) | 0).toString(36);

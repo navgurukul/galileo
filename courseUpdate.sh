@@ -13,8 +13,8 @@ if [ "$1" == "all" ]
 then
 	for input in $(find . -name "info.md" | awk -F'\/' '{print $3}')
 	do
-		ts-node src/seed-courses.ts --courseDir $input
+		ts-node src/seed-courses/index.ts --courseDir $input
 	done
 else
-	ts-node src/seed-courses.ts --courseDir $1
+	ts-node src/seed-courses/index.ts --courseDir $1
 fi
