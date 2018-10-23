@@ -12,7 +12,7 @@ import * as process from 'process';
 var globals = require('./globals');
 
 import { getSequenceNumbers, getCurriculumExerciseFiles, getAllExercises, uploadImagesAndUpdateContent } from './helpers';
-import { updateContentWithImageLinks, generateUID } from './utils';
+import { generateUID } from './utils';
 
 import { validateSequenceNumber, validateCourseDirParam, validateCourseInfo } from './validators';
 import { addOrUpdateExercises, addOrUpdateCourse, deleteExercises } from './database';

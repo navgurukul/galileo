@@ -55,7 +55,6 @@ export function parseAndUploadImage(imageText: string, sequenceNum: string, path
                 if (err) {
                     console.log("error in s3 upload", err);
                 } else {
-                    console.log(iIndex, jIndex)
                     return resolve({
                         relativePath: imagePath,
                         gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + filePath,

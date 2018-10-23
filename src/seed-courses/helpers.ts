@@ -7,6 +7,9 @@ import * as marked from "marked";
 import * as Joi from "joi";
 import { showErrorAndExit } from "./utils";
 import { exerciseInfoSchema } from './schema';
+import { updateContentWithImageLinks } from './utils';
+import { parseAndUploadImage } from './s3';
+
 
 var globals = require('./globals');
 

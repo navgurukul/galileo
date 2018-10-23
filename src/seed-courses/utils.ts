@@ -5,7 +5,6 @@ declare var module: any;
 import * as colors from "colors";
 import * as process from 'process';
 
-import { parseAndUploadImage } from './s3';
 
 // Helper function to generate UIDs
 export function generateUID():string {
