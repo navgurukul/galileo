@@ -150,7 +150,6 @@ let _getExerciseInfo = function(path, sequenceNum) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
     if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
-        // console.log(_getFileName(path))
         exInfo['name'] = _getFileName(path);
         exInfo['completionMethod'] = 'manual';
     }
