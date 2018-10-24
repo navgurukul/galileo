@@ -133,7 +133,13 @@ export const parseNgMetaText = function(text: string) {
     return parsed;
 };
 
-
+const _getFileName = (path) => {
+  path = path.split('/');
+  let fileName = path[path.length-1];
+  fileName =  fileName.replace('.md', '').replace('-', ' ');
+  fileName = fileName[0].toUpperCase() + fileName.slice(1, fileName.length);
+  return fileName
+}
 
 // Validate and return the content and meta information of an exercise on the given path
 let _getExerciseInfo = function(path, sequenceNum) {
@@ -144,9 +150,13 @@ let _getExerciseInfo = function(path, sequenceNum) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
     if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
-        showErrorAndExit("No code block of type `ngMeta` exists at the top of the exercise file " + path);
+        // console.log(_getFileName(path))
+        exInfo['name'] = _getFileName(path);
+        exInfo['completionMethod'] = 'manual';
     }
-    exInfo  = parseNgMetaText(tokens[0]['text']);
+    else{
+      exInfo  = parseNgMetaText(tokens[0]['text']);
+    }
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
     exInfo['slug'] = path.replace('curriculum/','').replace('/', '__').replace('.md', '');
     exInfo['sequenceNum'] = sequenceNum;
@@ -154,6 +164,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo['content'] = data;
     return exInfo;
 };
+
 
 export const getAllExercises = function(exercises) {
     let exerciseInfos = [];
