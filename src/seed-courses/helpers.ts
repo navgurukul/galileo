@@ -12,6 +12,7 @@ import { parseAndUploadImage } from './s3';
 
 
 var globals = require('./globals');
+let newtonGithubUrl = 'https://github.com/navgurukul/newton/tree/master/';
 
 export const getSequenceNumbers = function(dir: string, callType?: string) {
     let fileName = "index.md";
@@ -140,6 +141,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     let exInfo = {};
     let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
+    let gitFile = path.replace('curriculum/', '');
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
@@ -152,6 +154,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo['sequenceNum'] = sequenceNum;
     exInfo['path'] = path;
     exInfo['content'] = data;
+    exInfo['githubLink'] = newtonGithubUrl + gitFile;
     return exInfo;
 };
 
@@ -187,7 +190,7 @@ let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
     }
   }
   return Promise.all(uploadPromises);
-}
+};
 
 
 export const uploadImagesAndUpdateContent = () => {
@@ -223,5 +226,5 @@ export const uploadImagesAndUpdateContent = () => {
       return {
         exPromises,
         exChildPromises
-      }
-}
+      };
+};

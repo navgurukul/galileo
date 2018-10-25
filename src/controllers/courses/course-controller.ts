@@ -25,7 +25,7 @@ export default class CourseController {
         let enrolledQ;
         let facilitatingQ;
         let availableQ;
-        
+
         if (request.headers.authorization === undefined ){
             availableQ =
                 database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
@@ -140,7 +140,7 @@ export default class CourseController {
                     'availableCourses': availableCourses
                 });
             });
-            
+
         }
 
     }
@@ -213,7 +213,7 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
+                'exercises.reviewType',  'exercises.githubLink', 'submissions.state as submissionState', 'submissions.id as submissionId',
                 'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -255,7 +255,7 @@ export default class CourseController {
 
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content',
+                'exercises.reviewType', 'exercises.content', 'exercises.githubLink',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -277,7 +277,7 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content',
+                'exercises.reviewType', 'exercises.content', 'exercises.githubLink',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',

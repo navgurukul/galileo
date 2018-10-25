@@ -20,6 +20,7 @@ export default class UserController {
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
+        console.log(this.configs);
         let auth = new GoogleAuth;
         let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
         client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
