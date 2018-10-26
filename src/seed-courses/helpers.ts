@@ -187,7 +187,7 @@ let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
     }
   }
   return Promise.all(uploadPromises);
-}
+};
 
 
 export const uploadImagesAndUpdateContent = () => {
@@ -223,5 +223,5 @@ export const uploadImagesAndUpdateContent = () => {
       return {
         exPromises,
         exChildPromises
-      }
-}
+      };
+};

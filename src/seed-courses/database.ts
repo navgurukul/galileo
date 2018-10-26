@@ -50,7 +50,8 @@ export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
             slug: exercises[i]['slug'],
             sequenceNum: exercises[i]['sequenceNum'],
             reviewType: exercises[i]['completionMethod'],
-            content: exercises[i]['content']
+            content: exercises[i]['content'],
+            submissionType: exercises[i]['submissionType']
         };
 
         let query;

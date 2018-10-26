@@ -25,7 +25,7 @@ export default class CourseController {
         let enrolledQ;
         let facilitatingQ;
         let availableQ;
-        
+
         if (request.headers.authorization === undefined ){
             availableQ =
                 database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
@@ -70,7 +70,6 @@ export default class CourseController {
                     .where({'course_enrolments.studentId': request.userId})
                     .groupBy('exercises.courseId')
                     .then((rows) => {
-                        // console.log(rows);
                         enrolledCourses = rows;
                         let lastSubmissionQueries = [];
                         for (let i = 0; i < enrolledCourses.length; i++) {
@@ -140,7 +139,7 @@ export default class CourseController {
                     'availableCourses': availableCourses
                 });
             });
-            
+
         }
 
     }
@@ -213,8 +212,8 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
-                'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+                'exercises.reviewType', 'exercises.submissionType', 'submissions.state as submissionState',
+                'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
                     knex.raw(xyz)
@@ -227,7 +226,6 @@ export default class CourseController {
             let exercise = rows[0];
             for (let i = 0; i < rows.length; i++) {
                if (parseInt(exercise.sequenceNum, 10) < 100) {
-                    console.log("yaha");
                     exercise = rows[i];
                     if (!Number.isInteger(exercise.sequenceNum)) {
                         let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
@@ -255,7 +253,7 @@ export default class CourseController {
 
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content',
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -277,7 +275,7 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content',
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -290,7 +288,6 @@ export default class CourseController {
 
         query.then((rows) => {
             let exercise = rows[0];
-            console.log(exercise);
             return reply(exercise);
         });
     }
