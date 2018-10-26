@@ -49,7 +49,8 @@ export const validateSequenceNumber = function(exercises, depthLevel?) {
         if (exercises[i].childExercises.length > 0) {
             let childExsValidated = validateSequenceNumber(exercises[i], depthLevel+1);
             if (!childExsValidated) {
-                showErrorAndExit("Child ecourseDirxercises of Sequence Number " + exercises[i].sequenceNum + " are not in the sequential order.");
+                showErrorAndExit("Child ecourseDirxercises of Sequence Number "
+                        + exercises[i].sequenceNum + " are not in the sequential order.");
             }
         }
     }

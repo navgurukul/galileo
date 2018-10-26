@@ -139,8 +139,8 @@ const _getFileName = (path) => {
     let fileName = path[path.length-1];
     fileName =  fileName.replace('.md', '').replace('-', ' ');
     fileName = fileName[0].toUpperCase() + fileName.slice(1, fileName.length);
-    return fileName
-}
+    return fileName;
+};
 
 // Validate and return the content and meta information of an exercise on the given path
 let _getExerciseInfo = function(path, sequenceNum) {
@@ -160,10 +160,9 @@ let _getExerciseInfo = function(path, sequenceNum) {
         exInfo  = parseNgMetaText(tokens[0]['text']);
         if (!exInfo['name']){
             exInfo['name'] = fileName;
-            console.log(fileName);
         }
         if (!exInfo['completionMethod']){
-            exInfo['completionMethod'] = 'manual'
+            exInfo['completionMethod'] = 'manual';
         }
     }
 
@@ -208,7 +207,7 @@ let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
     }
   }
   return Promise.all(uploadPromises);
-}
+};
 
 
 export const uploadImagesAndUpdateContent = () => {
@@ -244,5 +243,5 @@ export const uploadImagesAndUpdateContent = () => {
       return {
         exPromises,
         exChildPromises
-      }
-}
+      };
+};
