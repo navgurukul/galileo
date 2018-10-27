@@ -131,10 +131,17 @@ export const parseNgMetaText = function(text: string) {
         let lineValue = tokens.slice(1).join(':').trim();
         parsed[ lineKey ] = lineValue;
     });
+
     return parsed;
 };
 
-
+const _getFileName = (path) => {
+    path = path.split('/');
+    let fileName = path[path.length-1];
+    fileName =  fileName.replace('.md', '').replace('-', ' ');
+    fileName = fileName[0].toUpperCase() + fileName.slice(1, fileName.length);
+    return fileName;
+};
 
 // Validate and return the content and meta information of an exercise on the given path
 let _getExerciseInfo = function(path, sequenceNum) {
@@ -145,10 +152,22 @@ let _getExerciseInfo = function(path, sequenceNum) {
     if (tokens.length < 1) {
         showErrorAndExit("No proper markdown content found in " + path);
     }
+    let fileName = _getFileName(path);
+
     if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
-        showErrorAndExit("No code block of type `ngMeta` exists at the top of the exercise file " + path);
+        exInfo['name'] = fileName;
+        exInfo['completionMethod'] = 'manual';
     }
-    exInfo  = parseNgMetaText(tokens[0]['text']);
+    else{
+        exInfo  = parseNgMetaText(tokens[0]['text']);
+        if (!exInfo['name']){
+            exInfo['name'] = fileName;
+        }
+        if (!exInfo['completionMethod']){
+            exInfo['completionMethod'] = 'manual';
+        }
+    }
+
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
     exInfo['slug'] = path.replace('curriculum/','').replace('/', '__').replace('.md', '');
     exInfo['sequenceNum'] = sequenceNum;
@@ -157,6 +176,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo['githubLink'] = newtonGithubUrl + gitFile;
     return exInfo;
 };
+
 
 export const getAllExercises = function(exercises) {
     let exerciseInfos = [];

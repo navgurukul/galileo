@@ -15,7 +15,7 @@ Made using hapi.js, the repository uses mysql database.
 * *npm run setup* (install nuget packages & typings)
 
 **Configuration**
-* export GALILEO='dev'
+* export GALILEO_ENV='dev'
 * cp src/configurations/sample-config.json src/configurations/config.dev.json
 * Edit the contents of src/configurations/config.dev.json to suit your configuration
 * git clone https://github.com/navgurukul/newton
