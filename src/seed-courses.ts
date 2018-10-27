@@ -364,6 +364,7 @@ let validateCourseInfo = function() {
     return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
+        console.log(ngMetaBlock);
         let courseInfo = parseNgMetaText(tokens[0]['text']);
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         courseData['info'] = courseInfo;
