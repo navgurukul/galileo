@@ -52,6 +52,7 @@ export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
             reviewType: exercises[i]['completionMethod'],
             content: exercises[i]['content'],
             submissionType: exercises[i]['submissionType']
+            githubLink: exercises[i]['githubLink']
         };
 
         let query;

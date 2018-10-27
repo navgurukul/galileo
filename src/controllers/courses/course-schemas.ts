@@ -52,7 +52,7 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     reviewType: Joi.string(),
     content: Joi.string(),
     submissionType: Joi.string().allow('number','text','text_large', null),
-
+    githubLink: Joi.string(),
     // Submission specfic
     submissionState: Joi.string().allow(null),
     submissionId: Joi.number().allow(null),

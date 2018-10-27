@@ -212,7 +212,7 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.submissionType', 'submissions.state as submissionState',
+                'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType', 'submissions.state as submissionState',
                 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -253,7 +253,7 @@ export default class CourseController {
 
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content', 'exercises.submissionType',
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
@@ -275,7 +275,7 @@ export default class CourseController {
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content', 'exercises.submissionType',
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
                 'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
             .leftJoin('submissions', function () {
                 this.on('submissions.id', '=',
