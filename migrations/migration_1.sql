@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.17, for osx10.12 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.24, for Linux (x86_64)
 --
 -- Host: localhost    Database: davinci
 -- ------------------------------------------------------
--- Server version	5.7.17
+-- Server version	5.7.24-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,16 +14,15 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
---
--- Current Database: `davinci`
---
 
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `davinci` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `davinci`;
+
 --
 -- Table structure for table `batches`
 --
+
 
 DROP TABLE IF EXISTS `batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -38,7 +37,7 @@ CREATE TABLE `batches` (
   KEY `batch_ibfk_2_idx` (`courseId`),
   CONSTRAINT `batches_ibfk_1` FOREIGN KEY (`facilitatorId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `batches_ibfk_2` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +61,7 @@ CREATE TABLE `course_enrolments` (
   CONSTRAINT `course_enrolments_ibfk_1` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `course_enrolments_ibfk_2` FOREIGN KEY (`studentId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `course_enrolments_ibfk_3` FOREIGN KEY (`batchId`) REFERENCES `batches` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -81,7 +80,7 @@ CREATE TABLE `courses` (
   `daysToComplete` int(11) DEFAULT NULL,
   `shortDescription` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,11 +99,13 @@ CREATE TABLE `exercises` (
   `sequenceNum` float unsigned DEFAULT NULL,
   `reviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
   `content` longtext,
+  `githubLink` varchar(300) DEFAULT NULL,
+  `submissionType` enum('number','text','text_large','attachments','url') DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug_UNIQUE` (`slug`),
   KEY `course_id` (`courseId`),
   CONSTRAINT `exercises_ibfk_2` FOREIGN KEY (`courseId`) REFERENCES `courses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=549 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,7 +152,7 @@ CREATE TABLE `submissions` (
   CONSTRAINT `submissions_ibfk_1` FOREIGN KEY (`exerciseId`) REFERENCES `exercises` (`id`),
   CONSTRAINT `submissions_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users` (`id`),
   CONSTRAINT `submissions_ibfk_3` FOREIGN KEY (`peerReviewerId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -171,7 +172,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `googleUserId` (`googleUserId`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -183,4 +184,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-08-16  0:04:15
+-- Dump completed on 2018-10-27 17:43:18
