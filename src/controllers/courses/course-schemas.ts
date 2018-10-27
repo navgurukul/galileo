@@ -51,6 +51,7 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     sequenceNum: Joi.number(),
     reviewType: Joi.string(),
     content: Joi.string(),
+    submissionType: Joi.string().allow('number','text','text_large', null),
     githubLink: Joi.string(),
     // Submission specfic
     submissionState: Joi.string().allow(null),
