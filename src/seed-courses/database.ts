@@ -51,7 +51,7 @@ export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
             sequenceNum: exercises[i]['sequenceNum'],
             reviewType: exercises[i]['completionMethod'],
             content: exercises[i]['content'],
-            submissionType: exercises[i]['submissionType']
+            submissionType: exercises[i]['submissionType'],
             githubLink: exercises[i]['githubLink']
         };
 
