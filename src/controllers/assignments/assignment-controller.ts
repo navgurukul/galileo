@@ -87,7 +87,7 @@ export default class AssignmentController {
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     submitterNotes: request.payload.notes,
-                                    files: JSON.stringify(request.payload.files),
+                                    // files: JSON.stringify(request.payload.files),
                                     state: 'completed',
                                     completed: 1,
                                     completedAt: new Date()
@@ -131,7 +131,7 @@ export default class AssignmentController {
                                             exerciseId: request.params.exerciseId,
                                             userId: request.userId,
                                             submitterNotes: request.payload.notes,
-                                            files: JSON.stringify(request.payload.files),
+                                            // files: JSON.stringify(request.payload.files),
                                             state: 'pending',
                                             completed: 0,
                                             peerReviewerId: response.reviewerId,
