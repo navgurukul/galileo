@@ -29,7 +29,6 @@ export default class AssignmentController {
     }
 
     public postExerciseSubmission(request: Hapi.Request, reply: Hapi.IReply) {
-
         database('course_enrolments').select('*')
             .where({
                 'studentId': request.userId,
@@ -45,6 +44,7 @@ export default class AssignmentController {
             })
             .then((response) => {
                 if (response.canSubmit === true) {
+                    let count;
                     database('exercises').select().where('id', request.params.exerciseId)
                         .then((rows) => {
                             if (rows.length < 1) {
@@ -61,37 +61,32 @@ export default class AssignmentController {
                                 'exerciseId': request.params.exerciseId,
                                 'completed': 1
                             }).then((rows) => {
-                                let count = rows[0].count;
-                                if ((count) > 0) {
-                                    reply(Boom.conflict("An approved submission for the given exercise ID by the user already exists."));
-                                    return Promise.reject("Rejected");
-                                }
+                                count = rows[0].count;
                                 return Promise.resolve(exercise);
                             });
                         })
                         .then((exercise) => {
-                            let submissionInsertQuery;
-
+                            let submissionInsertQuery, queryData;
                             if (exercise.reviewType === 'manual') {
-                                submissionInsertQuery = database('submissions').insert({
+                                queryData = {
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     completed: 1,
                                     state: 'completed',
                                     completedAt: new Date()
-                                });
+                                };
                             }
 
                             else if (exercise.reviewType === 'automatic') {
-                                submissionInsertQuery = database('submissions').insert({
+                                queryData = {
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     submitterNotes: request.payload.notes,
-                                    files: JSON.stringify(request.payload.files),
+                                    // files: JSON.stringify(request.payload.files),
                                     state: 'completed',
                                     completed: 1,
                                     completedAt: new Date()
-                                });
+                                };
                             }
 
                             else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
@@ -114,38 +109,59 @@ export default class AssignmentController {
 
                                 }
 
-                                submissionInsertQuery = reviewerIdQuery.then((rows) => {
-                                    let reviewerId;
-                                    if (rows.length < 1 && exercise.reviewType === 'peer') {
-                                        return facilitatorIdQuery.then((rows) => {
-                                            reviewerId = rows[0].reviewerID;
-                                            return Promise.resolve({reviewerId: reviewerId});
-                                        });
-                                    } else {
-                                        let reviewerId = rows[0].reviewerID;
-                                        return Promise.resolve({reviewerId: reviewerId});
-                                    }
-                                })
-                                    .then((response) => {
-                                        return database('submissions').insert({
-                                            exerciseId: request.params.exerciseId,
-                                            userId: request.userId,
-                                            submitterNotes: request.payload.notes,
-                                            files: JSON.stringify(request.payload.files),
-                                            state: 'pending',
-                                            completed: 0,
-                                            peerReviewerId: response.reviewerId,
-                                        });
+                                reviewerIdQuery.then((rows) => {
+                                          let reviewerId;
+                                          if (rows.length < 1 && exercise.reviewType === 'peer') {
+                                              return facilitatorIdQuery.then((rows) => {
+                                                  reviewerId = rows[0].reviewerID;
+                                                  return Promise.resolve({reviewerId: reviewerId});
+                                              });
+                                          } else {
+                                              let reviewerId = rows[0].reviewerID;
+                                              return Promise.resolve({reviewerId: reviewerId});
+                                          }
+                                    })
+                                      .then((response) => {
+                                          queryData =  {
+                                              exerciseId: request.params.exerciseId,
+                                              userId: request.userId,
+                                              submitterNotes: request.payload.notes,
+                                              // files: JSON.stringify(request.payload.files),
+                                              state: 'pending',
+                                              completed: 0,
+                                              peerReviewerId: response.reviewerId,
+                                          };
                                     });
                             }
 
-                            submissionInsertQuery.then((rows) => {
+                            // checks if we need to update existing submission of student
+                            // or create a new submission
+                            if (count > 0){
+                                submissionInsertQuery = database('submissions')
+                                        .where({
+                                            'submissions.userId': request.userId,
+                                            'exerciseId': request.params.exerciseId,
+                                            'completed': 1
+                                        })
+                                        .update(queryData)
+                                        .then((row) => {
+                                            return Promise.resolve(row);
+                                        });
+                            } else{
+                                submissionInsertQuery = database('submissions')
+                                      .insert(queryData)
+                                      .then((rows) => {
+                                          return Promise.resolve(rows[0]);
+                                      });
+                            }
+
+                            submissionInsertQuery.then((submissionId) => {
                                 return database('submissions')
                                     .select(
-                                        // Submissions table fields
+                                        // Submissions ta ble fields
                                         'submissions.state', 'submissions.completed')
                                     .where(
-                                        {'submissions.id': rows[0]}
+                                        {'submissions.id': submissionId}
                                     );
                             }).then((rows) => {
                                 return reply(rows[0]);
@@ -228,7 +244,6 @@ export default class AssignmentController {
                 let submissions = [];
                 for (let i = 0; i < rows.length; i++) {
                     let submission = rows[i];
-                    // console.log(submission.files);
                     if (submission.files !== null) {
                         submission.files = JSON.parse(submission.files);
                     }
@@ -282,7 +297,6 @@ export default class AssignmentController {
                 let submissions = [];
                 for (let i = 0; i < rows.length; i++) {
                     let submission = rows[i];
-                    // console.log(submission.files);
                     if (submission.files !== null) {
                         submission.files = JSON.parse(submission.files);
                     }
