@@ -59,26 +59,25 @@ export default class AssignmentController {
                             return database('submissions').count('id as count').where({
                                 'submissions.userId': request.userId,
                                 'exerciseId': request.params.exerciseId,
-                                'completed': 1
+                                // 'completed': 1
                             }).then((rows) => {
                                 count = rows[0].count;
                                 return Promise.resolve(exercise);
                             });
                         })
                         .then((exercise) => {
-                            let submissionInsertQuery, queryData;
                             if (exercise.reviewType === 'manual') {
-                                queryData = {
+                                  return Promise.resolve({
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     completed: 1,
                                     state: 'completed',
                                     completedAt: new Date()
-                                };
+                                });
                             }
 
                             else if (exercise.reviewType === 'automatic') {
-                                queryData = {
+                                return Promise.resolve({
                                     exerciseId: request.params.exerciseId,
                                     userId: request.userId,
                                     submitterNotes: request.payload.notes,
@@ -86,7 +85,8 @@ export default class AssignmentController {
                                     state: 'completed',
                                     completed: 1,
                                     completedAt: new Date()
-                                };
+                                });
+
                             }
 
                             else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
@@ -109,7 +109,7 @@ export default class AssignmentController {
 
                                 }
 
-                                reviewerIdQuery.then((rows) => {
+                                return reviewerIdQuery.then((rows) => {
                                           let reviewerId;
                                           if (rows.length < 1 && exercise.reviewType === 'peer') {
                                               return facilitatorIdQuery.then((rows) => {
@@ -122,7 +122,7 @@ export default class AssignmentController {
                                           }
                                     })
                                       .then((response) => {
-                                          queryData =  {
+                                            return Promise.resolve({
                                               exerciseId: request.params.exerciseId,
                                               userId: request.userId,
                                               submitterNotes: request.payload.notes,
@@ -130,38 +130,45 @@ export default class AssignmentController {
                                               state: 'pending',
                                               completed: 0,
                                               peerReviewerId: response.reviewerId,
-                                          };
+                                          });
                                     });
                             }
 
+
+                        }).then((queryData)=>{
                             // checks if we need to update existing submission of student
                             // or create a new submission
-                            if (count > 0){
+                            let submissionInsertQuery;
+                            if (count >= 1){
                                 submissionInsertQuery = database('submissions')
+                                        .select(`submissions.id`)
                                         .where({
                                             'submissions.userId': request.userId,
                                             'exerciseId': request.params.exerciseId,
-                                            'completed': 1
+                                            // 'completed': 1
                                         })
                                         .update(queryData)
                                         .then((row) => {
-                                            return Promise.resolve(row);
+                                            return Promise.resolve();
                                         });
                             } else{
                                 submissionInsertQuery = database('submissions')
                                       .insert(queryData)
                                       .then((rows) => {
-                                          return Promise.resolve(rows[0]);
+                                          return Promise.resolve();
                                       });
                             }
 
-                            submissionInsertQuery.then((submissionId) => {
+                            submissionInsertQuery.then(() => {
                                 return database('submissions')
                                     .select(
                                         // Submissions ta ble fields
                                         'submissions.state', 'submissions.completed')
                                     .where(
-                                        {'submissions.id': submissionId}
+                                        {
+                                          'submissions.userId': request.userId,
+                                          'exerciseId': request.params.exerciseId
+                                        }
                                     );
                             }).then((rows) => {
                                 return reply(rows[0]);
