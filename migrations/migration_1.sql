@@ -137,7 +137,7 @@ CREATE TABLE `submissions` (
   `exerciseId` int(11) unsigned NOT NULL,
   `userId` int(11) unsigned NOT NULL,
   `submittedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `submitterNotes` varchar(300) DEFAULT NULL,
+  `submitterNotes` varchar(1500) DEFAULT NULL,
   `files` varchar(1000) DEFAULT NULL,
   `peerReviewerId` int(11) unsigned DEFAULT NULL,
   `notesReviewer` varchar(300) DEFAULT NULL,
