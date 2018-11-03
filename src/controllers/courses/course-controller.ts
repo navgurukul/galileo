@@ -29,17 +29,6 @@ export default class CourseController {
         if (request.headers.authorization === undefined ){
             availableQ =
                 database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
-                    .where('courses.id', 'not in', database('courses').distinct()
-                        .select('courses.id')
-                        .join('batches', function () {
-                            this.on('courses.id', '=', 'batches.courseId');
-                        })
-                        .union(function () {
-                            this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
-                                this.on('courses.id', '=', 'course_enrolments.courseId');
-                            });
-                        })
-                    )
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();
