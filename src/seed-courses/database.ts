@@ -49,7 +49,7 @@ export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
             name: exercises[i]['name'],
             slug: exercises[i]['slug'],
             sequenceNum: exercises[i]['sequenceNum'],
-            reviewType: exercises[i]['completionMethod'],
+            reviewType: 'peer',//exercises[i]['completionMethod'],
             content: exercises[i]['content'],
             submissionType: exercises[i]['submissionType'],
             githubLink: exercises[i]['githubLink']

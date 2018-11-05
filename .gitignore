@@ -124,6 +124,6 @@ typings/
 .env
 
 migrations
-!migrations/migration_1.sql
+# !migrations/migration_1.sql
 
 curriculum

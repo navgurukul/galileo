@@ -66,6 +66,7 @@ export default class AssignmentController {
                             });
                         })
                         .then((exercise) => {
+                            let facilitatorIdQuery;
                             if (exercise.reviewType === 'manual') {
                                   return Promise.resolve({
                                     exerciseId: request.params.exerciseId,
