@@ -25,10 +25,10 @@ export default class CourseController {
         let enrolledQ;
         let facilitatingQ;
         let availableQ;
-
         if (request.headers.authorization === undefined ){
             availableQ =
-                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                database('courses').select('courses.id', 'courses.name', 'courses.type',
+                    'courses.logo', 'courses.shortDescription', 'courses.sequenceNum')
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();
@@ -43,8 +43,8 @@ export default class CourseController {
         } else if (request.headers.authorization !== ""){
             enrolledQ =
                 database('course_enrolments')
-                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
-                        'courses.shortDescription',
+                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo',
+                        'courses.daysToComplete', 'courses.shortDescription', 'courses.sequenceNum',
                         database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
                         database.raw('MIN(course_enrolments.batchId) as batchId'),
                         database.raw('COUNT(exercises.id) as totalExercises'),
@@ -92,7 +92,8 @@ export default class CourseController {
 
             facilitatingQ =
                 database('courses')
-                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
+                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo',
+                        'courses.shortDescription', 'courses.sequenceNum',
                         'batches.name as batch_name', 'batches.id as batchId')
                     .join('batches', function () {
                         this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
@@ -103,7 +104,9 @@ export default class CourseController {
                     });
 
             availableQ =
-                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                database('courses')
+                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo',
+                        'courses.shortDescription','courses.sequenceNum')
                     .where('courses.id', 'not in', database('courses').distinct()
                         .select('courses.id')
                         .join('batches', function () {
@@ -117,6 +120,7 @@ export default class CourseController {
                         })
                     )
                     .then((rows) => {
+                        console.log(rows);
                         availableCourses = rows;
                         return Promise.resolve();
                     });

@@ -82,36 +82,51 @@ export const addOrUpdateCourse = function() {
     .where({ 'name': globals.courseData['info']['name'] })
     .then( (rows) => {
         if (rows.length > 0) {
-            return Promise.resolve(rows[0].id);
+            return Promise.resolve(rows[0]);
         } else {
             return Promise.resolve(null);
         }
-    }).then( (courseId) => {
-        if (courseId == null) {
-            return database('courses')
-            .insert({
-                'type': globals.courseData['info']['type'],
-                'name': globals.courseData['info']['name'],
-                'logo': globals.courseData['info']['logo'],
-                'shortDescription': globals.courseData['info']['shortDescription'],
-                'daysToComplete': globals.courseData['info']['daysToComplete'],
-                // 'notes': globals.courseData['notes'],
-            })
-            .then( (rows) => {
-                return Promise.resolve(rows[0]);
+    }).then( (row) => {
+        return database('courses').select(database.raw('MAX(sequenceNum) as sequenceNum'))
+            .then((rows)=>{
+                let newSequenceNum = rows[0].sequenceNum || 0;
+                newSequenceNum++;
+                return Promise.resolve(newSequenceNum);
+            }).then( (newSequenceNum) => {
+                if (row == null) {
+                    return database('courses')
+                    .insert({
+                        'type': globals.courseData['info']['type'],
+                        'name': globals.courseData['info']['name'],
+                        'logo': globals.courseData['info']['logo'],
+                        'shortDescription': globals.courseData['info']['shortDescription'],
+                        'daysToComplete': globals.courseData['info']['daysToComplete'],
+                        'sequenceNum': newSequenceNum,
+                        // 'notes': globals.courseData['notes'],
+                    })
+                    .then( (rows) => {
+                        return Promise.resolve(rows[0]);
+                    });
+                } else {
+                    const { id:courseId, sequenceNum } = row;
+
+                    return database('courses')
+                    .where({ 'name': globals.courseData['info']['name'] })
+                    .update({
+                        // Not updating `type` and `name` as assuming they won't change
+                        'logo': globals.courseData['info']['logo'],
+                        'shortDescription': globals.courseData['info']['shortDescription'],
+                        'daysToComplete': globals.courseData['info']['daysToComplete'],
+
+                        // Updating course sequenceNum as maximum of existing sequenceNum+1
+                        // when it is null or else just leave it.
+                        'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
+                    })
+                    .then( () => {
+                        return Promise.resolve(courseId);
+                    });
+                }
             });
-        } else {
-            return database('courses')
-            .where({ 'name': globals.courseData['info']['name'] })
-            .update({ // Not updating `type` and `name` as assuming they won't change
-                'logo': globals.courseData['info']['logo'],
-                'shortDescription': globals.courseData['info']['shortDescription'],
-                'daysToComplete': globals.courseData['info']['daysToComplete'],
-            })
-            .then( () => {
-                return Promise.resolve(courseId);
-            });
-        }
     });
 };
 
