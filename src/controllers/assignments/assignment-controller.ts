@@ -299,7 +299,6 @@ export default class AssignmentController {
             )
             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
             .innerJoin('users', 'submissions.userId', 'users.id')
-            .where({'submissions.peerReviewerId': request.userId})
             .orderBy('submittedAt', 'desc')
             .then((rows) => {
                 let submissions = [];
