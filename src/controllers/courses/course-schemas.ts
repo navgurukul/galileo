@@ -60,3 +60,8 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     submissionCompleteAt: Joi.date().allow(null)
 }).unknown();
 export const exerciseSchema = _exerciseSchema.keys({childExercises: Joi.array().items(_exerciseSchema)});
+
+export const courseSequenceSchema: Joi.ObjectSchema = Joi.object({
+    id: Joi.number().required(),
+    sequenceNum: Joi.number().required(),
+});

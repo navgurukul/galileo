@@ -358,6 +358,6 @@ export default class AssignmentController {
 }
 // Add the course sequenceNum update controller and route
 
-// Update all courses using default sequenceNum 
+// Update all courses using default sequenceNum
 
 // Add the course delete controller and update route

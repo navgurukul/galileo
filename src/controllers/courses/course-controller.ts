@@ -332,4 +332,69 @@ export default class CourseController {
                 }
             });
     }
+
+    // Update all courses using default sequenceNum
+    public updateCourseSequence(request: Hapi.Request, reply:Hapi.IReply){
+
+      // TODO: check for minimum 2 id which should be change
+      //
+       database('user_roles').select('user_roles.roles')
+          .where({
+              'userId': request.userId
+          })
+          .then((rows) => {
+              if (rows[0].roles !== 'admin'){
+                reply(Boom.expectationFailed('Admin are only allowed to change course sequence number.'));
+                return Promise.resolve({isAdmin:false});
+              } else {
+                return Promise.resolve({isAdmin: true});
+              }
+          })
+          .then((response) => {
+              if(response.isAdmin === true){
+                  let allCoursesUpdatePromises = [],
+                      coursesData = request.payload.courses;
+                  // TODO: check if any 2 values are repeated or not?
+
+                  // Minimum 2 courses are required to change thier sequence number
+                  if (coursesData.length > 1){
+                      // iterate over each course data
+                      for(let i = 0; i < coursesData.length; i++){
+                        let courseUpdateQuery = database('courses')
+                              .update({'sequenceNum': coursesData[i].sequenceNum})
+                              .where({'id': coursesData[i].id})
+                              .then( (count) => {
+                                  // if any row is not updated
+                                  if (count < 1){
+                                      reply(Boom.expectationFailed(`No courses found for the given Id: ${coursesData[i].id}.`));
+                                      return Promise.reject('Rejected');
+                                  } else {
+                                      return Promise.resolve();
+                                  }
+                              });
+                        allCoursesUpdatePromises.push(courseUpdateQuery);
+                      }
+                      Promise.all(allCoursesUpdatePromises)
+                          .then((results) => {
+                              return Promise.resolve(true);
+
+                          })
+                          .catch((error) => {
+                              return Promise.resolve(false);
+                          })
+                          .then((success) => {
+                              if (success){
+                                  return reply({
+                                    "success": success
+                                  });
+                              }
+                          });
+                  } else {
+                      return reply(Boom.expectationFailed("Minimum 2 courses are required to change thier sequence number."));
+                  }
+
+              }
+          });
+    }
+    // Add the course delete controller and update route
 }
