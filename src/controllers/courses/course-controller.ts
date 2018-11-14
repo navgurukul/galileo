@@ -337,7 +337,6 @@ export default class CourseController {
     public updateCourseSequence(request: Hapi.Request, reply:Hapi.IReply){
 
       // TODO: check for minimum 2 id which should be change
-      //
        database('user_roles').select('user_roles.roles')
           .where({
               'userId': request.userId
