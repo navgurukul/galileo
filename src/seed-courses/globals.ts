@@ -6,7 +6,8 @@ var courseDir, // Path of the course directory relative to this file
     sequenceNumbers = {},
     revSeqNumbers = {},
     toReadFiles = [],
-    courseId;
+    courseId,
+    defaultCourseLogo = "http://navgurukul.org/img/sqlogo.jpg";
 
 export {
   courseDir,
