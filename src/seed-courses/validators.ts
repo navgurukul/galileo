@@ -93,11 +93,14 @@ export const validateCourseInfo = function() {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
-        console.log(courseInfo);
+        // when no logo is present
+        courseInfo['logo'] = courseInfo['logo']? courseInfo['logo']:globals.defaultLogo;
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
+        console.log(courseInfo);
         return Promise.resolve();
     }).catch( (err) => {
+        console.error(err);
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
     });
 };
