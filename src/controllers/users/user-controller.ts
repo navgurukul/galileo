@@ -1,5 +1,7 @@
 import * as GoogleAuth from 'google-auth-library';
 import * as Hapi from 'hapi';
+
+import database from '../../';
 import { IServerConfigurations } from '../../configurations';
 import { NotesModel } from '../../models/notes-model';
 import { UserModel } from '../../models/user-model';
@@ -27,8 +29,6 @@ export default class UserController {
             if (error) {
                 return console.error(error);
             }
-
-            console.log("login", login);
             let googleAuthPayload = login.getPayload();
 
             let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
@@ -40,6 +40,29 @@ export default class UserController {
                 facilitator: isFacilitator
             };
             return this.userModel.upsert(userObj, {'email': userObj['email']}, true)
+                .then((user)=> {
+                    return database('user_roles').select('*')
+                        .where({'id': user.id})
+                        .then((rows) => {
+                            if(rows.length < 1){
+                                database('user_roles').insert({
+                                    userId: user.id,
+                                  })
+                                  .then((row) => {
+                                    return Promise.resolve({
+                                      ...user,
+                                      isAdmin:false
+                                    });
+                                  });
+                            } else {
+                                const isAdmin = rows[0].roles ==='admin'?true:false;
+                                return Promise.resolve({
+                                  ...user,
+                                  isAdmin
+                                });
+                            }
+                        });
+                })
                 .then((user) => {
                     return reply({
                         'user': user,

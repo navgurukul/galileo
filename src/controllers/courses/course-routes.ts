@@ -163,7 +163,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "success": Joi.bool()
                 }
             },
-            auth: 'jwt',
+            // auth: 'jwt',
             tags: ['api'],
             handler: courseController.updateCourseSequence
         }

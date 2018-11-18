@@ -120,7 +120,6 @@ export default class CourseController {
                         })
                     )
                     .then((rows) => {
-                        console.log(rows);
                         availableCourses = rows;
                         return Promise.resolve();
                     });
@@ -376,7 +375,6 @@ export default class CourseController {
                       Promise.all(allCoursesUpdatePromises)
                           .then((results) => {
                               return Promise.resolve(true);
-
                           })
                           .catch((error) => {
                               return Promise.resolve(false);
