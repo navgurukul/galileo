@@ -339,11 +339,13 @@ export default class CourseController {
             return Promise.resolve(isAdmin);
           })
           .then((isAdmin) => {
+            // only admin are allowed to delete the courses
             if(isAdmin){
                 const courseId = request.params.courseId;
                 return database('courses').select('*')
                   .where({id:courseId})
                   .then((rows) => {
+                    // if the course for given id doesn't exist
                     if (rows.length < 1){
                         reply(Boom.expectationFailed(`courseId: ${courseId} doesn't exists.`));
                         return Promise.reject("Rejected");
@@ -357,7 +359,7 @@ export default class CourseController {
             }
           })
           .then((course) => {
-
+              // delete all the enrollment of the course
               database('course_enrolments')
                     .where({courseId:course.id})
                     .delete()
@@ -365,6 +367,7 @@ export default class CourseController {
                       return Promise.resolve();
                     })
                     .then(() => {
+                      // delete the batches of the course
                       return database('batches').where({courseId:course.id})
                           .delete()
                           .then(() => {
@@ -372,6 +375,8 @@ export default class CourseController {
                           });
                     })
                     .then(() => {
+                      // delete all the submissions for each of the exercises
+                      // before deleting the exercises
                       return database('exercises').select('*')
                           .where({courseId:course.id})
                           .then((rows) => {
@@ -389,6 +394,7 @@ export default class CourseController {
                                 });
                           })
                           .then(() => {
+                            //after deleting the submissions delete the exercise
                             return database('exercises')
                                 .where({courseId:course.id})
                                 .delete()
@@ -398,6 +404,7 @@ export default class CourseController {
                           });
                     })
                     .then(() => {
+                      // after all that deleting delete the course
                       return database('courses').where({id:course.id})
                             .delete()
                             .then(() => {
