@@ -328,4 +328,85 @@ export default class CourseController {
                 }
             });
     }
+
+    public deleteCourse(request: Hapi.Request, reply: Hapi.IReply){
+        database('user_roles').select('roles')
+          .where({
+            'userId': request.userId
+          })
+          .then((rows) => {
+            const isAdmin = rows[0].roles === 'admin' ? true : false;
+            return Promise.resolve(isAdmin);
+          })
+          .then((isAdmin) => {
+            if(isAdmin){
+                const courseId = request.params.courseId;
+                return database('courses').select('*')
+                  .where({id:courseId})
+                  .then((rows) => {
+                    if (rows.length < 1){
+                        reply(Boom.expectationFailed(`courseId: ${courseId} doesn't exists.`));
+                        return Promise.reject("Rejected");
+                    } else {
+                        return Promise.resolve(rows[0]);
+                    }
+                  });
+            } else {
+                reply(Boom.expectationFailed('Only Admins are allowed to delete the courses.'));
+                return Promise.reject("Rejected");
+            }
+          })
+          .then((course) => {
+
+              database('course_enrolments')
+                    .where({courseId:course.id})
+                    .delete()
+                    .then(() => {
+                      return Promise.resolve();
+                    })
+                    .then(() => {
+                      return database('batches').where({courseId:course.id})
+                          .delete()
+                          .then(() => {
+                            return Promise.resolve();
+                          });
+                    })
+                    .then(() => {
+                      return database('exercises').select('*')
+                          .where({courseId:course.id})
+                          .then((rows) => {
+                            let allSubmissionDeleteQuery = [];
+                            for(let i = 0; i < rows.length; i++){
+                              let submissionDeleteQuery = database('submissions')
+                                    .select('*')
+                                    .where({exerciseId:rows[i].id})
+                                    .delete();
+                              allSubmissionDeleteQuery.push(submissionDeleteQuery);
+                            };
+                            return Promise.all(allSubmissionDeleteQuery)
+                                .then(() => {
+                                  return Promise.resolve();
+                                });
+                          })
+                          .then(() => {
+                            return database('exercises')
+                                .where({courseId:course.id})
+                                .delete()
+                                .then(() => {
+                                    return Promise.resolve();
+                                });
+                          });
+                    })
+                    .then(() => {
+                      return database('courses').where({id:course.id})
+                            .delete()
+                            .then(() => {
+                              return reply({
+                                deleted:true
+                              });
+                            });
+                    });
+          });
+      }
+
 }
