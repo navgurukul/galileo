@@ -145,7 +145,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'DELETE',
         path: '/courses/{courseId}/delete',
         config: {
-            description: 'Enroll in the course with the given ID.',
+            description: 'Delete the course with the given course id.',
             validate: {
                 params: {
                     courseId: Joi.number()
