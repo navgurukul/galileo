@@ -1,5 +1,6 @@
 import * as GoogleAuth from 'google-auth-library';
 import * as Hapi from 'hapi';
+import database from "../../";
 import { IServerConfigurations } from '../../configurations';
 import { NotesModel } from '../../models/notes-model';
 import { UserModel } from '../../models/user-model';
