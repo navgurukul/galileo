@@ -28,7 +28,9 @@ export default class CourseController {
 
         if (request.headers.authorization === undefined ){
             availableQ =
-                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo',
+                    'courses.shortDescription', 'courses.sequenceNum',
+                    )
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();
@@ -43,8 +45,9 @@ export default class CourseController {
         } else if (request.headers.authorization !== ""){
             enrolledQ =
                 database('course_enrolments')
-                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.daysToComplete',
-                        'courses.shortDescription',
+                    .select('courses.id', 'courses.name', 'courses.type',
+                        'courses.logo', 'courses.daysToComplete',
+                        'courses.shortDescription', 'courses.sequenceNum',
                         database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
                         database.raw('MIN(course_enrolments.batchId) as batchId'),
                         database.raw('COUNT(exercises.id) as totalExercises'),
@@ -92,7 +95,8 @@ export default class CourseController {
 
             facilitatingQ =
                 database('courses')
-                    .select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription',
+                    .select('courses.id', 'courses.name', 'courses.type',
+                        'courses.logo','courses.shortDescription', 'courses.sequenceNum',
                         'batches.name as batch_name', 'batches.id as batchId')
                     .join('batches', function () {
                         this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
@@ -103,7 +107,9 @@ export default class CourseController {
                     });
 
             availableQ =
-                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo', 'courses.shortDescription')
+                database('courses')
+                    .select('courses.id', 'courses.name', 'courses.type',
+                      'courses.logo', 'courses.shortDescription','courses.sequenceNum')
                     .where('courses.id', 'not in', database('courses').distinct()
                         .select('courses.id')
                         .join('batches', function () {
@@ -327,6 +333,65 @@ export default class CourseController {
                         });
                 }
             });
+    }
+    // Update all courses using default sequenceNum
+    public updateCourseSequence(request: Hapi.Request, reply:Hapi.IReply){
+      database('user_roles').select('user_roles.roles')
+         .where({
+             'userId': request.userId
+         })
+         .then((rows) => {
+             if (rows[0].roles !== 'admin'){
+               reply(Boom.expectationFailed('Admin are only allowed to change course sequence number.'));
+               return Promise.resolve({isAdmin:false});
+             } else {
+               return Promise.resolve({isAdmin: true});
+             }
+         })
+         .then((response) => {
+             if(response.isAdmin === true){
+                 let allCoursesUpdatePromises = [],
+                     coursesData = request.payload.courses;
+                 // TODO: check if any 2 values are repeated or not?
+
+                 // Minimum 2 courses are required to change thier sequence number
+                 if (coursesData.length > 1){
+                     // iterate over each course data
+                     for(let i = 0; i < coursesData.length; i++){
+                       let courseUpdateQuery = database('courses')
+                             .update({'sequenceNum': coursesData[i].sequenceNum})
+                             .where({'id': coursesData[i].id})
+                             .then( (count) => {
+                                 // if any row is not updated
+                                 if (count < 1){
+                                     reply(Boom.expectationFailed(`No courses found for the given Id: ${coursesData[i].id}.`));
+                                     return Promise.reject('Rejected');
+                                 } else {
+                                     return Promise.resolve();
+                                 }
+                             });
+                       allCoursesUpdatePromises.push(courseUpdateQuery);
+                     }
+                     Promise.all(allCoursesUpdatePromises)
+                         .then((results) => {
+                             return Promise.resolve(true);
+                         })
+                         .catch((error) => {
+                             return Promise.resolve(false);
+                         })
+                         .then((success) => {
+                             if (success){
+                                 return reply({
+                                   "success": success
+                                 });
+                             }
+                         });
+                 } else {
+                     return reply(Boom.expectationFailed("Minimum 2 courses are required to change thier sequence number."));
+                 }
+
+             }
+         });
     }
 
     public deleteCourse(request: Hapi.Request, reply: Hapi.IReply){
