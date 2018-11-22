@@ -141,4 +141,25 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'DELETE',
+        path: '/courses/{courseId}/delete',
+        config: {
+            description: 'Delete the course with the given course id.',
+            validate: {
+                params: {
+                    courseId: Joi.number()
+                }
+            },
+            response: {
+                schema: {
+                    "deleted": Joi.bool()
+                }
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.deleteCourse
+        }
+    });
+
 }
