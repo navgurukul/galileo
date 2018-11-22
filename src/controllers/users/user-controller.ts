@@ -44,7 +44,8 @@ export default class UserController {
                         .where({'id': user.id})
                         .then((rows) => {
                             if(rows.length < 1){
-                                database('user_roles').insert({
+                                return database('user_roles').insert({
+                                  database('user_roles').insert({
                                     userId: user.id,
                                   })
                                   .then((row) => {
