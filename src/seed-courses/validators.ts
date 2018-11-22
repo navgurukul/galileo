@@ -93,6 +93,7 @@ export const validateCourseInfo = function() {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
+        courseInfo['logo'] = courseInfo['logo']?courseInfo['logo']:globals.defaultCourseLogo;
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
         return Promise.resolve();
