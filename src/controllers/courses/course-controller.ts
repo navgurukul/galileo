@@ -25,12 +25,10 @@ export default class CourseController {
         let enrolledQ;
         let facilitatingQ;
         let availableQ;
-
         if (request.headers.authorization === undefined ){
             availableQ =
-                database('courses').select('courses.id', 'courses.name', 'courses.type', 'courses.logo',
-                    'courses.shortDescription', 'courses.sequenceNum',
-                    )
+                database('courses').select('courses.id', 'courses.name', 'courses.type',
+                    'courses.logo', 'courses.shortDescription', 'courses.sequenceNum')
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();
