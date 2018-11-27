@@ -6,7 +6,7 @@ export const courseSchema: Joi.ObjectSchema = Joi.object({
     type: Joi.string(),
     logo: Joi.string(),
     shortDescription: Joi.string(),
-    sequenceNum: Joi.number()
+    sequenceNum: Joi.number().allow(null)
 });
 
 export const topicSchema: Joi.ObjectSchema = Joi.object({
