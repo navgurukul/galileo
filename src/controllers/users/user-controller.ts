@@ -21,7 +21,6 @@ export default class UserController {
     }
 
     public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
-        console.log(this.configs);
         let auth = new GoogleAuth;
         let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
         client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
@@ -41,9 +40,9 @@ export default class UserController {
             return this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                 .then((user)=> {
                     return database('user_roles').select('*')
-                        .where({'id': user.id})
+                        .where({'userId': user.id})
                         .then((rows) => {
-                            if(rows.length < 1){
+                            if(rows.length < 1) {
                                 return database('user_roles').insert({
                                     userId: user.id,
                                   })
