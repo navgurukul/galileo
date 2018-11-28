@@ -11,7 +11,7 @@ import {
           topicSchema,
           courseSequenceSchema,
         } from "./course-schemas";
-        
+
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
     const courseController = new CourseController(serverConfigs, database);
