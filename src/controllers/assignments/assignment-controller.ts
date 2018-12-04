@@ -283,34 +283,68 @@ export default class AssignmentController {
 
     public getPeerReviewRequests(request: Hapi.Request, reply: Hapi.IReply) {
 
-        database('submissions')
+      // Hackish Solution to show all the review to the Developer.
+      let developerEmails = [
+        'amar17@navgurukul.org',
+        'lalita17@navgurukul.org',
+        'diwakar17@navgurukul.org',
+        'kanika17@navgurukul.org',
+        'rani17@navgurukul.org',
+        'khusboo17@navgurukul.org',
+      ];
+
+      database('users')
+          .select('users.email')
+          .where({'users.id': request.userId})
+          .then((rows)=> {
+            for(let i = 0; i < developerEmails.length; i++){
+              if(developerEmails[i] === rows[0].email){
+                // Show all the Peer Review to the user when the User is Developer.
+                return Promise.resolve({
+                  whereClause:{}
+                });
+              }
+            }
+            // if not develop show him the assignmnt assign to him for
+            // reviewing
+            return Promise.resolve({
+                whereClause:{
+                  'submissions.peerReviewerId': request.userId
+                }
+              });
+          })
+        // Hackish solution till here.
+          .then((response) => {
+            database('submissions')
             .select(
-                // Submissions table
-                'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
-                'submissions.files', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
-                'submissions.completedAt', 'submissions.submittedAt', 'submissions.submittedAt',
-                // Exercises Table
-                'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.courseId',
-                'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
-                'exercises.reviewType', 'exercises.content as exerciseContent',
-                // Users table
-                'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture',
-                'users.facilitator as isSubmitterFacilitator'
+              // Submissions table
+              'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
+              'submissions.files', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
+              'submissions.completedAt', 'submissions.submittedAt', 'submissions.submittedAt',
+              // Exercises Table
+              'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.courseId',
+              'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
+              'exercises.reviewType', 'exercises.content as exerciseContent',
+              // Users table
+              'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture',
+              'users.facilitator as isSubmitterFacilitator'
             )
             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
             .innerJoin('users', 'submissions.userId', 'users.id')
+            .where(response.whereClause)
             .orderBy('submittedAt', 'desc')
             .then((rows) => {
-                let submissions = [];
-                for (let i = 0; i < rows.length; i++) {
-                    let submission = rows[i];
-                    if (submission.files !== null) {
-                        submission.files = JSON.parse(submission.files);
-                    }
-                    submissions.push(submission);
+              let submissions = [];
+              for (let i = 0; i < rows.length; i++) {
+                let submission = rows[i];
+                if (submission.files !== null) {
+                  submission.files = JSON.parse(submission.files);
                 }
-                return reply({"data": submissions});
+                submissions.push(submission);
+              }
+              return reply({"data": submissions});
             });
+          });
 
     }
 
