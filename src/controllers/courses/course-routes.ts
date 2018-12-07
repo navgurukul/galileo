@@ -11,7 +11,7 @@ import {
           topicSchema,
           courseSequenceSchema,
         } from "./course-schemas";
-        
+
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
     const courseController = new CourseController(serverConfigs, database);
@@ -76,7 +76,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "data": Joi.array().items(exerciseSchema)
                 })
             },
-            auth: 'jwt',
+            // auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseExercises
         }
@@ -98,7 +98,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             // response: {
             //     schema: exerciseSchema
             // },
-            auth: 'jwt',
+            // auth: 'jwt',
             tags: ['api'],
             handler: courseController.getExerciseBySlug
         }

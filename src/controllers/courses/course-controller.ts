@@ -202,18 +202,19 @@ export default class CourseController {
     public getCourseExercises(request: Hapi.Request, reply: Hapi.IReply) {
 
         let exercises = [];
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
-            + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
+        // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
+        //     + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType', 'submissions.state as submissionState',
-                'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
-            .leftJoin('submissions', function () {
-                this.on('submissions.id', '=',
-                    knex.raw(xyz)
-                ).on('submissions.userId', '=', 1);
-            })
+                'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType')
+            //  'submissions.state as submissionState','submissions.id as submissionId',
+            //  'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+            // .leftJoin('submissions', function () {
+            //     this.on('submissions.id', '=',
+            //         knex.raw(xyz)
+            //     ).on('submissions.userId', '=', 1);
+            // })
             .where({'exercises.courseId': parseInt(request.params.courseId, 10)})
             .orderBy('exercises.sequenceNum', 'asc');
 
@@ -248,13 +249,15 @@ export default class CourseController {
 
         database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
-                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
-            .leftJoin('submissions', function () {
-                this.on('submissions.id', '=',
-                    database.raw('(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
-                );
-            })
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
+            //  'submissions.state as submissionState', 'submissions.id as submissionId',
+            //  'submissions.completedAt as submissionCompleteAt')
+            // .leftJoin('submissions', function () {
+            //     this.on('submissions.id', '=',
+            //         database.raw('(SELECT max(submissions.id) FROM submissions
+            //             WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+            //     );
+            // })
             .where({'exercises.id': request.params.exerciseId})
             .then((rows) => {
                 let exercise = rows[0];
@@ -265,18 +268,19 @@ export default class CourseController {
 
     public getExerciseBySlug(request: Hapi.Request, reply: Hapi.IReply) {
 
-        let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
-            'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+        // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
+        //     'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
 
         let query = database('exercises')
             .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
-                'submissions.state as submissionState', 'submissions.id as submissionId', 'submissions.completedAt as submissionCompleteAt')
-            .leftJoin('submissions', function () {
-                this.on('submissions.id', '=',
-                    database.raw(xyz)
-                );
-            })
+                'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
+            //  'submissions.state as submissionState', 'submissions.id as submissionId',
+            //  'submissions.completedAt as submissionCompleteAt')
+            // .leftJoin('submissions', function () {
+            //     this.on('submissions.id', '=',
+            //         database.raw(xyz)
+            //     );
+            // })
             .where({'exercises.slug': request.query.slug});
 
         // console.log(query.toSQL());
