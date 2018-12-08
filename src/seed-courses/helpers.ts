@@ -22,10 +22,8 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
     let l1 = 0;
     let l2 = 0;
     let inside = false;
-
     for (let i=1; i<tokens.length-1; i++) {
         tokens[i]["text"] = tokens[i]["text"] ? tokens[i]["text"].trim() : undefined;
-
         if (tokens[i]["type"]==="list_start") {
             inside=true;
             l2=0;
@@ -131,7 +129,6 @@ export const parseNgMetaText = function(text: string) {
         let lineValue = tokens.slice(1).join(':').trim();
         parsed[ lineKey ] = lineValue;
     });
-
     return parsed;
 };
 
