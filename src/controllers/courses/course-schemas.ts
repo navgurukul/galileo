@@ -35,7 +35,7 @@ export const enrolledCourseSchema: Joi.ObjectSchema = courseSchema.keys({
 //     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
 //         .description("IDs of batches for whom the user is a facilitator.")
 // });
-
+//
 
 let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     // Exercise Specific

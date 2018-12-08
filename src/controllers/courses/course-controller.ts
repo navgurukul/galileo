@@ -112,7 +112,7 @@ export default class CourseController {
                         'courses.facilitator':request.userId
                     })
                     .then((rows)=>{
-                        facilitatorCourses = rows;
+                        facilitatingCourses = rows;
                         return Promise.resolve();
                     });
 
@@ -136,7 +136,6 @@ export default class CourseController {
             //             availableCourses = rows;
             //             return Promise.resolve();
             //         });
-
             availableQ =
                 database('courses')
                     .select('courses.id', 'courses.name', 'courses.type',
@@ -148,7 +147,10 @@ export default class CourseController {
                                 .andOn('course_enrolments.studentId', '=', request.userId);
                         })
                     )
-                    .andWhere('courses.facilitator', '!=', request.userId)
+                    .andWhere(function(){
+                        this.whereNot('courses.facilitator',request.userId)
+                            .orWhereNull('courses.facilitator');
+                    })
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();

@@ -41,6 +41,32 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     return query;
 };
 
+export const findFaciliator = function(email) {
+    return database('users')
+              .select('users.id')
+              .where({
+                  'users.email': email
+              })
+              .then((rows) => {
+                  if (rows.length < 1){
+                      let facilitatorEmails = globals.defaultFacilators;
+                      return database('users')
+                                .select('users.id')
+                                .where({
+                                    'users.email':facilitatorEmails[((Math.random * facilitatorEmails.length-1)|0)]
+                                })
+                                .then((response) => {
+                                    console.log(response);
+                                    return Promise.resolve({facilitator:response[0].id});
+                                });
+                  } else {
+                      console.log(rows);
+                      return Promise.resolve({facilitator:rows[0].id});
+                  }
+        });
+};
+
+
 export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
     for (let i = 0; i < exercises.length; i++) {
@@ -102,6 +128,7 @@ export const addOrUpdateCourse = function() {
                         'shortDescription': globals.courseData['info']['shortDescription'],
                         'daysToComplete': globals.courseData['info']['daysToComplete'],
                         'sequenceNum': newSequenceNum,
+                        'facilitator': globals.courseData['info']['facilitator']
                         // 'notes': globals.courseData['notes'],
                     })
                     .then( (rows) => {
@@ -117,7 +144,7 @@ export const addOrUpdateCourse = function() {
                         'logo': globals.courseData['info']['logo'],
                         'shortDescription': globals.courseData['info']['shortDescription'],
                         'daysToComplete': globals.courseData['info']['daysToComplete'],
-
+                        'facilitator': globals.courseData['info']['facilitator'],
                         // Updating course sequenceNum as maximum of existing sequenceNum+1
                         // when it is null or else just leave it.
                         'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
