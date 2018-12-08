@@ -49,7 +49,7 @@ export default class CourseController {
                         'courses.logo', 'courses.daysToComplete',
                         'courses.shortDescription', 'courses.sequenceNum',
                         database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
-                        database.raw('MIN(course_enrolments.batchId) as batchId'),
+                        // database.raw('MIN(course_enrolments.batchId) as batchId'),
                         database.raw('COUNT(exercises.id) as totalExercises'),
                         database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
                     .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
@@ -93,18 +93,51 @@ export default class CourseController {
                         });
                     });
 
+            // facilitatingQ =
+            //     database('courses')
+            //         .select('courses.id', 'courses.name', 'courses.type',
+            //             'courses.logo','courses.shortDescription', 'courses.sequenceNum',
+            //             'batches.name as batch_name', 'batches.id as batchId')
+            //         .join('batches', function () {
+            //             this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
+            //         })
+            //         .then((rows) => {
+            //             facilitatingCourses = rows;
+            //             return Promise.resolve();
+            //         });
+
             facilitatingQ =
                 database('courses')
                     .select('courses.id', 'courses.name', 'courses.type',
-                        'courses.logo','courses.shortDescription', 'courses.sequenceNum',
-                        'batches.name as batch_name', 'batches.id as batchId')
-                    .join('batches', function () {
-                        this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', request.userId);
+                        'courses.logo','courses.shortDescription', 'courses.sequenceNum')
+                    .where({
+                        'courses.facilitator':request.userId
                     })
-                    .then((rows) => {
-                        facilitatingCourses = rows;
+                    .then((rows)=>{
+                        facilitatorCourses = rows;
                         return Promise.resolve();
                     });
+
+            // availableQ =
+            //     database('courses')
+            //         .select('courses.id', 'courses.name', 'courses.type',
+            //           'courses.logo', 'courses.shortDescription','courses.sequenceNum')
+            //         .where('courses.id', 'not in', database('courses').distinct()
+            //             .select('courses.id')
+            //             .join('batches', function () {
+            //                 this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
+            //             })
+            //             .union(function () {
+            //                 this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
+            //                     this.on('courses.id', '=', 'course_enrolments.courseId')
+            //                         .andOn('course_enrolments.studentId', '=', request.userId);
+            //                 });
+            //             })
+            //         )
+            //         .then((rows) => {
+            //             availableCourses = rows;
+            //             return Promise.resolve();
+            //         });
 
             availableQ =
                 database('courses')
@@ -112,16 +145,12 @@ export default class CourseController {
                       'courses.logo', 'courses.shortDescription','courses.sequenceNum')
                     .where('courses.id', 'not in', database('courses').distinct()
                         .select('courses.id')
-                        .join('batches', function () {
-                            this.on('courses.id', '=', 'batches.courseId').andOn('batches.facilitatorId', '=', request.userId);
-                        })
-                        .union(function () {
-                            this.select('courses.id').distinct().from('courses').join('course_enrolments', function () {
-                                this.on('courses.id', '=', 'course_enrolments.courseId')
-                                    .andOn('course_enrolments.studentId', '=', request.userId);
-                            });
+                        .join('course_enrolments', function () {
+                            this.on('courses.id', '=', 'course_enrolments.courseId')
+                                .andOn('course_enrolments.studentId', '=', request.userId);
                         })
                     )
+                    .andWhere('courses.facilitator', '!=', request.userId)
                     .then((rows) => {
                         availableCourses = rows;
                         return Promise.resolve();
@@ -314,26 +343,50 @@ export default class CourseController {
             })
             .then((response) => {
                 if (response.alreadyEnrolled === false) {
-                    database('batches').select('batches.id as batchId')
-                        .where({'courseId': request.params.courseId})
+                    // database('batches').select('batches.id as batchId')
+                    //     .where({'courseId': request.params.courseId})
+                    //     .then((rows) => {
+                    //         if (rows.length > 0) {
+                    //             return Promise.resolve(rows[0]);
+                    //         } else {
+                    //             reply(Boom.expectationFailed('The course with the given Id doesn\'t exists' +
+                    //                 'or there is no facilitator for the course'));
+                    //         }
+                    //     })
+                    //     .then((batchId) => {
+                    //         database('course_enrolments').insert({
+                    //             studentId: request.userId,
+                    //             courseId: request.params.courseId,
+                    //             batchId: batchId['batchId']
+                    //         }).then((response) => {
+                    //             return reply({
+                    //                 'enrolled': true,
+                    //             });
+                    //         });
+                    //     });
+
+                    database('courses')
+                        .select('courses.id as courseId')
+                        .where({
+                            'courses.id':request.params.courseId
+                        })
                         .then((rows) => {
                             if (rows.length > 0) {
                                 return Promise.resolve(rows[0]);
                             } else {
-                                reply(Boom.expectationFailed('The course with the given Id doesn\'t exists' +
-                                    'or there is no facilitator for the course'));
+                                reply(Boom.expectationFailed('The course for given id doesn\'t exists.'));
                             }
                         })
-                        .then((batchId) => {
+                        .then((courseId) => {
                             database('course_enrolments').insert({
                                 studentId: request.userId,
-                                courseId: request.params.courseId,
-                                batchId: batchId['batchId']
-                            }).then((response) => {
+                                courseId: courseId
+                            })
+                              .then((response) => {
                                 return reply({
                                     'enrolled': true,
                                 });
-                            });
+                              });
                         });
                 }
             });

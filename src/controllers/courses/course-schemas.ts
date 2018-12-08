@@ -14,18 +14,13 @@ export const topicSchema: Joi.ObjectSchema = Joi.object({
     name: Joi.string()
 });
 
-export const facilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
-    batch_name: Joi.string(),
-    batchId: Joi.number()
-});
-
 export const enrolledCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     totalExercises: Joi.number(),
     completedSubmissions: Joi.number(),
     enrolledAt: Joi.date(),
     daysToComplete: Joi.number(),
     daysSinceEnrolled: Joi.number(),
-    batchId: Joi.number(),
+    // batchId: Joi.number(),
     lastSubmission: Joi.object({
         name: Joi.string().allow(null),
         slug: Joi.string().allow(null),
@@ -34,12 +29,12 @@ export const enrolledCourseSchema: Joi.ObjectSchema = courseSchema.keys({
     })
 });
 
-export const enrolledOrFacilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
-    enrolled: Joi.bool().allow(null),
-    enrolledBatch: Joi.bool(),
-    facilitatingFor: Joi.array().items(Joi.number()).allow(null)
-        .description("IDs of batches for whom the user is a facilitator.")
-});
+// export const enrolledOrFacilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
+//     enrolled: Joi.bool().allow(null),
+//     enrolledBatch: Joi.bool(),
+//     facilitatingFor: Joi.array().items(Joi.number()).allow(null)
+//         .description("IDs of batches for whom the user is a facilitator.")
+// });
 
 
 let _exerciseSchema: Joi.ObjectSchema = Joi.object({

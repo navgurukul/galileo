@@ -93,21 +93,29 @@ export default class AssignmentController {
                             else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
 
                                 let reviewerIdQuery, facilitatorIdQuery;
-                                facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
-                                    .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
-                                    .where({'course_enrolments.studentId': request.userId});
+                                // TODO: FIND FACILIATOR FROM THE COURSES TABLE
+                                // TODO: ASK USERNAME OF FACILITAOR OPTIONALLY IN INFO.MD
+
+                                // facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
+                                //     .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
+                                //     .where({'course_enrolments.studentId': request.userId});
+
+                                facilitatorIdQuery = database('courses')
+                                    .select('courses.facilitatorId as reviewerID')
+                                    .where({'courses.id':request.params.courseId});
+
                                 if (exercise.reviewType === 'peer') {
                                     reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
                                         .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
-                                        .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
+                                        // .innerJoin('batches', 'batches.courseId', 'course_enrolments.batchId')
                                         .where({
                                             'submissions.completed': 1,
                                             'submissions.exerciseId': request.params.exerciseId,
                                             'course_enrolments.courseId': request.params.courseId
                                         }).orderByRaw('RAND()').limit(1);
+
                                 } else {
                                     reviewerIdQuery = facilitatorIdQuery;
-
                                 }
 
                                 return reviewerIdQuery.then((rows) => {
@@ -146,7 +154,6 @@ export default class AssignmentController {
                                         .where({
                                             'submissions.userId': request.userId,
                                             'exerciseId': request.params.exerciseId,
-                                            // 'completed': 1
                                         })
                                         .update(queryData)
                                         .then((row) => {
@@ -163,7 +170,7 @@ export default class AssignmentController {
                             submissionInsertQuery.then(() => {
                                 return database('submissions')
                                     .select(
-                                        // Submissions ta ble fields
+                                        // Submissions table fields
                                         'submissions.state', 'submissions.completed')
                                     .where(
                                         {
