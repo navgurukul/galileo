@@ -54,10 +54,13 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     content: Joi.string(),
     submissionType: Joi.string().allow('number','text','text_large','attachments','url', null),
     githubLink: Joi.string(),
+
+    // NOTE: Commenting out as the feature is no longer required
+    // the model of course was changing.
     // Submission specfic
-    submissionState: Joi.string().allow(null),
-    submissionId: Joi.number().allow(null),
-    submissionCompleteAt: Joi.date().allow(null)
+    // submissionState: Joi.string().allow(null),
+    // submissionId: Joi.number().allow(null),
+    // submissionCompleteAt: Joi.date().allow(null)
 }).unknown();
 export const exerciseSchema = _exerciseSchema.keys({childExercises: Joi.array().items(_exerciseSchema)});
 
