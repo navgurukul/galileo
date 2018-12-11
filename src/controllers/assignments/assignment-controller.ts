@@ -101,7 +101,7 @@ export default class AssignmentController {
                                 //     .where({'course_enrolments.studentId': request.userId});
 
                                 facilitatorIdQuery = database('courses')
-                                    .select('courses.facilitatorId as reviewerID')
+                                    .select('courses.facilitator as reviewerID')
                                     .where({'courses.id':request.params.courseId});
 
                                 if (exercise.reviewType === 'peer') {

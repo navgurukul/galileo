@@ -377,7 +377,7 @@ export default class CourseController {
                                 reply(Boom.expectationFailed('The course for given id doesn\'t exists.'));
                             }
                         })
-                        .then((courseId) => {
+                        .then(({courseId}) => {
                             database('course_enrolments').insert({
                                 studentId: request.userId,
                                 courseId: courseId

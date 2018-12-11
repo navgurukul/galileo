@@ -98,7 +98,7 @@ export const validateCourseInfo = function() {
 
         // assign the courses to Amar, Abhishek or Rishabh when there are no facilitator for the course
         let facilitatorEmails = globals.defaultFacilators;
-        let email = courseInfo['email'] || facilitatorEmails[((Math.random * facilitatorEmails.length-1)|0)];
+        let email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
 
         return findFaciliator(email)
                 .then(({facilitator}) => {

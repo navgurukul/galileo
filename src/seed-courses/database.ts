@@ -50,10 +50,11 @@ export const findFaciliator = function(email) {
               .then((rows) => {
                   if (rows.length < 1){
                       let facilitatorEmails = globals.defaultFacilators;
+                      let index = ((Math.random() * facilitatorEmails.length)|0);
                       return database('users')
                                 .select('users.id')
                                 .where({
-                                    'users.email':facilitatorEmails[((Math.random * facilitatorEmails.length-1)|0)]
+                                    'users.email':facilitatorEmails[index]
                                 })
                                 .then((response) => {
                                     console.log(response);
