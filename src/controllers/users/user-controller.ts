@@ -20,7 +20,8 @@ export default class UserController {
         this.notesModel = new NotesModel(this.configs);
     }
 
-    public loginUser(request: Hapi.Request, reply: Hapi.IReply) {
+    public loginUser(request, h) {
+        console.log(h.response);
         let auth = new GoogleAuth;
         let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
         client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
@@ -62,7 +63,8 @@ export default class UserController {
                         });
                 })
                 .then((user) => {
-                    return reply({
+                    // console.log(user)
+                    return h.response({
                         'user': user,
                         'jwt': this.userModel.getJWTToken(user)
                     });

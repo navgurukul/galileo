@@ -9,25 +9,23 @@ export default (): IPlugin => {
                 const database = options.database;
                 const serverConfig = options.serverConfigs;
 
-                const validateUser = (decoded, request, cb) => {
-                    request.userId = decoded.id;
-                    // console.log('this is the id', request.userId);
-                    return cb(null, true);
-                };
-
-                server.register({
-                    register: require('hapi-auth-jwt2')
-                }, (error) => {
-                    if (error) {
-                        console.log('error', error);
-                    } else {
-                        server.auth.strategy('jwt', 'jwt', false,
-                            {
-                                key: serverConfig.jwtSecret,
-                                validateFunc: validateUser,
-                                verifyOptions: { algorithms: ['HS256'] }
-                            });
-                    }
+                server.register(require('hapi-auth-jwt2'))
+                .then(() => {
+                    // console.log("hello")
+                    const validateUser = (decoded, request) => {
+                        request.userId = decoded.id;
+                        // console.log('this is the id', request.userId);
+                        // console.log( decoded);
+                        // return cb(null, true);
+                        return {
+                            isValid:true
+                        };
+                    };
+                    server.auth.strategy('jwt', 'jwt', {
+                            key: serverConfig.jwtSecret,
+                            validate: validateUser,
+                            verifyOptions: { algorithms: ['HS256'] }
+                        });
                     resolve();
                 });
             });
