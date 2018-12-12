@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^1.0.0",
+    "@sentry/node": "4.4.1",
     "@types/node": "^10.9.2",
     "ajv": "5.2.0",
     "aws-sdk": "^2.302.0",

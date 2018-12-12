@@ -304,15 +304,13 @@ export default class AssignmentController {
           .select('users.email')
           .where({'users.id': request.userId})
           .then((rows)=> {
-            for(let i = 0; i < developerEmails.length; i++){
-              if(developerEmails[i] === rows[0].email){
+              if(developerEmails.indexOf(rows[0].email) > -1){
                 // Show all the Peer Review to the user when the User is Developer.
                 return Promise.resolve({
                   whereClause:{}
                 });
-              }
             }
-            // if not develop show him the assignmnt assign to him for
+            // if not a developer show him the assignmnt assign to him for
             // reviewing
             return Promise.resolve({
                 whereClause:{

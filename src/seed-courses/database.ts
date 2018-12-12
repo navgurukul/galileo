@@ -41,7 +41,7 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     return query;
 };
 
-export const findFaciliator = function(email) {
+export const findFacilitator = function(email) {
     return database('users')
               .select('users.id')
               .where({
