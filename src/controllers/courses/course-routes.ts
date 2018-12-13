@@ -7,7 +7,6 @@ import {
           courseSchema,
           enrolledCourseSchema,
           exerciseSchema,
-          facilitatingCourseSchema,
           topicSchema,
           courseSequenceSchema,
         } from "./course-schemas";
@@ -27,7 +26,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                           3. All courses (includes courses from 1 and 2.)',
             response: {
                 schema: Joi.object({
-                    "facilitatingCourses": Joi.array().items(facilitatingCourseSchema),
                     "enrolledCourses": Joi.array().items(enrolledCourseSchema),
                     "availableCourses": Joi.array().items(courseSchema)
                 })

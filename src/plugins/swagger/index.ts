@@ -9,7 +9,7 @@ export default (): IPlugin => {
                     require('inert'),
                     require('vision'),
                     {
-                        register: require('hapi-swagger'),
+                        plugin: require('hapi-swagger'),
                         options: {
                             info: {
                                 title: 'Galielo - SARAL API',
@@ -40,21 +40,18 @@ export default (): IPlugin => {
                             documentationPage: true,
                             documentationPath: '/docs'
                         }
-                    }
-                ]
-                    , (error) => {
-                        if (error) {
-                            console.log('error', error);
-                        }
-                        resolve();
-                    });
+                  }
+                ])
+                .then(()=>{
+                    resolve();
                 });
+              });
         },
         info: () => {
             return {
                 name: "Swagger Documentation",
                 version: "1.0.0"
             };
-        }
+        },
     };
 };

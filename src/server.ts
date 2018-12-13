@@ -10,17 +10,17 @@ import { IPlugin } from './plugins/interfaces';
 export function init(serverConfigs: IServerConfigurations, databaseConfig: any): Promise<Hapi.Server> {
     return new Promise<Hapi.Server>(resolve => {
         const port = process.env.port || serverConfigs.port;
-        const server = new Hapi.Server();
-
-        server.connection({
+        const server = new Hapi.Server({
             port: port,
             routes: {
                 cors: {
                     'headers': ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'Accept-language']
                 },
-                log: true
+                // log: true
             }
         });
+
+        // server.connection();
         // server.ext('onPreResponse', corsHeaders);
 
         //  Setup Hapi Plugins
@@ -34,11 +34,11 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
 
         plugins.forEach((pluginName: string) => {
             let plugin: IPlugin = (require('./plugins/' + pluginName)).default();
-            //console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
+            console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
-
         // Register all the routes once all plugins have been initialized
+        // console.log(pluginPromises); 
         Promise.all(pluginPromises).then(() => {
             Users.init(server, serverConfigs, databaseConfig);
             Courses.init(server, serverConfigs, databaseConfig);

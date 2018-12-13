@@ -10,29 +10,29 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     const reportController = new ReportController(serverConfigs, database);
     server.bind(reportController);
 
-    server.route({
-        method: 'GET',
-        path: '/reports/batch/{batchId}/course/{courseId}',
-        config: {
-            description: 'Details of all excercise attempts of the given batch and course.',
-            validate: {
-                params: {
-                    batchId: Joi.number().required(),
-                    courseId: Joi.number().required()
-                }
-            },
-            // #TODO: Leaving out the response right now.
-            // Will add when we re-factor the code.
-            // response: {
-            //     schema: Joi.object({
-            //         "data": Joi.array().items(exerciseReportSchema),
-            //     })
-            // },
-            auth: 'jwt',
-            tags: ['api'],
-            handler: reportController.getBatchCourseReport
-        }
-    });
+    // server.route({
+    //     method: 'GET',
+    //     path: '/reports/batch/{batchId}/course/{courseId}',
+    //     config: {
+    //         description: 'Details of all excercise attempts of the given batch and course.',
+    //         validate: {
+    //             params: {
+    //                 batchId: Joi.number().required(),
+    //                 courseId: Joi.number().required()
+    //             }
+    //         },
+    //         // #TODO: Leaving out the response right now.
+    //         // Will add when we re-factor the code.
+    //         // response: {
+    //         //     schema: Joi.object({
+    //         //         "data": Joi.array().items(exerciseReportSchema),
+    //         //     })
+    //         // },
+    //         auth: 'jwt',
+    //         tags: ['api'],
+    //         handler: reportController.getBatchCourseReport
+    //     }
+    // });
 
     server.route({
         method: 'GET',
