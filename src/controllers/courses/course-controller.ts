@@ -198,7 +198,6 @@ export default class CourseController {
                 .orderBy('exercises.sequenceNum', 'asc');
 
             query.then((rows) => {
-
                 let exercise = rows[0];
                 for (let i = 0; i < rows.length; i++) {
                    if (parseInt(exercise.sequenceNum, 10) < 100) {
@@ -206,19 +205,18 @@ export default class CourseController {
                         if (!Number.isInteger(exercise.sequenceNum)) {
                             let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
                             exercises[parentIndex].childExercises.push(exercise);
-                    } else {
-                       exercise = rows[i];
-                       if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
-                          let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
-                          exercises[parentIndex].childExercises.push(exercise);
-                       } else {
-                          exercise.childExercises = [];
-                          exercises.push(exercise);
-                       }
+                        } else {
+                            exercise = rows[i];
+                            if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
+                               let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
+                               exercises[parentIndex].childExercises.push(exercise);
+                            } else {
+                               exercise.childExercises = [];
+                               exercises.push(exercise);
+                            }
+                        }
                     }
                 }
-                console.log(request.params);
-
                 resolve({data: exercises});
             });
         });
