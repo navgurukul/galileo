@@ -13,6 +13,7 @@ import * as process from 'process';
 var globals = require('./globals');
 import { parseNgMetaText } from './helpers';
 import { courseInfoSchema } from './schema';
+import { findFacilitator } from './database';
 
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
@@ -94,10 +95,22 @@ export const validateCourseInfo = function() {
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
         courseInfo['logo'] = courseInfo['logo']?courseInfo['logo']:globals.defaultCourseLogo;
-        courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
-        globals.courseData['info'] = courseInfo;
-        return Promise.resolve();
+
+        // assign the courses to Amar, Abhishek or Rishabh when there are no facilitator for the course
+        let facilitatorEmails = globals.defaultFacilators;
+        let email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+
+        return findFacilitator(email)
+                .then(({facilitator}) => {
+                    delete courseInfo['email'];
+                    courseInfo['facilitator'] = facilitator;
+                    courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
+                    globals.courseData['info'] = courseInfo;
+                    return Promise.resolve();
+                });
+
     }).catch( (err) => {
+        console.log(err);
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
     });
 };

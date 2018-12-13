@@ -7,6 +7,7 @@ export const courseInfoSchema:Joi.ObjectSchema = Joi.object({
     daysToComplete: Joi.number().required().strict(false),
     shortDescription: Joi.string().required(),
     logo: Joi.string(),
+    facilitator: Joi.number().required()
 });
 
 export const exerciseInfoSchema:Joi.ObjectSchema =  Joi.object({

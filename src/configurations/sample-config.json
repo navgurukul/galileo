@@ -23,7 +23,8 @@
          "logger",
          "bell",
          "jwt-auth",
-         "swagger"
+         "swagger",
+         "hapi-sentry"
       ],
       "googleAuth":{
          "clientId":"googleAppClientId",
