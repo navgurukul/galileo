@@ -4,7 +4,6 @@ import * as knex from 'knex';
 
 import database from '../../';
 import { IServerConfigurations } from '../../configurations/index';
-import { resolve } from 'path';
 
 
 export default class CourseController {
@@ -207,10 +206,6 @@ export default class CourseController {
                         if (!Number.isInteger(exercise.sequenceNum)) {
                             let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
                             exercises[parentIndex].childExercises.push(exercise);
-                        } else {
-                            exercise.childExercises = [];
-                            exercises.push(exercise);
-                        }
                     } else {
                        exercise = rows[i];
                        if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
@@ -248,12 +243,10 @@ export default class CourseController {
                     resolve(exercise);
                 });
         });
-
     }
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
-
             // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
             //     'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
 
