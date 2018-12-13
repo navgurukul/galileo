@@ -6,21 +6,31 @@ export default (): IPlugin => {
         register: (server: Hapi.Server): Promise<Hapi.Server> => {
             return new Promise<void>(resolve => {
                 const opts = {
-                    opsInterval: 1000,
-                    reporters: [{
-                        reporter: require('good-console'),
-                        events: { error: '*', log: '*', response: '*', request: '*' }
-                    }]
+                    ops:{
+                        interval:1000,
+                    },
+                    reporters: {
+                        myConsoleReporter: [
+                            {
+                                module: 'good-squeeze',
+                                name: 'Squeeze',
+                                args: [{ log: '*', response: '*' }]
+                            }, 
+                            {
+                                module: 'good-console'
+                            }, 
+                            'stdout'
+                        ],
+                    }
                 };
 
                 server.register({
-                    register: require('good'),
+                    plugin: require('good'),
                     options: opts
-                }, (error) => {
-                    if (error) {
-                        console.log('error', error);
-                    }
-                resolve();
+                })
+                .then(() => {
+                //   console.log("hello")
+                  resolve();
                 });
             });
         },

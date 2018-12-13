@@ -41,7 +41,7 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     return query;
 };
 
-export const findFaciliator = function(email) {
+export const findFacilitator = function(email) {
     return database('users')
               .select('users.id')
               .where({
@@ -50,7 +50,7 @@ export const findFaciliator = function(email) {
               .then((rows) => {
                   if (rows.length < 1){
                       let facilitatorEmails = globals.defaultFacilators;
-                      let index = ((Math.random() * facilitatorEmails.length)|0);
+                      let index = ((Math.random() * facilitatorEmails.length-1)|0);
                       return database('users')
                                 .select('users.id')
                                 .where({

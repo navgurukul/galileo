@@ -13,7 +13,7 @@ import * as process from 'process';
 var globals = require('./globals');
 import { parseNgMetaText } from './helpers';
 import { courseInfoSchema } from './schema';
-import { findFaciliator } from './database';
+import { findFacilitator } from './database';
 
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
@@ -100,7 +100,7 @@ export const validateCourseInfo = function() {
         let facilitatorEmails = globals.defaultFacilators;
         let email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
 
-        return findFaciliator(email)
+        return findFacilitator(email)
                 .then(({facilitator}) => {
                     delete courseInfo['email'];
                     courseInfo['facilitator'] = facilitator;

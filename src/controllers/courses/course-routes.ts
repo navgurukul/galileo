@@ -26,7 +26,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                           3. All courses (includes courses from 1 and 2.)',
             response: {
                 schema: Joi.object({
-                    "facilitatingCourses": Joi.array().items(courseSchema),
                     "enrolledCourses": Joi.array().items(enrolledCourseSchema),
                     "availableCourses": Joi.array().items(courseSchema)
                 })
