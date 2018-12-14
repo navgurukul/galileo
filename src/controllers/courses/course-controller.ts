@@ -179,23 +179,32 @@ export default class CourseController {
 
     public getCourseExercises(request, h) {
         return new Promise((resolve, reject) => {
+            let exercises = [], query;
+            if (request.headers.authorization === undefined){
+              query = database('exercises')
+                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                      'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType')
+                  .where({'exercises.courseId': request.params.courseId})
+                  .orderBy('exercises.sequenceNum', 'asc');
 
-            let exercises = [];
-            // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
-            //     + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
+            } else{
+              let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
+                  + 'AND userId = ' + request.userId + ' ORDER BY state ASC LIMIT 1)';
+              query = database('exercises')
+                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                        'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType',
+                        'submissions.state as submissionState','submissions.id as submissionId',
+                        'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+                  .leftJoin('submissions', function () {
+                      this.on('submissions.id', '=',
+                          knex.raw(xyz)
+                      ).on('submissions.userId', '=', request.userId);
+                  })
+                  .where({'exercises.courseId': request.params.courseId})
+                  .orderBy('exercises.sequenceNum', 'asc');
+            }
 
-            let query = database('exercises')
-                .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                    'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType')
-                //  'submissions.state as submissionState','submissions.id as submissionId',
-                //  'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
-                // .leftJoin('submissions', function () {
-                //     this.on('submissions.id', '=',
-                //         knex.raw(xyz)
-                //     ).on('submissions.userId', '=', 1);
-                // })
-                .where({'exercises.courseId': request.params.courseId})
-                .orderBy('exercises.sequenceNum', 'asc');
+
 
             query.then((rows) => {
                 let exercise = rows[0];
@@ -248,19 +257,19 @@ export default class CourseController {
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
-            // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
-            //     'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+            let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
+                'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
 
             let query = database('exercises')
                 .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                    'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
-                //  'submissions.state as submissionState', 'submissions.id as submissionId',
-                //  'submissions.completedAt as submissionCompleteAt')
-                // .leftJoin('submissions', function () {
-                //     this.on('submissions.id', '=',
-                //         database.raw(xyz)
-                //     );
-                // })
+                    'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
+                    'submissions.state as submissionState', 'submissions.id as submissionId',
+                    'submissions.completedAt as submissionCompleteAt')
+                .leftJoin('submissions', function () {
+                    this.on('submissions.id', '=',
+                        database.raw(xyz)
+                    );
+                })
                 .where({'exercises.slug': request.query.slug});
 
 
