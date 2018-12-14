@@ -78,7 +78,7 @@ export default class AssignmentController {
                                         completedAt: new Date()
                                     });
                                 }
-    
+
                                 else if (exercise.reviewType === 'automatic') {
                                     return Promise.resolve({
                                         exerciseId: request.params.exerciseId,
@@ -89,23 +89,23 @@ export default class AssignmentController {
                                         completed: 1,
                                         completedAt: new Date()
                                     });
-    
+
                                 }
-    
+
                                 else if (exercise.reviewType === 'peer' || exercise.reviewType === 'facilitator') {
-    
+
                                     let reviewerIdQuery, facilitatorIdQuery;
                                     // TODO: FIND FACILIATOR FROM THE COURSES TABLE
                                     // TODO: ASK USERNAME OF FACILITAOR OPTIONALLY IN INFO.MD
-    
+
                                     // facilitatorIdQuery = database('batches').select('batches.facilitatorId as reviewerID')
                                     //     .innerJoin('course_enrolments', 'batches.id', 'course_enrolments.batchId')
                                     //     .where({'course_enrolments.studentId': request.userId});
-    
+
                                     facilitatorIdQuery = database('courses')
                                         .select('courses.facilitator as reviewerID')
                                         .where({'courses.id':request.params.courseId});
-    
+
                                     if (exercise.reviewType === 'peer') {
                                         reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
                                             .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
@@ -115,11 +115,11 @@ export default class AssignmentController {
                                                 'submissions.exerciseId': request.params.exerciseId,
                                                 'course_enrolments.courseId': request.params.courseId
                                             }).orderByRaw('RAND()').limit(1);
-    
+
                                     } else {
                                         reviewerIdQuery = facilitatorIdQuery;
                                     }
-    
+
                                     return reviewerIdQuery.then((rows) => {
                                               let reviewerId;
                                               if (rows.length < 1 && exercise.reviewType === 'peer') {
@@ -144,8 +144,8 @@ export default class AssignmentController {
                                               });
                                         });
                                 }
-    
-    
+
+
                             })
                             .then((queryData)=>{
                                 // checks if we need to update existing submission of student
@@ -169,7 +169,7 @@ export default class AssignmentController {
                                               return Promise.resolve();
                                           });
                                 }
-    
+
                                 submissionInsertQuery.then(() => {
                                     return database('submissions')
                                         .select(
@@ -249,7 +249,7 @@ export default class AssignmentController {
                     )
                     .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
                     .leftJoin('users', 'submissions.userId', 'users.id');
-    
+
             let whereClause = {
                 'submissions.exerciseId': request.params.exerciseId
             };
@@ -259,7 +259,7 @@ export default class AssignmentController {
             if (request.query.submissionState !== 'all') {
                 whereClause['submissions.state'] = request.query.submissionState;
             }
-    
+
             submissionQuery.where(whereClause)
                 .then((rows) => {
                     let submissions = [];
@@ -301,13 +301,13 @@ export default class AssignmentController {
             // Hackish Solution to show all the review to the Developer.
             let developerEmails = [
                 'amar17@navgurukul.org',
-                'lalita17@navgurukul.org',
                 'diwakar17@navgurukul.org',
-                'kanika17@navgurukul.org',
-                'rani17@navgurukul.org',
-                'khusboo17@navgurukul.org',
+                // 'lalita17@navgurukul.org',
+                // 'kanika17@navgurukul.org',
+                // 'rani17@navgurukul.org',
+                // 'khusboo17@navgurukul.org',
             ];
-    
+
             database('users')
                 .select('users.email')
                 .where({'users.id': request.userId})
@@ -330,32 +330,32 @@ export default class AssignmentController {
                 .then((response) => {
                     database('submissions')
                     .select(
-                    // Submissions table
-                    'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
-                    'submissions.files', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
-                    'submissions.completedAt', 'submissions.submittedAt', 'submissions.submittedAt',
-                    // Exercises Table
-                    'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.courseId',
-                    'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
-                    'exercises.reviewType', 'exercises.content as exerciseContent',
-                    // Users table
-                    'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture',
-                    'users.facilitator as isSubmitterFacilitator'
+                        // Submissions table
+                        'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
+                        'submissions.files', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
+                        'submissions.completedAt', 'submissions.submittedAt', 'submissions.submittedAt',
+                        // Exercises Table
+                        'exercises.id as exerciseId', 'exercises.parentExerciseId as parentExerciseId', 'exercises.courseId',
+                        'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
+                        'exercises.reviewType', 'exercises.content as exerciseContent',
+                        // Users table
+                        'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture',
+                        'users.facilitator as isSubmitterFacilitator'
                     )
                     .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
                     .innerJoin('users', 'submissions.userId', 'users.id')
                     .where(response.whereClause)
                     .orderBy('submittedAt', 'desc')
                     .then((rows) => {
-                    let submissions = [];
-                    for (let i = 0; i < rows.length; i++) {
-                        let submission = rows[i];
-                        if (submission.files !== null) {
-                        submission.files = JSON.parse(submission.files);
+                        let submissions = [];
+                        for (let i = 0; i < rows.length; i++) {
+                            let submission = rows[i];
+                            if (submission.files !== null) {
+                            submission.files = JSON.parse(submission.files);
+                            }
+                            submissions.push(submission);
                         }
-                        submissions.push(submission);
-                    }
-                    resolve({"data": submissions});
+                        resolve({"data": submissions});
                     });
                 });
         });

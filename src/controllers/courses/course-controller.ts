@@ -122,10 +122,10 @@ export default class CourseController {
             let courseId = parseInt(request.params.courseId, 10);
 
             let query = database('exercises')
-                        .select('exercises.id', 'exercises.name')
-                        .where({"exercises.courseId": courseId})
-                        .andWhere({"exercises.parentExerciseId": null})
-                        .orderBy("exercises.sequenceNum", "asc");
+                          .select('exercises.id', 'exercises.name')
+                          .where({"exercises.courseId": courseId})
+                          .andWhere({"exercises.parentExerciseId": null})
+                          .orderBy("exercises.sequenceNum", "asc");
 
             query.then((rows) => {
                 resolve({data: rows});
@@ -257,26 +257,62 @@ export default class CourseController {
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
-            let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
-                'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+              let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
+                  'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
 
-            let query = database('exercises')
-                .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                    'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
-                    'submissions.state as submissionState', 'submissions.id as submissionId',
-                    'submissions.completedAt as submissionCompleteAt')
-                .leftJoin('submissions', function () {
-                    this.on('submissions.id', '=',
+              let exerciseQuery = database('exercises')
+                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                      'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
+                      'submissions.state as submissionState', 'submissions.id as submissionId',
+                      'submissions.completedAt as submissionCompleteAt')
+                  .leftJoin('submissions', function () {
+                      this.on('submissions.id', '=',
                         database.raw(xyz)
-                    );
-                })
-                .where({'exercises.slug': request.query.slug});
+                      );
+                  })
+                  .where({'exercises.slug': request.query.slug});
 
+            if (request.headers.authorization === undefined){
+                exerciseQuery.then((rows) => {
+                    let exercise = rows[0];
+                    resolve(exercise);
+                });
+            } else {
+                database('users')
+                    .select('users.currentCenter')
+                    .where({'users.id': request.userId})
+                    .then((rows) => {
+                        console.log(rows)
+                        let usersCompletedExerciseQuery = database('users')
+                                  .select('users.id', 'users.name')
+                                  .innerJoin('submissions', 'submissions.userId', '=', 'users.id')
+                                  .innerJoin('exercises', function (){
+                                      this.on('exercises.id', '=', 'submissions.exerciseId')
+                                  })
+                                  .where({
+                                      'exercises.slug':request.query.slug,
+                                      // only those names who have completed the exercise
+                                      'submissions.completed':1,
+                                      'submissions.state':'completed',
+                                      // first priority to student from same center
+                                      'users.currentCenter':rows[0].currentCenter,
+                                  });
 
-            query.then((rows) => {
-                let exercise = rows[0];
-                resolve(exercise);
-            });
+                        // select user from submission of same exercise
+
+                        Promise.all([usersCompletedExerciseQuery, exerciseQuery]).then((queries) => {
+                            let exercise, usersCompletedExercise;
+                            exercise = queries[1][0];
+                            usersCompletedExercise = queries[0];
+
+                            let response = {
+                                ...exercise,
+                                usersCompletedExercise:usersCompletedExercise
+                            };
+                            resolve(response);
+                        });
+                  });
+            }
         });
     }
 
