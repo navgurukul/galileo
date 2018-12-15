@@ -4,6 +4,9 @@ import {IServerConfigurations} from "../../configurations";
 import * as Boom from "boom";
 
 import ReportController from "./report-controller";
+import {
+    menteesReportSchema
+} from "./report-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -54,6 +57,24 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.getStudentReport,
+        }
+    });
+    
+    server.route({
+        method: 'GET',
+        path: '/reports/users/getMenteesReport',
+        config: {
+            description: 'List of all Mentees assgin to a Mentor.',
+
+            response: {
+                schema: Joi.object({
+                    data: Joi.array().items(menteesReportSchema)
+                          .description("List of Mentees for the current user.")
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.getMenteesReport,
         }
     });
 

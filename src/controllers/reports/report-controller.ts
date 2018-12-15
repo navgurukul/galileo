@@ -5,6 +5,7 @@ import * as GoogleAuth from "google-auth-library";
 
 import database from "../../";
 import {IServerConfigurations} from "../../configurations";
+import { resolve } from "path";
 
 
 export default class ReportController {
@@ -166,7 +167,7 @@ export default class ReportController {
                         let subStateOrder = ['rejected', 'pending', 'completed'];
                         let curSubState = subStateOrder.indexOf(submission.state);
                         let storedSubmission = submissionsObj[submission.exerciseId] || {};
-    
+
                         // No submission is stored in the object
                         if (Object.keys(storedSubmission).length === 0) {
                             submissionsObj[submission.exerciseId] = submission;
@@ -197,6 +198,52 @@ export default class ReportController {
                 });
         });
 
+    }
+
+
+
+    public getMenteesReport(request, h){
+        return new Promise((resolve, reject) => {
+
+            // get all the courses where the mentors menties have enrolled
+            let menteesReportQuery = database('course_enrolments')
+                        .select('courses.name as courseName','courses.id as courseId','users.id',
+                                'users.name', 'users.email', 'users.profilePicture')
+                        .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
+                        .rightJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
+                        .innerJoin('users', 'users.id', 'mentors.mentee')
+                        .where({
+                            'mentors.mentor': request.userId
+                        });
+
+            menteesReportQuery.then((rows) => {
+                // arranging student according to courses
+                let courses = {};
+                for(let i = 0; i < rows.length-1 ; i++){
+                    const { courseName, courseId, ...userDetails } = rows[i];
+
+                    if (courses[courseName] === undefined){
+                        courses[courseName] = {
+                          courseId,
+                          studentEnrolled:[],
+                        };
+                    }
+                    courses[courseName]['studentEnrolled'].push(userDetails);
+                  }
+
+                let enrolledCoursesReport = [];
+                for(let courseName of Object.keys(courses)){
+                  let courseReport = {
+                    courseName,
+                    ...courses[courseName]
+                  }
+                  enrolledCoursesReport.push(courseReport);
+                }
+                resolve({
+                  "data":enrolledCoursesReport
+                });
+            });
+        });
     }
 
 

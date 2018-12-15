@@ -286,7 +286,7 @@ export default class CourseController {
                                   .select('users.id', 'users.name')
                                   .innerJoin('submissions', 'submissions.userId', '=', 'users.id')
                                   .innerJoin('exercises', function (){
-                                      this.on('exercises.id', '=', 'submissions.exerciseId')
+                                      this.on('exercises.id', '=', 'submissions.exerciseId');
                                   })
                                   .where({
                                       'exercises.slug':request.query.slug,
