@@ -279,10 +279,9 @@ export default class CourseController {
                 });
             } else {
                 database('users')
-                    .select('users.currentCenter')
+                    .select('users.center')
                     .where({'users.id': request.userId})
                     .then((rows) => {
-                        console.log(rows)
                         let usersCompletedExerciseQuery = database('users')
                                   .select('users.id', 'users.name')
                                   .innerJoin('submissions', 'submissions.userId', '=', 'users.id')
@@ -295,7 +294,7 @@ export default class CourseController {
                                       'submissions.completed':1,
                                       'submissions.state':'completed',
                                       // first priority to student from same center
-                                      'users.currentCenter':rows[0].currentCenter,
+                                      'users.center':rows[0].center,
                                   });
 
                         // select user from submission of same exercise

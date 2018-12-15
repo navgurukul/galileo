@@ -57,11 +57,9 @@ export const findFacilitator = function(email) {
                                     'users.email':facilitatorEmails[index]
                                 })
                                 .then((response) => {
-                                    console.log(response);
                                     return Promise.resolve({facilitator:response[0].id});
                                 });
                   } else {
-                      console.log(rows);
                       return Promise.resolve({facilitator:rows[0].id});
                   }
         });
