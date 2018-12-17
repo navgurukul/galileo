@@ -74,7 +74,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "data": Joi.array().items(exerciseSchema)
                 })
             },
-            // auth: 'jwt',
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
             tags: ['api'],
             handler: courseController.getCourseExercises
         }
@@ -96,7 +99,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             // response: {
             //     schema: exerciseSchema
             // },
-            // auth: 'jwt',
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
             tags: ['api'],
             handler: courseController.getExerciseBySlug
         }

@@ -67,7 +67,7 @@
     "sigmund": "1.0.1",
     "to-iso-string": "0.0.2",
     "tunnel-agent": "0.6.0",
-    "typings": "2.1.0",
+    "typings": "^2.1.1",
     "vision": "^5.4.3",
     "yarn": "^1.12.3"
   },

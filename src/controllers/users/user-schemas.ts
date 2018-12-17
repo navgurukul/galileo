@@ -8,6 +8,8 @@ export const userSchema: Joi.ObjectSchema = Joi.object({
     googleUserId: Joi.string(),
     facilitator: Joi.bool(),
     isAdmin: Joi.bool(),
+    center: Joi.string(),
+    isAlumni: Joi.bool().allow(null).default(false),
 });
 
 export const noteSchema: Joi.ObjectSchema = Joi.object({

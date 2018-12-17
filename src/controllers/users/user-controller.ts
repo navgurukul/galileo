@@ -30,7 +30,7 @@ export default class UserController {
                     return console.error(error);
                 }
                 let googleAuthPayload = login.getPayload();
-    
+
                 let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
                 let userObj = {
                     email: googleAuthPayload['email'],
@@ -41,6 +41,7 @@ export default class UserController {
                 };
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                     .then((user)=> {
+                        console.log(user);
                         return database('user_roles').select('*')
                             .where({'userId': user.id})
                             .then((rows) => {
@@ -109,6 +110,6 @@ export default class UserController {
                     resolve({status: status});
                 });
         });
-        
+
     }
 }

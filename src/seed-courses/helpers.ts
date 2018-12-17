@@ -135,9 +135,23 @@ export const parseNgMetaText = function(text: string) {
 const _getFileName = (path) => {
     path = path.split('/');
     let fileName = path[path.length-1];
-    fileName =  fileName.replace('.md', '').replace('-', ' ');
-    fileName = fileName[0].toUpperCase() + fileName.slice(1, fileName.length);
-    return fileName;
+    let wordInFileName =  fileName.replace('.md', '').replace(/[-__/_]/g, ' ').split(' ');
+    let newFileName = "", temp;
+
+    // change the first letter of each word to upper case
+    for(let i = 0; i < wordInFileName.length; i++){
+      temp = wordInFileName[i];
+      temp = temp[0].toUpperCase() + temp.slice(1, temp.length);
+      
+      // don't add spaces if it is the last word
+      if (i === wordInFileName.length-1){
+        newFileName += temp;
+      } else {
+        newFileName += `${temp} `;
+      }
+    };
+
+    return newFileName;
 };
 
 // Validate and return the content and meta information of an exercise on the given path
