@@ -5,6 +5,8 @@ import * as Boom from "boom";
 import database from "../../";
 import {IServerConfigurations} from "../../configurations/index";
 
+import { sendAssignmentReviewEmail } from "../../sendEmail";
+
 // Helper function to generate UIDs
 function generateUID() {
     // I generate the UID from two parts here
@@ -160,27 +162,59 @@ export default class AssignmentController {
                                             })
                                             .update(queryData)
                                             .then((row) => {
-                                                return Promise.resolve();
+                                                return Promise.resolve({
+                                                    reviewerId: queryData.peerReviewerId,
+                                                    studentId: queryData.userId
+                                                });
                                             });
                                 } else{
                                     submissionInsertQuery = database('submissions')
                                           .insert(queryData)
                                           .then((rows) => {
-                                              return Promise.resolve();
+                                              return Promise.resolve({
+                                                  reviewerId: queryData.peerReviewerId,
+                                                  studentId: queryData.userId
+                                              });
                                           });
                                 }
 
-                                submissionInsertQuery.then(() => {
-                                    return database('submissions')
-                                        .select(
-                                            // Submissions table fields
-                                            'submissions.state', 'submissions.completed')
-                                        .where(
-                                            {
-                                              'submissions.userId': request.userId,
-                                              'exerciseId': request.params.exerciseId
-                                            }
-                                        );
+                                submissionInsertQuery.then((response) => {
+                                    let student, reviewer;
+                                    console.log(response);
+                                    let studentQuery  = database('users')
+                                          .select('users.email', 'users.name')
+                                          .where({
+                                            'users.id': response.studentId
+                                          })
+                                          .then(rows => {
+                                            student = rows[0];
+                                            return Promise.resolve();
+                                          });
+
+                                    let reviewerQuery = database('users')
+                                          .select('users.email', 'users.name')
+                                          .where({
+                                            'users.id': response.reviewerId
+                                          })
+                                          .then((rows) => {
+                                            reviewer = rows[0];
+                                            return Promise.resolve();
+                                          });
+                                    return Promise.all([studentQuery, reviewerQuery])
+                                          .then(response => {
+                                            console.log(this.configs);
+                                            return sendAssignmentReviewEmail(student, reviewer, this.configs.awsEmailConfig);
+                                          })
+                                          .then(() => {
+                                            return database('submissions')
+                                                .select(
+                                                  // Submissions table fields
+                                                  'submissions.state', 'submissions.completed')
+                                                .where({
+                                                      'submissions.userId': request.userId,
+                                                      'exerciseId': request.params.exerciseId
+                                                });
+                                          });
                                 })
                                 .then((rows) => {
                                     resolve(rows[0]);

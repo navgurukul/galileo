@@ -236,7 +236,7 @@ export default class ReportController {
                   let courseReport = {
                     courseName,
                     ...courses[courseName]
-                  }
+                  };
                   enrolledCoursesReport.push(courseReport);
                 }
                 resolve({
