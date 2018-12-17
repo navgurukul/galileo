@@ -57,7 +57,7 @@ interface User{
 };
 
 export const sendAssignmentReviewEmail = (student:User, reviewer:User, awsConfig) => {
-    // student Email template
+    // Email template
     let reviewerHtmlTemplate = `
       <div>
         <h5>
@@ -71,15 +71,7 @@ export const sendAssignmentReviewEmail = (student:User, reviewer:User, awsConfig
       </div>
     `;
 
-    // reviwer Email template
-    // let studentHtmlTemplate = `
-    //   <div>
-    //     <h3>
-    //         Hi ${student.name}, Apka Assignment ${reviwer.name} ke pass &nbsp;
-    //         jama kiya gaya ha review ke liye, Jinka email address ${reviwer.email} hai.
-    //     </h3>
-    //   </div>
-    // `;
+
 
     let subject = "Assignment Review Details.";
 
@@ -92,10 +84,4 @@ export const sendAssignmentReviewEmail = (student:User, reviewer:User, awsConfig
       return Promise.resolve();
     });
 
-    //send email to the student
-    // let studentEmailPromise = sendEmail([student.email], studentHtmlTemplate, subject, emailText, []);
-    // return Promise.all([reviewerEmailPromise,studentEmailPromise]).then(() => {
-    //     console.log("done");
-    //     return Promsie.resolve();
-    // })
 };
