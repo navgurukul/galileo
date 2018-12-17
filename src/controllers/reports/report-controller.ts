@@ -202,29 +202,32 @@ export default class ReportController {
 
 
 
-    public getMenteesReport(request, h){
+    public getMenteesCoursesReport(request, h){
         return new Promise((resolve, reject) => {
 
             // get all the courses where the mentors menties have enrolled
             let menteesReportQuery = database('course_enrolments')
-                        .select('courses.name as courseName','courses.id as courseId','users.id',
-                                'users.name', 'users.email', 'users.profilePicture')
+                        .select('courses.name as courseName','courses.id as courseId',
+                                'users.id', 'users.name', 'users.email', 'users.profilePicture',
+                                'course_enrolments.enrolled as isEnrolled', 'course_enrolments.completed as isCourseCompleted ')
                         .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
                         .rightJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
                         .innerJoin('users', 'users.id', 'mentors.mentee')
                         .where({
                             'mentors.mentor': request.userId
                         });
-
+            // Add mentee list to be also sent
             menteesReportQuery.then((rows) => {
                 // arranging student according to courses
                 let courses = {};
                 for(let i = 0; i < rows.length-1 ; i++){
-                    const { courseName, courseId, ...userDetails } = rows[i];
+                    const { courseName, courseId, isEnrolled, isCourseCompleted, ...userDetails } = rows[i];
 
                     if (courses[courseName] === undefined){
                         courses[courseName] = {
                           courseId,
+                          isEnrolled,
+                          isCourseCompleted,
                           studentEnrolled:[],
                         };
                     }
@@ -247,4 +250,87 @@ export default class ReportController {
     }
 
 
+    public getMenteesExercisesReport(request, h){
+      return new Promise((resolve, reject) => {
+        database('courses')
+            .select('courses.id as courseId')
+            .where({
+                'courses.id': request.params.courseId
+            })
+            .then((rows) => {
+              // what if the courseId doesn't exist
+              if (rows.length < 1){
+                  return reject(Boom.expectationFailed("CourseId doesn't exist please check the id."));
+              } else{
+                  return Promise.resolve({courseId: rows[0].courseId})
+              }
+
+            })
+            .then(({ courseId }) => {
+                let mentees = [],
+                exercises = {};
+                let menteesQuery = database('users')
+                        .select('users.id', 'users.name', 'users.email')
+                        .innerJoin('mentors', 'mentors.mentee', 'users.id')
+                        .where({
+                            'mentors.mentor': request.userId
+                        })
+                        .then((rows) => {
+                            mentees = rows;
+                        })
+                let exerciseQuery = database('exercises')
+                        .select('exercises.id as exerciseId', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
+                            'exercises.name as exerciseName', 'exercises.submissionType as exerciseSubmissionType',
+                            'exercises.githubLink as exerciseGithubLink', 'exercises.content as exerciseContent')
+                        .where({
+                            'exercises.courseId': courseId
+                        })
+                        .orderBy('exercises.sequenceNum', 'asc')
+                        .then((rows) => {
+                          for(let i = 0; i < rows.length; i++){
+                            let exercise = rows[i];
+                            exercises[exercise.exerciseId] = exercise;
+                            exercises[exercise.exerciseId]['submissions'] = []
+                          }
+                        });
+
+                Promise.all([menteesQuery, exerciseQuery]).then(() => {
+                      database('submissions')
+                          .select(
+                              'submissions.id as submissionId', 'submissions.state as submissionState',
+                              'submissions.completed as submissionCompleted', 'submissions.exerciseId as exerciseId',
+                              'users.id as menteeId', 'users.name as menteeName', 'users.email as menteeEmail'
+                          )
+                          .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                          .innerJoin('mentors', 'mentors.mentee', 'submissions.userId')
+                          .innerJoin('users', 'users.id', 'mentors.mentee')
+                          .where({
+                              'exercises.courseId': courseId,
+                              'mentors.mentor':request.userId
+                          })
+                          .then((rows) => {
+                              console.log(rows);
+                              // arrange the submissions of users exercise wise in exercises;
+                              for(let i = 0; i < rows.length; i++){
+                                  let { exerciseId, ...submission } = rows[i];
+                                  exercises[exerciseId]['submissions'].push(submission)
+                              }
+                              let menteeSubmissions = []
+                              // convert exercises from dictionary to list sorted by sequenceNum
+                              for(let exerciseId of Object.keys(exercises)){
+                                  menteeSubmissions.push(exercises[exerciseId]);
+                              }
+                              menteeSubmissions.sort(function(a, b){
+                                return a.exerciseSequenceNum - b.exerciseSequenceNum;
+                              })
+                              // console.log(exercises);
+                              resolve({
+                                  "data": menteeSubmissions
+                              });
+
+                          });
+                    });
+            });
+      });
+    }
 }

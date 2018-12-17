@@ -5,7 +5,8 @@ import * as Boom from "boom";
 
 import ReportController from "./report-controller";
 import {
-    menteesReportSchema
+    menteesCourseReportSchema,
+    menteesExerciseReportSchema,
 } from "./report-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
@@ -59,23 +60,44 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: reportController.getStudentReport,
         }
     });
-    
+
     server.route({
         method: 'GET',
-        path: '/reports/users/getMenteesReport',
+        path: '/reports/mentors/getMenteesCourseReport',
         config: {
             description: 'List of all Mentees assgin to a Mentor.',
 
             response: {
                 schema: Joi.object({
-                    data: Joi.array().items(menteesReportSchema)
-                          .description("List of Mentees for the current user.")
+                    data: Joi.array().items(menteesCourseReportSchema)
+                          .description("List of Mentees report courses for the current user.")
                 })
             },
             auth: 'jwt',
             tags: ['api'],
-            handler: reportController.getMenteesReport,
+            handler: reportController.getMenteesCoursesReport,
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/reports/mentors/getMenteesExerciseReport/{courseId}',
+        config: {
+            description: 'List of all Mentees assgin to a Mentor.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                }
+            },
+            // response: {
+            //     schema: Joi.object({
+            //         data: Joi.array().items(menteesExerciseReportSchema)
+            //               .description("List of Mentees report course exercises for the current user.")
+            //     })
+            // },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.getMenteesExercisesReport,
+        }
+    });
 }

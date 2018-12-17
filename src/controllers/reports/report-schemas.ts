@@ -7,8 +7,30 @@ const _userSchema: Joi.ObjectSchema = Joi.object({
     profilePicture: Joi.string().uri(),
 });
 
-export const menteesReportSchema: Joi.ObjectSchema = Joi.object({
+export const menteesCourseReportSchema: Joi.ObjectSchema = Joi.object({
     courseId: Joi.number(),
     courseName: Joi.string(),
+    isEnrolled: Joi.bool(),
+    isCourseCompleted: Joi.bool(),
     studentEnrolled: Joi.array().items(_userSchema),
 });
+
+// const _submissionSchema: Joi.ObjectSchema = Joi.object({
+//     submissionId: Joi.number().optional(),
+//     submissionState: Joi.string().optional(),
+//     submissionCompleted: Joi.bool().optional(),
+//     menteeId: Joi.number().optional(),
+//     menteeName: Joi.string().optional(),
+//     menteeEmail: Joi.string().email().optional()
+// })
+//
+// export const menteesExerciseReportSchema: Joi.ObjectSchema = Joi.object({
+//     exerciseId : Joi.number(),
+//     exerciseSlug : Joi.string(),
+//     exerciseSequenceNum : Joi.number(),
+//     exerciseName : Joi.string(),
+//     exerciseSubmissionType : Joi.string(),
+//     exerciseGithubLink : Joi.string().uri(),
+//     exerciseContent : Joi.string(),
+//     submissions : Joi.array().items(_submissionSchema).default([]),
+// });
