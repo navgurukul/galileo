@@ -257,27 +257,30 @@ export default class CourseController {
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
-              let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
-                  'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
-
-              let exerciseQuery = database('exercises')
-                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                      'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
-                      'submissions.state as submissionState', 'submissions.id as submissionId',
-                      'submissions.completedAt as submissionCompleteAt')
-                  .leftJoin('submissions', function () {
-                      this.on('submissions.id', '=',
-                        database.raw(xyz)
-                      );
-                  })
-                  .where({'exercises.slug': request.query.slug});
-
+            let exerciseQuery;
             if (request.headers.authorization === undefined){
+                exerciseQuery = database('exercises')
+                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                      'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
+                  .where({'exercises.slug': request.query.slug});
                 exerciseQuery.then((rows) => {
-                    let exercise = rows[0];
-                    resolve(exercise);
+                    resolve(rows[0]);
                 });
             } else {
+                let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id ' +
+                    'AND userId = ' + request.userId + '  ORDER BY state ASC LIMIT 1)';
+
+                exerciseQuery = database('exercises')
+                    .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                        'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
+                        'submissions.state as submissionState', 'submissions.id as submissionId',
+                        'submissions.completedAt as submissionCompleteAt')
+                    .leftJoin('submissions', function () {
+                        this.on('submissions.id', '=',
+                          database.raw(xyz)
+                        );
+                    })
+                    .where({'exercises.slug': request.query.slug});
                 database('users')
                     .select('users.center')
                     .where({'users.id': request.userId})
