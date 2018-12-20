@@ -204,7 +204,17 @@ export default class ReportController {
 
     public getMenteesCoursesReport(request, h){
         return new Promise((resolve, reject) => {
-
+            let mentees = [],
+                course_enrolments = [];
+            let menteesQuery = database('users')
+                        .select('users.id', 'users.name', 'users.email')
+                        .innerJoin('mentors', 'mentors.mentee', 'users.id')
+                        .where({
+                            'mentors.mentor': request.userId
+                        })
+                        .then((rows) => {
+                            mentees = rows;
+                        })
             // get all the courses where the mentors menties have enrolled
             let menteesReportQuery = database('course_enrolments')
                         .select('courses.name as courseName','courses.id as courseId',
@@ -215,13 +225,17 @@ export default class ReportController {
                         .innerJoin('users', 'users.id', 'mentors.mentee')
                         .where({
                             'mentors.mentor': request.userId
-                        });
+                        })
+                        .then((rows) => {
+                          course_enrolments = rows;
+                        })
             // Add mentee list to be also sent
-            menteesReportQuery.then((rows) => {
+            Promise.all([menteesReportQuery, menteesQuery]).then(() => {
+
                 // arranging student according to courses
                 let courses = {};
-                for(let i = 0; i < rows.length-1 ; i++){
-                    const { courseName, courseId, isEnrolled, isCourseCompleted, ...userDetails } = rows[i];
+                for(let i = 0; i < course_enrolments.length-1 ; i++){
+                    const { courseName, courseId, isEnrolled, isCourseCompleted, ...userDetails } = course_enrolments[i];
 
                     if (courses[courseName] === undefined){
                         courses[courseName] = {
@@ -242,8 +256,10 @@ export default class ReportController {
                   }
                   enrolledCoursesReport.push(courseReport);
                 }
+
                 resolve({
-                  "data":enrolledCoursesReport
+                  "data":enrolledCoursesReport,
+                  "userList":mentees,
                 });
             });
         });
@@ -267,7 +283,8 @@ export default class ReportController {
 
             })
             .then(({ courseId }) => {
-                let mentees = [],
+              let mentees = [],
+                menteeSubmissions = [];
                 exercises = {};
                 let menteesQuery = database('users')
                         .select('users.id', 'users.name', 'users.email')
@@ -315,7 +332,6 @@ export default class ReportController {
                                   let { exerciseId, ...submission } = rows[i];
                                   exercises[exerciseId]['submissions'].push(submission)
                               }
-                              let menteeSubmissions = []
                               // convert exercises from dictionary to list sorted by sequenceNum
                               for(let exerciseId of Object.keys(exercises)){
                                   menteeSubmissions.push(exercises[exerciseId]);
@@ -325,7 +341,8 @@ export default class ReportController {
                               })
                               // console.log(exercises);
                               resolve({
-                                  "data": menteeSubmissions
+                                  "data": menteeSubmissions,
+                                  "userList": mentees,
                               });
 
                           });

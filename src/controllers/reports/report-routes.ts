@@ -66,12 +66,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         config: {
             description: 'List of all Mentees assgin to a Mentor.',
 
-            response: {
-                schema: Joi.object({
-                    data: Joi.array().items(menteesCourseReportSchema)
-                          .description("List of Mentees report courses for the current user.")
-                })
-            },
+            // response: {
+            //     schema: Joi.object({
+            //         data: Joi.array().items(menteesCourseReportSchema)
+            //               .description("List of Mentees report courses for the current user.")
+            //     })
+            // },
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesCoursesReport,
