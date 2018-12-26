@@ -57,23 +57,23 @@ export const findFacilitator = function(email) {
 
                       let facilitatorEmails = serverConfigs.facilitatorEmails;
                       if (facilitatorEmails.length !== 0){
-                        let facilitatorEmail = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+                          let facilitatorEmail = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
 
-                        return database('users')
-                                .select('users.id')
-                                .where({
-                                  'users.email':facilitatorEmail
-                                })
-                                .then((response) => {
-                                  if (response.length >= 1){
-                                    return Promise.resolve({facilitator:response[0].id});
-                                  } else {
-                                    // if there is no data for the given email on the platform
-                                    console.warn("Warning: Please sign-in using the given"
-                                        + "facilitator email in config to submit assignment.");
-                                    return Promise.resolve({facilitator:null})
-                                  }
-                                });
+                          return database('users')
+                                  .select('users.id')
+                                  .where({
+                                    'users.email':facilitatorEmail
+                                  })
+                                  .then((response) => {
+                                    if (response.length >= 1){
+                                      return Promise.resolve({facilitator:response[0].id});
+                                    } else {
+                                      // if there is no data for the given email on the platform
+                                      console.warn("Warning: Please sign-in using the given"
+                                          + "facilitator email in config to submit assignment.");
+                                      return Promise.resolve({facilitator:null})
+                                    }
+                                  });
 
                       } else {
                         // if there is no facilitator in the config

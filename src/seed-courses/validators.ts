@@ -102,12 +102,13 @@ export const validateCourseInfo = function() {
         let email;
         // assign the courses to Amar, Abhishek or Rishabh when there are no facilitator for the course
         let facilitatorEmails = serverConfigs.facilitatorEmails;
+
         // if there is no facilitator in config dev
-        if (facilitatorEmails.length !== 0){
-          email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+        if ((facilitatorEmails.length !== 0) || courseInfo['email'] !== undefined){
+            email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
         } else {
-          email = null;
-          console.warn("Warning : Please add a facilitator email in config json file.")
+            email = null;
+            console.warn("Warning : Please add a facilitator emails in config json file.")
         }
 
         return findFacilitator(email)
