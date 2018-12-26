@@ -1,6 +1,8 @@
 
 import database from '../index';
 var globals = require('./globals');
+import * as Configs from "../configurations";
+serverConfigs = Configs.getServerConfigs()
 
 let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     let query = database('exercises')
@@ -49,16 +51,34 @@ export const findFacilitator = function(email) {
               })
               .then((rows) => {
                   if (rows.length < 1){
-                      let facilitatorEmails = globals.defaultFacilators;
-                      let index = ((Math.random() * facilitatorEmails.length-1)|0);
-                      return database('users')
+                      // if there is user in the platform for the given facilitator email in the course
+                      // then select the default facilitator from configurations
+
+                      let facilitatorEmails = serverConfigs.facilitatorEmails;
+                      if (facilitatorEmails.length !== 0){
+
+                        let email = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+                        return database('users')
                                 .select('users.id')
                                 .where({
-                                    'users.email':facilitatorEmails[index]
+                                  'users.email':email
                                 })
                                 .then((response) => {
+                                  if (response.length >= 1){
                                     return Promise.resolve({facilitator:response[0].id});
+                                  } else {
+                                    // if there is no data for the given email on the platform
+                                    console.warn("Warning: Please sign-in using the given"
+                                        + "facilitator email in config to submit assignment.");
+                                    return Promise.resolve({facilitator:null})
+                                  }
                                 });
+
+                      } else {
+                        // if there is no facilitator in the config
+                        return Promise.resolve({facilitator: null})
+                      }
+                  
                   } else {
                       return Promise.resolve({facilitator:rows[0].id});
                   }
