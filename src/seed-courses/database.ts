@@ -1,6 +1,7 @@
 
 import database from '../index';
 var globals = require('./globals');
+
 import * as Configs from "../configurations";
 serverConfigs = Configs.getServerConfigs()
 
@@ -52,16 +53,16 @@ export const findFacilitator = function(email) {
               .then((rows) => {
                   if (rows.length < 1){
                       // if there is user in the platform for the given facilitator email in the course
-                      // then select the default facilitator from configurations
+                      // then select the default facilitatorEmail from configurations
 
                       let facilitatorEmails = serverConfigs.facilitatorEmails;
                       if (facilitatorEmails.length !== 0){
+                        let facilitatorEmail = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
 
-                        let email = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
                         return database('users')
                                 .select('users.id')
                                 .where({
-                                  'users.email':email
+                                  'users.email':facilitatorEmail
                                 })
                                 .then((response) => {
                                   if (response.length >= 1){
@@ -78,7 +79,7 @@ export const findFacilitator = function(email) {
                         // if there is no facilitator in the config
                         return Promise.resolve({facilitator: null})
                       }
-                  
+
                   } else {
                       return Promise.resolve({facilitator:rows[0].id});
                   }
