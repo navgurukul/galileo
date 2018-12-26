@@ -72,7 +72,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             //               .description("List of Mentees report courses for the current user.")
             //     })
             // },
-            auth: 'jwt',
+            // auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesCoursesReport,
         }

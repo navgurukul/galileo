@@ -210,7 +210,7 @@ export default class ReportController {
                         .select('users.id', 'users.name', 'users.email')
                         .innerJoin('mentors', 'mentors.mentee', 'users.id')
                         .where({
-                            'mentors.mentor': request.userId
+                            'mentors.mentor': 1 //request.userId
                         })
                         .then((rows) => {
                             mentees = rows;
@@ -218,14 +218,15 @@ export default class ReportController {
             // get all the courses where the mentors menties have enrolled
             let menteesReportQuery = database('course_enrolments')
                         .select('courses.name as courseName','courses.id as courseId',
-                                'users.id', 'users.name', 'users.email', 'users.profilePicture',
+                                'users.id', 'users.name', 'users.email',
                                 'course_enrolments.enrolled as isEnrolled', 'course_enrolments.completed as isCourseCompleted ')
                         .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
                         .rightJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
                         .innerJoin('users', 'users.id', 'mentors.mentee')
                         .where({
-                            'mentors.mentor': request.userId
+                            'mentors.mentor': 1 //request.userId
                         })
+                        .distinct('users.id')
                         .then((rows) => {
                           course_enrolments = rows;
                         })
@@ -235,13 +236,11 @@ export default class ReportController {
                 // arranging student according to courses
                 let courses = {};
                 for(let i = 0; i < course_enrolments.length-1 ; i++){
-                    const { courseName, courseId, isEnrolled, isCourseCompleted, ...userDetails } = course_enrolments[i];
+                    const { courseName, courseId, ...userDetails } = course_enrolments[i];
 
                     if (courses[courseName] === undefined){
                         courses[courseName] = {
                           courseId,
-                          isEnrolled,
-                          isCourseCompleted,
                           studentEnrolled:[],
                         };
                     }
@@ -283,9 +282,9 @@ export default class ReportController {
 
             })
             .then(({ courseId }) => {
-              let mentees = [],
-                menteeSubmissions = [];
-                exercises = {};
+                let mentees = [],
+                    menteeSubmissions = [],
+                    exercises = {};
                 let menteesQuery = database('users')
                         .select('users.id', 'users.name', 'users.email')
                         .innerJoin('mentors', 'mentors.mentee', 'users.id')
