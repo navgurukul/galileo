@@ -5,6 +5,10 @@ Made using hapi.js, the repository uses mysql database.
 
 ## How to Run?
 
+### **How to setup on Linux or Mac**
+* *git clone http://github.com/navgurukul/galileo*
+* *cd galileo*
+
 **Installation**
 * *npm install -g gulp@3.9.0*
 * *npm install -g typescript*
@@ -34,9 +38,11 @@ Made using hapi.js, the repository uses mysql database.
 
 
 
-**How to setup on windows**
+### **How to setup on windows**
 * *git clone http://github.com/navgurukul/galileo*
 * *cd galileo*
+
+**Installation**
 * *npm install -g typescript*
 * *npm install -g ts-node* (required to run typescript)
 * *npm install -g typings* (required for setup)
