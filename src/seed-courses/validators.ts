@@ -18,7 +18,7 @@ import { courseInfoSchema } from './schema';
 import { findFacilitator } from './database';
 
 import * as Configs from "../configurations";
-serverConfigs = Configs.getServerConfigs()
+let serverConfigs = Configs.getServerConfigs()
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
 // Eg. if 1.2 is given this will give 1.3.
@@ -108,7 +108,7 @@ export const validateCourseInfo = function() {
             email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
         } else {
             email = null;
-            console.warn("Warning : Please add a facilitator emails in config json file.")
+            console.warn("Warning : Please add a facilitator emails in config json file.");
         }
 
         return findFacilitator(email)

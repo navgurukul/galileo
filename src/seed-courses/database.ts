@@ -3,7 +3,7 @@ import database from '../index';
 var globals = require('./globals');
 
 import * as Configs from "../configurations";
-serverConfigs = Configs.getServerConfigs()
+let serverConfigs = Configs.getServerConfigs()
 
 let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     let query = database('exercises')
@@ -71,13 +71,13 @@ export const findFacilitator = function(email) {
                                       // if there is no data for the given email on the platform
                                       console.warn("Warning: Please sign-in using the given"
                                           + "facilitator email in config to submit assignment.");
-                                      return Promise.resolve({facilitator:null})
+                                      return Promise.resolve({facilitator:null});
                                     }
                                   });
 
                       } else {
                         // if there is no facilitator in the config
-                        return Promise.resolve({facilitator: null})
+                        return Promise.resolve({facilitator: null});
                       }
 
                   } else {
