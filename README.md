@@ -38,6 +38,7 @@ Made using hapi.js, the repository uses mysql database.
 
 
 
+
 ### **How to setup on windows**
 * *git clone http://github.com/navgurukul/galileo*
 * *cd galileo*
@@ -74,6 +75,9 @@ Made using hapi.js, the repository uses mysql database.
 * *npm run start* (start the application)
 * *npm run watch* (restart the application when files change)
 
+**Extra Configuration**
+* Add facilitator emails in json file to assign each courses to the facilitator.
+* `bash courseUpdateWindows.sh all` in git Bash to import update all the courses with facilitator email Id.
 
 ## Documentation
 When the code is running, documentation is accessible at `localhost:5000/docs`.
