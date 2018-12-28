@@ -63,18 +63,16 @@ Made using hapi.js, the repository uses mysql database.
 * *aws configure* (to setup aws-sdk provide the keyId, SecretKey and region which has access to upload images to AWS).
 
 **DB SETUP**
-* Create a database *davinci*, add the access credentials of the database to your `config` file
-* Import schema.sql to import the database schema
-* `bash courseUpdate.sh all` to import all the courses to your local database
+* Create a database *davinci*, add the access credentials of the database to your `config` file.
+* Import schema.sql to import the database schema.
+* `bash courseUpdateWindows.sh all` in git Bash to import all the courses to your local database.
 
 **Run**
-* *gulp build* (build ts files and run linter)
-* *gulp tslint* (run tslint)
-* *gulp watch* (watch ts files)
+* *npx gulp build* (build ts files and run linter)
+* *npx gulp tslint* (run tslint)
+* *npx gulp watch* (watch ts files)
 * *npm run start* (start the application)
 * *npm run watch* (restart the application when files change)
-
-
 
 
 ## Documentation

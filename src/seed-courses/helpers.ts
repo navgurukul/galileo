@@ -142,7 +142,7 @@ const _getFileName = (path) => {
     for(let i = 0; i < wordInFileName.length; i++){
       temp = wordInFileName[i];
       temp = temp[0].toUpperCase() + temp.slice(1, temp.length);
-      
+
       // don't add spaces if it is the last word
       if (i === wordInFileName.length-1){
         newFileName += temp;
@@ -171,7 +171,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     }
     else{
         exInfo  = parseNgMetaText(tokens[0]['text']);
-        if (!exInfo['name']){
+        if (exInfo['name'] === null || exInfo['name'] === undefined){
             exInfo['name'] = fileName;
         }
         if (!exInfo['completionMethod']){
