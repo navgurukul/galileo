@@ -5,6 +5,7 @@ var globals = require('./globals');
 import * as Configs from "../configurations";
 let serverConfigs = Configs.getServerConfigs();
 
+
 let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     let query = database('exercises')
     .where({ 'slug': exerciseInfo['slug'] })
