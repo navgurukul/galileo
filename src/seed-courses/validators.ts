@@ -18,7 +18,8 @@ import { courseInfoSchema } from './schema';
 import { findFacilitator } from './database';
 
 import * as Configs from "../configurations";
-let serverConfigs = Configs.getServerConfigs()
+let serverConfigs = Configs.getServerConfigs();
+
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
 // Eg. if 1.2 is given this will give 1.3.

@@ -1,14 +1,18 @@
 var AWS = require('aws-sdk');
 // Set the region
+import * as Configs from "./configurations";
+let serverConfigs = Configs.getServerConfigs();
 
+let baseUrl = process.env.GALILEO_ENV === 'dev'?
+              "http://localhost:3000":"http://saral.navgurukul.org";
 
 const sendEmail = (receiverEmails:Array<string>, htmlTemplate:string, subject:string,
-      emailText:string, CcEmails: Array<string>, awsConfig) => {
+      emailText:string, CcEmails: Array<string>) => {
 
       AWS.config.update({
         region: "us-east-1",
-        accessKeyId: awsConfig.accessKeyId,
-        secretAccessKey: awsConfig.secretAccessKey,
+        accessKeyId: serverConfigs.awsEmailConfig.accessKeyId,
+        secretAccessKey: serverConfigs.awsEmailConfig.secretAccessKey,
       });
 
       let SENDER = "SARAL <saral@navgurukul.org>";
@@ -51,37 +55,76 @@ const sendEmail = (receiverEmails:Array<string>, htmlTemplate:string, subject:st
       });
 };
 
-interface User{
+interface User {
   name: string;
   email: string;
 };
 
-export const sendAssignmentReviewEmail = (student:User, reviewer:User, awsConfig) => {
+interface SubmissionDetail {
+  submissionId: number;
+  exerciseName: string;
+  exerciseSlug: string;
+  completed: boolean;
+  state: string;
+}
+
+interface ExerciseDetail {
+  courseId: number;
+  slug: string;
+  name: string;
+}
+
+export const sendAssignmentReviewPendingEmail = (student:User, reviewer:User, submissionDetail: SubmissionDetail) => {
     // Email template
-    let reviewerHtmlTemplate = `
+    let emailTemplate = `
       <div>
         <h5>
-            Hi ${reviewer.name}, Apke pass ${student.name} ka assignment aya hai.<br />
-            Ushe app review karle. <br />
-            <a target="_blank" href="http://saral.navgurukul.org/assignment-review">Link</a>
-            <br/> <br/>
-            Hello ${student.name}, ${reviewer.name} apka assignment review kardenge,<br />
-            warna app ushe yahi pe remind karwa sakte ho.
+          Hi ${reviewer.name}, Apke pass ${student.name} ka assignment aya hai.<br />
+          Ushe app review karle. <br />
+          <a
+            target="_blank"
+            href="${baseUrl}/assignment-review?submissionId=${submissionDetail.submissionId}">
+              Link
+          </a>
+          <br/> <br/>
+          Hello ${student.name}, ${reviewer.name} apka assignment review kardenge,<br />
+          warna app ushe yahi pe remind karwa sakte ho.
         </h5>
       </div>
-    `;
-
-
-
-    let subject = "Assignment Review Details.";
+      `;
+    let subject = `Assignment Review for ${submissionDetail.exerciseName} of ${student.name}.`;
 
     let emailText = ("\r\n");
 
     // send email to reviewer
-    let reviewerEmailPromise = sendEmail([reviewer.email], reviewerHtmlTemplate, subject, emailText, [student.email], awsConfig);
-
-    return reviewerEmailPromise.then(() => {
-      return Promise.resolve();
+    let emailPromise = sendEmail([reviewer.email], emailTemplate, subject, emailText, [student.email]);
+    return emailPromise.then(() => {
+        return Promise.resolve();
     });
 
+};
+
+
+export const sendAssignmentReviewCompleteEmail = (student:User, reviewer:User, exerciseDetail: ExerciseDetail) => {
+    let emailTemplate = `
+      <div>
+        <h5>
+          Hi ${student.name}, Apka assignment check hogya ha. <br />
+          Aap apna assignment ka feedback
+          <a href="${baseUrl}/course?id=${exerciseDetail.courseId}&slug=${exerciseDetail.slug}">
+            yahan
+          </a>
+          dekh sakte ho.
+        </h5>
+      </div>
+    `;
+    let subject = `Assignment Review for ${exerciseDetail.name} of ${student.name}.`;
+    let emailText = ("\r\n");
+
+    // send email to reviewer
+    let emailPromise = sendEmail([student.email], emailTemplate, subject, emailText, []);
+
+    return emailPromise.then(() => {
+        return Promise.resolve();
+    });
 };
