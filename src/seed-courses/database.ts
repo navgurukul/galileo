@@ -71,7 +71,7 @@ export const findFacilitator = function(email) {
                                     } else {
                                       // if there is no data for the given email on the platform
                                       console.warn("Warning: Please sign-in using the given"
-                                          + "facilitator email in config to submit assignment.");
+                                          + "facilitator emails in config to submit assignment.");
                                       return Promise.resolve({facilitator:null});
                                     }
                                   });
