@@ -268,7 +268,7 @@ export default class AssignmentController {
                         'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
                         'submissions.completedAt',
                         // Reviewer details
-                        'reviewUsers.name as reviwerName', 'reviewUsers.id as reviwerId',
+                        'reviewUsers.name as reviewerName', 'reviewUsers.id as reviewerId',
                         'reviewUsers.profilePicture as reviewerProfilePicture',
                         'reviewUsers.facilitator as isReviewerFacilitator',
                         // Submitter Details
@@ -310,7 +310,8 @@ export default class AssignmentController {
                 .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
                     'submissions.submitterNotes', 'submissions.files', 'submissions.notesReviewer', 'submissions.state',
                     'submissions.completed', 'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviewerName',
-                    'users.id as reviewerId', 'users.profilePicture as reviewerProfilePicture', 'users.facilitator as isReviewerFacilitator')
+                    'users.id as reviewerId', 'users.profilePicture as reviewerProfilePicture',
+                    'users.facilitator as isReviewerFacilitator')
                 .leftJoin('users', 'submissions.peerReviewerId', 'users.id')
                 .where({'submissions.id': request.params.submissionId})
                 .then((rows) => {
