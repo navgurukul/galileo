@@ -121,8 +121,7 @@ export const parseNgMetaText = function(text: string) {
         }
         let tokens = line.split(':');
         if (tokens.length < 2) {
-            parsed = null;
-            parsed = null;
+            // parsed = null;
             return;
         }
         let lineKey = tokens[0].trim();
@@ -171,11 +170,16 @@ let _getExerciseInfo = function(path, sequenceNum) {
     }
     else{
         exInfo  = parseNgMetaText(tokens[0]['text']);
-        if (exInfo['name'] === null || exInfo['name'] === undefined){
+        try {
+          if (exInfo['name'] === null || exInfo['name'] === undefined){
             exInfo['name'] = fileName;
+          }
+        } catch {
+          showErrorAndExit(`There is some error in ${path}`);
         }
+
         if (!exInfo['completionMethod']){
-            exInfo['completionMethod'] = 'manual';
+            exInfo['completionMethod'] = 'peer';
         }
     }
 
