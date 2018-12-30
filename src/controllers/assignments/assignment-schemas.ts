@@ -27,13 +27,16 @@ export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     exerciseContent: Joi.string(),
     parentExerciseId: Joi.number().allow(null),
     courseId: Joi.number(),
-    exerciseName: Joi.string(), 
+    exerciseName: Joi.string(),
     exerciseSlug: Joi.string(),
     exerciseSequenceNum: Joi.number(),
     reviewType: Joi.string(),
 });
 
 export const postSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
+    submissionId: Joi.number(),
+    exerciseName: Joi.string(),
+    exerciseSlug: Joi.string(),
     completed: Joi.bool(),
-    state: Joi.string(), 
+    state: Joi.string(),
 });
