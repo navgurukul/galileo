@@ -71,7 +71,7 @@ export default class UserController {
                         });
                     });
             });
-        });
+        // });
     }
 
     public getUserInfo(request, h) {
