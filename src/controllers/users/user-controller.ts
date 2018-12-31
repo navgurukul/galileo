@@ -21,23 +21,23 @@ export default class UserController {
     }
 
     public loginUser(request, h) {
-        let auth = new GoogleAuth;
-        let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+        // let auth = new GoogleAuth;
+        // let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
         return new Promise((resolve, reject) => {
 
-            client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
-                if (error) {
-                    return console.error(error);
-                }
-                let googleAuthPayload = login.getPayload();
-
-                let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+            // client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
+            //     if (error) {
+            //         return console.error(error);
+            //     }
+            //     let googleAuthPayload = login.getPayload();
+            //
+            //     let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
                 let userObj = {
-                    email: googleAuthPayload['email'],
-                    name: googleAuthPayload['name'],
-                    profilePicture: googleAuthPayload['picture'],
-                    googleUserId: googleAuthPayload['sub'],
-                    facilitator: isFacilitator
+                    email: "ashok@gmail.com",//googleAuthPayload['email'],
+                    name: "Ashok", //googleAuthPayload['name'],
+                    profilePicture: "https://picture.com",//googleAuthPayload['picture'],
+                    googleUserId: 123456789098765432,//googleAuthPayload['sub'],
+                    facilitator: true,
                 };
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                     .then((user)=> {
