@@ -20,6 +20,10 @@ export interface IServerConfigurations {
         clientId: string;
         clientSecret: string;
     };
+    awsEmailConfig:{
+      accessKeyId: string;
+      secretAccessKey: string;
+    };
     facilitatorEmails: Array<string>;
     defaultBatchId: number;
 }

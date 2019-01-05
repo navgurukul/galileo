@@ -13,5 +13,5 @@ export const courseInfoSchema:Joi.ObjectSchema = Joi.object({
 export const exerciseInfoSchema:Joi.ObjectSchema =  Joi.object({
     name: Joi.string().required(),
     completionMethod: Joi.string().allow('manual', 'peer', 'facilitator', 'automatic'),
-    submissionType: Joi.string().allow('number','text','text_large').default(null),
+    submissionType: Joi.string().allow('number','text','text_large', 'url').default(null),
 });

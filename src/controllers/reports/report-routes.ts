@@ -62,6 +62,24 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/reports/users/getMenteesReport',
+        config: {
+            description: 'List of all Mentees assgin to a Mentor.',
+
+            response: {
+                schema: Joi.object({
+                    data: Joi.array().items(menteesReportSchema)
+                          .description("List of Mentees for the current user.")
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.getMenteesReport,
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/reports/mentors/getMenteesCourseReport',
         config: {
             description: 'List of all Mentees assgin to a Mentor.',

@@ -30,6 +30,10 @@
          "clientId":"googleAppClientId",
          "clientSecret":"googleAppClientSecret"
       },
+      "awsEmailConfig":{
+        "accessKeyId": "AWS-SES accessKeyId",
+        "secretAccessKey": "AWS-SES secretAccessKey",
+      },
       "facilitatorEmails":[
       ],
       "defaultBatchId":1

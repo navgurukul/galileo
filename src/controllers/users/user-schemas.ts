@@ -8,7 +8,7 @@ export const userSchema: Joi.ObjectSchema = Joi.object({
     googleUserId: Joi.string(),
     facilitator: Joi.bool(),
     isAdmin: Joi.bool(),
-    center: Joi.string(),
+    center: Joi.string().allow(null),
     isAlumni: Joi.bool().allow(null).default(false),
 });
 
