@@ -128,8 +128,7 @@ export default class AssignmentController {
                                             })
                                             .then((rows) => {
                                               if (rows.length < 1) {
-                                                // if no user roles exist than get
-                                                // facilitator from default facilitator
+                                                // if no user roles exist than get facilitator from default facilitator
                                                 const { facilitatorEmails } = this.configs;
                                                 if(facilitatorEmails.length < 1){
                                                     reject(Boom.expectationFailed("No facilitators in config add them."));
@@ -140,20 +139,18 @@ export default class AssignmentController {
                                                           .select('users.id as reviewerID')
                                                           .where({'users.email': facilitatorEmail})
                                                           .then((rows) => {
-                                                              if(rows.length < 1){
-                                                                  console.log(1)
+                                                            // if no facilitator exist than just
+                                                            // throw error of no facilitator found for the center.
+                                                            if(rows.length < 1){
                                                                   reject(Boom.expectationFailed("There is no facilitator "
                                                                                                 + "added on Platform."));
                                                               } else {
                                                                   return Promise.resolve(rows);
                                                               }
                                                           })
-                                                // if no facilitator exist than just
-                                                // throw error of no facilitator found for the center.
                                               } else {
                                                   return Promise.resolve(rows);
                                               }
-
                                             });
 
                                     // facilitatorIdQuery = database('courses')
