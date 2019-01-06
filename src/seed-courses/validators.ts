@@ -10,10 +10,15 @@ import * as marked from "marked";
 import * as Joi from "joi";
 import * as process from 'process';
 
+
 var globals = require('./globals');
+
 import { parseNgMetaText } from './helpers';
 import { courseInfoSchema } from './schema';
 import { findFacilitator } from './database';
+
+import * as Configs from "../configurations";
+let serverConfigs = Configs.getServerConfigs();
 
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
@@ -95,10 +100,17 @@ export const validateCourseInfo = function() {
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
         courseInfo['logo'] = courseInfo['logo']?courseInfo['logo']:globals.defaultCourseLogo;
-
+        let email;
         // assign the courses to Amar, Abhishek or Rishabh when there are no facilitator for the course
-        let facilitatorEmails = globals.defaultFacilators;
-        let email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+        let facilitatorEmails = serverConfigs.facilitatorEmails;
+
+        // if there is no facilitator in config dev
+        if ((facilitatorEmails.length !== 0) || courseInfo['email'] !== undefined){
+            email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
+        } else {
+            email = null;
+            console.warn("Warning : Please add a facilitator emails in config json file.");
+        }
 
         return findFacilitator(email)
                 .then(({facilitator}) => {

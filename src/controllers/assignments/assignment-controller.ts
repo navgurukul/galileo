@@ -5,7 +5,7 @@ import * as Boom from "boom";
 import database from "../../";
 import {IServerConfigurations} from "../../configurations/index";
 
-import { sendAssignmentReviewEmail } from "../../sendEmail";
+import { sendAssignmentReviewPendingEmail, sendAssignmentReviewCompleteEmail } from "../../sendEmail";
 
 // Helper function to generate UIDs
 function generateUID() {
@@ -48,7 +48,7 @@ export default class AssignmentController {
                 })
                 .then((response) => {
                     if (response.canSubmit === true) {
-                        let count;
+                        let count, student, reviewer;
                         database('exercises').select().where('id', request.params.exerciseId)
                             .then((rows) => {
                                 if (rows.length < 1) {
@@ -128,7 +128,7 @@ export default class AssignmentController {
                                                                    // facilitator from default facilitator
 
                                                                    const { facilitatorEmails } = this.configs;
-                                                                   
+
                                                                    // if no facilitator exist than just
                                                                    // throw error of no facilitator found for the center.
                                                                    } else {
@@ -181,7 +181,7 @@ export default class AssignmentController {
 
 
                             })
-                            .then((queryData)=>{
+                            .then((queryData) => {
                                 // checks if we need to update existing submission of student
                                 // or create a new submission
                                 let submissionInsertQuery;
@@ -211,27 +211,28 @@ export default class AssignmentController {
                                 }
 
                                 submissionInsertQuery.then((response) => {
-                                    let student, reviewer;
-                                    console.log(response);
+
+                                    // console.log(response);
                                     let studentQuery  = database('users')
                                           .select('users.email', 'users.name')
                                           .where({
-                                            'users.id': response.studentId
+                                              'users.id': response.studentId
                                           })
                                           .then(rows => {
-                                            student = rows[0];
-                                            return Promise.resolve();
+                                              student = rows[0];
+                                              return Promise.resolve();
                                           });
 
                                     let reviewerQuery = database('users')
                                           .select('users.email', 'users.name')
                                           .where({
-                                            'users.id': response.reviewerId
+                                              'users.id': response.reviewerId
                                           })
                                           .then((rows) => {
-                                            reviewer = rows[0];
-                                            return Promise.resolve();
+                                              reviewer = rows[0];
+                                              return Promise.resolve();
                                           });
+
                                     return Promise.all([studentQuery, reviewerQuery])
                                               .then(response => {
                                                 console.log(this.configs);
@@ -249,6 +250,7 @@ export default class AssignmentController {
                                               });
                                 })
                                 .then((rows) => {
+                                    sendAssignmentReviewPendingEmail(student, reviewer, rows[0]);
                                     resolve(rows[0]);
                                 });
                         });
@@ -454,12 +456,47 @@ export default class AssignmentController {
                         updateFields['state'] = 'rejected';
                         updateFields['completedAt'] = new Date();
                     }
-                    return Promise.resolve(updateFields);
+                    return Promise.resolve({updateFields, submission});
                 })
-                .then((updateFields) => {
+                .then(({updateFields, submission}) => {
                     database('submissions')
                         .update(updateFields)
                         .where({id: request.params.submissionId})
+                        .then((rows) => {
+                          let student, reviewer;
+                          let studentQ = database('users').select('*')
+                                            .where({
+                                                'users.id': submission.userId
+                                            })
+                                            .then((rows) => {
+                                                student = rows[0];
+                                                return Promise.resolve();
+                                            });
+
+                          let reviewerQ = database('users').select('*')
+                                            .where({
+                                                'users.id': submission.userId
+                                            })
+                                            .then((rows) => {
+                                                reviewer = rows[0];
+                                                return Promise.resolve();
+                                            });
+
+                          return Promise.all([studentQ, reviewerQ])
+                                    .then(() => {
+                                        // send email for submission review completion
+                                        return database('submissions')
+                                            .select('exercises.courseId', 'exercises.slug',
+                                                    'exercises.name')
+                                            .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                            .where({
+                                                'submissions.id': submission.id
+                                            })
+                                            .then((rows) => {
+                                                return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
+                                            });
+                                    });
+                        })
                         .then(() => {
                             resolve({'success': true});
                         });
