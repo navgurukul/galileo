@@ -31,13 +31,13 @@ export default class UserController {
                 }
                 let googleAuthPayload = login.getPayload();
 
-                let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                // let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
                 let userObj = {
                     email: googleAuthPayload['email'],
                     name: googleAuthPayload['name'],
                     profilePicture: googleAuthPayload['picture'],
                     googleUserId: googleAuthPayload['sub'],
-                    facilitator: isFacilitator
+                    // facilitator: isFacilitator
                 };
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                     .then((user)=> {
@@ -50,10 +50,10 @@ export default class UserController {
                                         userId: user.id,
                                       })
                                       .then((row) => {
-                                        return Promise.resolve({
-                                          ...user,
-                                          isAdmin:false
-                                        });
+                                          return Promise.resolve({
+                                            ...user,
+                                            isAdmin:false
+                                          });
                                       });
                                 } else {
                                     const isAdmin = rows[0].roles ==='admin'?true:false;

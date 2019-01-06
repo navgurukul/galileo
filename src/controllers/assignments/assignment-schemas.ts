@@ -15,19 +15,19 @@ export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
     reviwerName: Joi.string().allow(null),
     reviwerId: Joi.number().allow(null),
     reviewerProfilePicture: Joi.string().uri().allow(null),
-    isReviewerFacilitator: Joi.bool().allow(null),
+    // isReviewerFacilitator: Joi.bool().allow(null),
     // Submitter Details
     submitterName: Joi.string(),
     submitterId: Joi.number(),
     submitterProfilePicture: Joi.string().uri(),
-    isSubmitterFacilitator: Joi.bool()
+    // isSubmitterFacilitator: Joi.bool()
 });
 
 export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     exerciseContent: Joi.string(),
     parentExerciseId: Joi.number().allow(null),
     courseId: Joi.number(),
-    exerciseName: Joi.string(), 
+    exerciseName: Joi.string(),
     exerciseSlug: Joi.string(),
     exerciseSequenceNum: Joi.number(),
     reviewType: Joi.string(),
@@ -35,5 +35,5 @@ export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
 
 export const postSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     completed: Joi.bool(),
-    state: Joi.string(), 
+    state: Joi.string(),
 });

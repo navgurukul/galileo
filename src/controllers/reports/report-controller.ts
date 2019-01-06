@@ -310,21 +310,22 @@ export default class ReportController {
                                   .then((rows) => {
                                       mentees = rows;
                                   });
-                          let exerciseQuery = database('exercises')
-                                  .select('exercises.id as exerciseId', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
-                                      'exercises.name as exerciseName', 'exercises.submissionType as exerciseSubmissionType',
-                                      'exercises.githubLink as exerciseGithubLink', 'exercises.content as exerciseContent')
-                                  .where({
-                                      'exercises.courseId': courseId
-                                  })
-                                  .orderBy('exercises.sequenceNum', 'asc')
-                                  .then((rows) => {
-                                    for(let i = 0; i < rows.length; i++){
-                                      let exercise = rows[i];
-                                      exercises[exercise.exerciseId] = exercise;
-                                      exercises[exercise.exerciseId]['submissions'] = []
-                                    }
-                                  });
+                          let exerciseQuery =
+                                database('exercises')
+                                    .select(
+                                      'exercises.id as exerciseId', 'exercises.slug as exerciseSlug',
+                                      'exercises.sequenceNum as exerciseSequenceNum', 'exercises.name as exerciseName', 'exercises.submissionType as exerciseSubmissionType', 'exercises.githubLink as exerciseGithubLink', 'exercises.content as exerciseContent')
+                                    .where({
+                                        'exercises.courseId': courseId
+                                    })
+                                    .orderBy('exercises.sequenceNum', 'asc')
+                                    .then((rows) => {
+                                        for(let i = 0; i < rows.length; i++){
+                                            let exercise = rows[i];
+                                            exercises[exercise.exerciseId] = exercise;
+                                            exercises[exercise.exerciseId]['submissions'] = []
+                                        }
+                                    });
 
                           Promise.all([menteesQuery, exerciseQuery]).then(() => {
                                 database('submissions')

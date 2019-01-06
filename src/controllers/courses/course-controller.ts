@@ -46,13 +46,12 @@ export default class CourseController {
                             'courses.logo', 'courses.daysToComplete',
                             'courses.shortDescription', 'courses.sequenceNum',
                             database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
-                            database.raw('COUNT(exercises.id) as totalExercises'),
+                            database.raw('COUNT(CASE WHEN exercises.submissionType IS NOT NULL THEN 1 END) as totalExercises'),
                             database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
                         .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
                         .innerJoin('exercises', function(){
-                            // count only those exercises which have submissionType!=null
+                            // count only those exercises which have submissionType != null
                             this.on('course_enrolments.courseId', '=', 'exercises.courseId')
-                                .addOn('exercises.submissionType', '<>', null)
                         })
                         .leftJoin('submissions', function () {
                             this.on('submissions.userId', '=', request.userId)
@@ -282,7 +281,7 @@ export default class CourseController {
                         'submissions.completedAt as submissionCompleteAt')
                     .leftJoin('submissions', function () {
                         this.on('submissions.id', '=',
-                          database.raw(xyz)
+                            database.raw(xyz)
                         );
                     })
                     .where({'exercises.slug': request.query.slug});
@@ -368,11 +367,11 @@ export default class CourseController {
                                     studentId: request.userId,
                                     courseId: courseId
                                 })
-                                  .then((response) => {
+                                .then((response) => {
                                     resolve({
                                         'enrolled': true,
                                     });
-                                  });
+                                });
                             });
                     }
                 });

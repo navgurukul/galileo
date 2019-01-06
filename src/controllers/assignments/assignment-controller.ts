@@ -257,56 +257,56 @@ export default class AssignmentController {
     }
 
     public getExerciseSubmissions(request, h) {
-        return new Promise((resolve, reject) => {
-            let submissionQuery =
-                database('submissions')
-                    .select(
-                        // Submissions table fields
-                        'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
-                        'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
-                        'submissions.completedAt',
-                        // Reviewer details
-                        'reviewUsers.name as reviwerName', 'reviewUsers.id as reviwerId',
-                        'reviewUsers.profilePicture as reviewerProfilePicture',
-                        'reviewUsers.facilitator as isReviewerFacilitator',
-                        // Submitter Details
-                        'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
-                        'users.facilitator as isSubmitterFacilitator'
-                    )
-                    .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
-                    .leftJoin('users', 'submissions.userId', 'users.id');
+      return new Promise((resolve, reject) => {
+                  let submissionQuery =
+                      database('submissions')
+                          .select(
+                              // Submissions table fields
+                              'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
+                              'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
+                              'submissions.completedAt',
+                              // Reviewer details
+                              'reviewUsers.name as reviewerName', 'reviewUsers.id as reviewerId',
+                              'reviewUsers.profilePicture as reviewerProfilePicture',
+                              // 'reviewUsers.facilitator as isReviewerFacilitator',
+                              // Submitter Details
+                              'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
+                              // 'users.facilitator as isSubmitterFacilitator'
+                          )
+                          .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
+                          .leftJoin('users', 'submissions.userId', 'users.id');
 
-            let whereClause = {
-                'submissions.exerciseId': request.params.exerciseId
-            };
-            
-            if (request.query.submissionUsers === 'current') {
-                whereClause['submissions.userId'] = request.userId;
-            }
-            if (request.query.submissionState !== 'all') {
-                whereClause['submissions.state'] = request.query.submissionState;
-            }
+                  let whereClause = {
+                      'submissions.exerciseId': request.params.exerciseId
+                  };
+                  if (request.query.submissionUsers === 'current') {
+                      whereClause['submissions.userId'] = request.userId;
+                  }
+                  if (request.query.submissionState !== 'all') {
+                      whereClause['submissions.state'] = request.query.submissionState;
+                  }
 
-            submissionQuery.where(whereClause)
-                .then((rows) => {
-                    let submissions = [];
-                    for (let i = 0; i < rows.length; i++) {
-                        let submission = rows[i];
-                        if (submission.files !== null) {
-                            submission.files = JSON.parse(submission.files);
-                        }
-                        submissions.push(submission);
-                    }
-                    resolve({"data": submissions});
-                });
-        });
+                  submissionQuery.where(whereClause)
+                      .then((rows) => {
+                          let submissions = [];
+                          for (let i = 0; i < rows.length; i++) {
+                              let submission = rows[i];
+                              if (submission.files !== null) {
+                                  submission.files = JSON.parse(submission.files);
+                              }
+                              submissions.push(submission);
+                          }
+                          resolve({"data": submissions});
+                      });
+              });
 
     }
 
     public getExerciseSubmissionById(request, h) {
         return new Promise((resolve, reject) => {
             database('submissions')
-                .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt','submissions.submitterNotes', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName', 'users.id as reviwerId', 'users.profilePicture as reviewerProfilePicture', 'users.facilitator as isReviewerFacilitator')
+                .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt','submissions.submitterNotes', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName', 'users.id as reviwerId', 'users.profilePicture as reviewerProfilePicture')
+                // ,'users.facilitator as isReviewerFacilitator')
                 .leftJoin('users', 'submissions.peerReviewerId', 'users.id')
                 .where({'submissions.id': request.params.submissionId})
                 .then((rows) => {
@@ -362,8 +362,8 @@ export default class AssignmentController {
                         'exercises.name as exerciseName', 'exercises.slug as exerciseSlug', 'exercises.sequenceNum as exerciseSequenceNum',
                         'exercises.reviewType', 'exercises.content as exerciseContent',
                         // Users table
-                        'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture',
-                        'users.facilitator as isSubmitterFacilitator'
+                        'users.id as submitterId', 'users.name as submitterName', 'users.profilePicture as submitterProfilePicture'
+                        // 'users.facilitator as isSubmitterFacilitator'
                     )
                     .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
                     .innerJoin('users', 'submissions.userId', 'users.id')
