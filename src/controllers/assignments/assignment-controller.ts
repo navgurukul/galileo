@@ -98,6 +98,45 @@ export default class AssignmentController {
 
                                     let reviewerIdQuery, facilitatorIdQuery;
 
+                                    // get the user center
+                                    facilitatorIdQuery =
+                                            database('users')
+                                                  .select('users.center as studentCenter')
+                                                  .where({
+                                                      'users.id':request.userId
+                                                  })
+                                                  .then((rows) => {
+                                                      if (rows.length < 1){
+                                                          reject(Boom.expectationFailed("Student have no center assigned can't"
+                                                           + "submit assignment."));
+                                                          return Promise.reject();
+                                                      } else {
+                                                         const { studentCenter } = rows[0];
+                                                         return Promise.resolve(studentCenter)
+                                                      }
+                                                  })
+                                                  .then((studentCenter) => {
+                                                      // check if the user_roles exist as facilitator for that center
+                                                      database('user_roles')
+                                                               .select('userId as reviwerId')
+                                                               .where({
+                                                                   'user_roles.center': studentCenter
+                                                               })
+                                                               .then((rows) => {
+                                                                   if (rows.length < 1) {
+                                                                   // if no user roles exist than get
+                                                                   // facilitator from default facilitator
+
+                                                                   const { facilitatorEmails } = this.configs;
+                                                                   
+                                                                   // if no facilitator exist than just
+                                                                   // throw error of no facilitator found for the center.
+                                                                   } else {
+                                                                       return Promise.resolve(rows[0].reviwerId);
+                                                                   }
+                                                               });
+                                                  })
+
                                     facilitatorIdQuery = database('courses')
                                         .select('courses.facilitator as reviewerID')
                                         .where({'courses.id':request.params.courseId});
