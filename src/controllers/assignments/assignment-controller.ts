@@ -100,46 +100,65 @@ export default class AssignmentController {
 
                                     // get the user center
                                     facilitatorIdQuery =
-                                            database('users')
-                                                  .select('users.center as studentCenter')
-                                                  .where({
-                                                      'users.id':request.userId
-                                                  })
-                                                  .then((rows) => {
-                                                      if (rows.length < 1){
-                                                          reject(Boom.expectationFailed("Student have no center assigned can't"
-                                                           + "submit assignment."));
-                                                          return Promise.reject();
-                                                      } else {
-                                                         const { studentCenter } = rows[0];
-                                                         return Promise.resolve(studentCenter)
-                                                      }
-                                                  })
-                                                  .then((studentCenter) => {
-                                                      // check if the user_roles exist as facilitator for that center
-                                                      database('user_roles')
-                                                               .select('userId as reviwerId')
-                                                               .where({
-                                                                   'user_roles.center': studentCenter
-                                                               })
-                                                               .then((rows) => {
-                                                                   if (rows.length < 1) {
-                                                                   // if no user roles exist than get
-                                                                   // facilitator from default facilitator
+                                        database('users')
+                                            .select('users.center as studentCenter')
+                                            .where({
+                                                'users.id':request.userId
+                                            })
+                                            .then((rows) => {
+                                                if (rows.length < 1){
+                                                    reject(Boom.expectationFailed("Student have no center assigned can't"
+                                                     + "submit assignment."));
+                                                    return Promise.reject();
+                                                } else {
+                                                   const { studentCenter } = rows[0];
+                                                   return Promise.resolve(studentCenter);
+                                                }
+                                            })
+                                            .then((studentCenter) => {
+                                                // check if the user_roles exist as facilitator for that center
+                                                let query =
+                                                    database('user_roles')
+                                                       .select('userId as reviewerID')
+                                                       .where({
+                                                           'user_roles.center': studentCenter,
+                                                           'user_roles.roles':'facilitator',
+                                                       });
+                                                return query;
+                                            })
+                                            .then((rows) => {
+                                              if (rows.length < 1) {
+                                                // if no user roles exist than get
+                                                // facilitator from default facilitator
+                                                const { facilitatorEmails } = this.configs;
+                                                if(facilitatorEmails.length < 1){
+                                                    reject(Boom.expectationFailed("No facilitators in config add them."));
+                                                }
+                                                let facilitatorEmail =
+                                                facilitatorEmails[((Math.random() * facilitatorEmails.length) | 0)];
+                                                return database('users')
+                                                          .select('users.id as reviewerID')
+                                                          .where({'users.email': facilitatorEmail})
+                                                          .then((rows) => {
+                                                              if(rows.length < 1){
+                                                                  console.log(1)
+                                                                  reject(Boom.expectationFailed("There is no facilitator "
+                                                                                                + "added on Platform."));
+                                                              } else {
+                                                                  return Promise.resolve(rows);
+                                                              }
+                                                          })
+                                                // if no facilitator exist than just
+                                                // throw error of no facilitator found for the center.
+                                              } else {
+                                                  return Promise.resolve(rows);
+                                              }
 
-                                                                   const { facilitatorEmails } = this.configs;
+                                            });
 
-                                                                   // if no facilitator exist than just
-                                                                   // throw error of no facilitator found for the center.
-                                                                   } else {
-                                                                       return Promise.resolve(rows[0].reviwerId);
-                                                                   }
-                                                               });
-                                                  })
-
-                                    facilitatorIdQuery = database('courses')
-                                        .select('courses.facilitator as reviewerID')
-                                        .where({'courses.id':request.params.courseId});
+                                    // facilitatorIdQuery = database('courses')
+                                    //     .select('courses.facilitator as reviewerID')
+                                    //     .where({'courses.id':request.params.courseId});
 
                                     if (exercise.reviewType === 'peer') {
                                         reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
@@ -234,20 +253,18 @@ export default class AssignmentController {
                                           });
 
                                     return Promise.all([studentQuery, reviewerQuery])
-                                              .then(response => {
-                                                console.log(this.configs);
-                                                return sendAssignmentReviewEmail(student, reviewer, this.configs.awsEmailConfig);
-                                              })
-                                              .then(() => {
-                                                return database('submissions')
-                                                    .select(
-                                                      // Submissions table fields
-                                                      'submissions.state', 'submissions.completed')
-                                                    .where({
-                                                          'submissions.userId': request.userId,
-                                                          'exerciseId': request.params.exerciseId
-                                                    });
-                                              });
+                                          .then(() => {
+                                            return database('submissions')
+                                                .select(
+                                                  // Submissions table fields
+                                                  'submissions.id as submissionId', 'exercises.name as exerciseName',
+                                                  'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed')
+                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                .where({
+                                                      'submissions.userId': request.userId,
+                                                      'exerciseId': request.params.exerciseId
+                                                });
+                                          });
                                 })
                                 .then((rows) => {
                                     sendAssignmentReviewPendingEmail(student, reviewer, rows[0]);
