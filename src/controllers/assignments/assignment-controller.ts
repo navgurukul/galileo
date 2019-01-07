@@ -36,7 +36,7 @@ export default class AssignmentController {
             database('course_enrolments').select('*')
                 .where({
                     'studentId': request.userId,
-                    'courseId': request.params.courseId
+                    'courseId': request.params.courseId,
                 })
                 .then((rows) => {
                     if (rows.length > 0) {
@@ -49,7 +49,8 @@ export default class AssignmentController {
                 .then((response) => {
                     if (response.canSubmit === true) {
                         let count, student, reviewer;
-                        database('exercises').select().where('id', request.params.exerciseId)
+                        database('exercises').select('*')
+                            .where('id', request.params.exerciseId)
                             .then((rows) => {
                                 if (rows.length < 1) {
                                     reject(Boom.notFound('The exercise with the given ID is not found.'));
@@ -62,8 +63,7 @@ export default class AssignmentController {
                             .then((exercise) => {
                                 return database('submissions').count('id as count').where({
                                     'submissions.userId': request.userId,
-                                    'exerciseId': request.params.exerciseId,
-                                    // 'completed': 1
+                                    'exerciseId': request.params.exerciseId
                                 }).then((rows) => {
                                     count = rows[0].count;
                                     return Promise.resolve(exercise);
@@ -100,16 +100,13 @@ export default class AssignmentController {
 
                                     // get the user center
                                     facilitatorIdQuery =
-                                        database('users')
-                                            .select('users.center as studentCenter')
-                                            .where({
-                                                'users.id':request.userId
-                                            })
+                                        database('users').select('users.center as studentCenter')
+                                            .where({'users.id':request.userId})
                                             .then((rows) => {
                                                 if (rows.length < 1){
                                                     reject(Boom.expectationFailed("Student have no center assigned can't"
                                                      + "submit assignment."));
-                                                    return Promise.reject();
+                                                    return Promise.reject("Rejected");
                                                 } else {
                                                    const { studentCenter } = rows[0];
                                                    return Promise.resolve(studentCenter);
@@ -128,29 +125,34 @@ export default class AssignmentController {
                                             })
                                             .then((rows) => {
                                               if (rows.length < 1) {
-                                                // if no user roles exist than get facilitator from default facilitator
                                                 const { facilitatorEmails } = this.configs;
+
+                                                // if no user roles exist than get facilitator from default facilitator
                                                 if(facilitatorEmails.length < 1){
                                                     reject(Boom.expectationFailed("No facilitators in config add them."));
+                                                    return Promise.reject("Rejected");
                                                 }
-                                                let facilitatorEmail =
-                                                facilitatorEmails[((Math.random() * facilitatorEmails.length) | 0)];
+
+                                                const index =  (Math.random() * facilitatorEmails.length) | 0
+                                                let facilitatorEmail = facilitatorEmails[index];
+
                                                 return database('users')
-                                                          .select('users.id as reviewerID')
-                                                          .where({'users.email': facilitatorEmail})
-                                                          .then((rows) => {
-                                                            // if no facilitator exist than just
-                                                            // throw error of no facilitator found for the center.
-                                                            if(rows.length < 1){
-                                                                  reject(Boom.expectationFailed("There is no facilitator "
-                                                                                                + "added on Platform."));
-                                                              } else {
-                                                                  return Promise.resolve(rows);
-                                                              }
-                                                          })
+                                                            .select('users.id as reviewerID')
+                                                            .where({'users.email': facilitatorEmail})
                                               } else {
                                                   return Promise.resolve(rows);
                                               }
+                                            })
+                                            .then((rows) => {
+                                              // if no facilitator exist than just
+                                              // throw error of no facilitator found for the center.
+                                                if(rows.length < 1){
+                                                      reject(Boom.expectationFailed("There is no facilitator "
+                                                            + "added on the platform."));
+                                                      return Promise.reject("Rejected")
+                                                } else {
+                                                      return Promise.resolve(rows);
+                                                }
                                             });
 
                                     // facilitatorIdQuery = database('courses')
@@ -159,12 +161,14 @@ export default class AssignmentController {
 
                                     if (exercise.reviewType === 'peer') {
                                         reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
-                                            .innerJoin('course_enrolments', 'submissions.userId', 'course_enrolments.studentId')
+                                            .innerJoin('course_enrolments', 'submissions.userId','course_enrolments.studentId')
                                             .where({
                                                 'submissions.completed': 1,
                                                 'submissions.exerciseId': request.params.exerciseId,
                                                 'course_enrolments.courseId': request.params.courseId
-                                            }).orderByRaw('RAND()').limit(1);
+                                            })
+                                            .orderByRaw('RAND()')
+                                            .limit(1);
 
                                     } else {
                                         reviewerIdQuery = facilitatorIdQuery;
@@ -202,65 +206,60 @@ export default class AssignmentController {
                                 // or create a new submission
                                 let submissionInsertQuery;
                                 if (count >= 1){
-                                    submissionInsertQuery = database('submissions')
-                                            .select(`submissions.id`)
-                                            .where({
-                                                'submissions.userId': request.userId,
-                                                'exerciseId': request.params.exerciseId,
-                                            })
-                                            .update(queryData)
-                                            .then((row) => {
-                                                return Promise.resolve({
-                                                    reviewerId: queryData.peerReviewerId,
-                                                    studentId: queryData.userId
-                                                });
-                                            });
+                                    submissionInsertQuery =
+                                            database('submissions').select(`submissions.id`)
+                                                  .where({
+                                                      'submissions.userId': request.userId,
+                                                      'exerciseId': request.params.exerciseId,
+                                                  })
+                                                  .update(queryData)
+                                                  .then((row) => {
+                                                      return Promise.resolve({
+                                                          reviewerId: queryData.peerReviewerId,
+                                                          studentId: queryData.userId
+                                                      });
+                                                  });
                                 } else{
-                                    submissionInsertQuery = database('submissions')
-                                          .insert(queryData)
-                                          .then((rows) => {
-                                              return Promise.resolve({
-                                                  reviewerId: queryData.peerReviewerId,
-                                                  studentId: queryData.userId
+                                    submissionInsertQuery =
+                                          database('submissions').insert(queryData)
+                                              .then((rows) => {
+                                                  return Promise.resolve({
+                                                      reviewerId: queryData.peerReviewerId,
+                                                      studentId: queryData.userId
+                                                  });
                                               });
-                                          });
                                 }
 
                                 submissionInsertQuery.then((response) => {
+                                    let studentQuery =
+                                          database('users').select('users.email', 'users.name')
+                                              .where({'users.id': response.studentId})
+                                              .then((rows) => {
+                                                  student = rows[0];
+                                                  return Promise.resolve();
+                                              });
 
-                                    // console.log(response);
-                                    let studentQuery  = database('users')
-                                          .select('users.email', 'users.name')
-                                          .where({
-                                              'users.id': response.studentId
-                                          })
-                                          .then(rows => {
-                                              student = rows[0];
-                                              return Promise.resolve();
-                                          });
-
-                                    let reviewerQuery = database('users')
-                                          .select('users.email', 'users.name')
-                                          .where({
-                                              'users.id': response.reviewerId
-                                          })
-                                          .then((rows) => {
-                                              reviewer = rows[0];
-                                              return Promise.resolve();
-                                          });
+                                    let reviewerQuery =
+                                          database('users').select('users.email', 'users.name')
+                                              .where({'users.id': response.reviewerId})
+                                              .then((rows) => {
+                                                  reviewer = rows[0];
+                                                  return Promise.resolve();
+                                              });
 
                                     return Promise.all([studentQuery, reviewerQuery])
                                           .then(() => {
-                                            return database('submissions')
-                                                .select(
-                                                  // Submissions table fields
-                                                  'submissions.id as submissionId', 'exercises.name as exerciseName',
-                                                  'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed')
-                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                                .where({
-                                                      'submissions.userId': request.userId,
-                                                      'exerciseId': request.params.exerciseId
-                                                });
+                                              return database('submissions')
+                                                        .select(
+                                                          // Submissions table fields
+                                                          'submissions.id as submissionId', 'exercises.name as exerciseName',
+                                                          'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed'
+                                                        )
+                                                      .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                      .where({
+                                                            'submissions.userId': request.userId,
+                                                            'exerciseId': request.params.exerciseId
+                                                      });
                                           });
                                 })
                                 .then((rows) => {

@@ -31,43 +31,124 @@ export default class UserController {
                 }
                 let googleAuthPayload = login.getPayload();
 
-                // let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                let isAdmin = false,
+                    isAlumni = false;
+
                 let userObj = {
                     email: googleAuthPayload['email'],
                     name: googleAuthPayload['name'],
                     profilePicture: googleAuthPayload['picture'],
-                    googleUserId: googleAuthPayload['sub'],
-                    // facilitator: isFacilitator
+                    googleUserId: googleAuthPayload['sub']
                 };
+                
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
-                    .then((user)=> {
-                        console.log(user);
+                    .then((user) => {
                         return database('user_roles').select('*')
-                            .where({'userId': user.id})
-                            .then((rows) => {
-                                if(rows.length < 1) {
-                                    return database('user_roles').insert({
-                                        userId: user.id,
-                                      })
-                                      .then((row) => {
+                                  .where({'user_roles.userId':user.id})
+                                  .then((rows) => {
+                                        if(rows.length < 1){
+                                            return Promise.resolve({
+                                                shouldCreateRole: true,
+                                                user
+                                            });
+                                        } else {
+                                            return Promise.resolve({
+                                                shouldCreateRole: false,
+                                                user
+                                            });
+                                        }
+                                  });
+                    })
+                    .then((response) => {
+                        const { shouldCreateRole, user } = response;
+
+                        if(shouldCreateRole === false){
+                            // when the user signup for the first time or
+                            // didn't have any user_roles
+                            let whereClause = {
+                                userId: user.id
+                            }
+                            // if he is a facilitator
+                            if(isFacilitator){
+                                whereClause.roles = 'facilitator';
+                            }
+
+                            return database('user_roles')
+                                      .insert(whereClause)
+                                      .then(() => {
                                           return Promise.resolve({
-                                            ...user,
-                                            isAdmin:false
+                                              ...user,
+                                              isAdmin,
+                                              isFacilitator,
+                                              isAlumni,
                                           });
                                       });
-                                } else {
-                                    const isAdmin = rows[0].roles ==='admin'?true:false;
-                                    return Promise.resolve({
-                                      ...user,
-                                      isAdmin
-                                    });
-                                }
-                            });
+
+                        } else {
+                            // update the facilitator from config files
+                            let shouldCreateFacilitatorRole =
+                                    database('user_roles').select('*')
+                                          .where({
+                                              'user_roles.userId': user.id,
+                                              'user_roles.roles':'facilitator'
+                                          })
+                                          .then((rows) => {
+                                              // if user had been added as f
+                                              // acilitator after joining SARAL
+                                              if(rows.length < 1 && isFacilitator){
+                                                  return Promise.resolve({createFacilitatorRole: true});
+                                              } else {
+                                                  return Promise.resolve({createFacilitatorRole: false});
+                                              }
+                                          });
+                            // NOTE: Need to create a route which grants roles to users
+
+                            return shouldCreateFacilitatorRole
+                                      .then((rows) => {
+                                            if(createFacilitatorRole){
+                                                return database('user_roles').insert({
+                                                              'user_roles.userId': user.id,
+                                                              'user_roles.roles': 'facilitator',
+                                                          })
+                                                          .then((rows) => Promise.resolve());
+
+                                            } else {
+                                                 return Promise.resolve();
+                                            }
+                                      })
+                                      .then(() => {
+                                          // get all the roles the user have
+                                          return database('user_roles').select('*')
+                                                    .where({
+                                                        'user_roles.userId': user.id,
+                                                    });
+                                      })
+                                      .then((rows) => {
+                                            // get the roles of the users
+                                            for(let i = 0; i < rows.length; i++){
+                                                if (rows[i].roles === "facilitator"){
+                                                    isFacilitator = true;
+                                                } else if (rows[i].roles === "admin") {
+                                                    isAdmin = true;
+                                                } else if (rows[i].roles === "alumni") {
+                                                    isAlumni = true
+                                                }
+                                            }
+
+                                            return Promise.resolve({
+                                                ...user,
+                                                isFacilitator,
+                                                isAdmin,
+                                                isAlumni,
+                                            });
+                                      });
+                        }
                     })
                     .then((user) => {
-                         resolve({
-                            'user': user,
-                            'jwt': this.userModel.getJWTToken(user)
+                        resolve({
+                          'user': user,
+                          'jwt': this.userModel.getJWTToken(user)
                         });
                     });
             });

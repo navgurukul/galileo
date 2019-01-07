@@ -19,11 +19,12 @@ export default class CourseController {
 
     public getCoursesList(request, h) {
         return new Promise((resolve, reject) => {
-            let enrolledCourses = [];
-            let availableCourses = [];
+            let enrolledCourses = [],
+                availableCourses = [],
+                completedCourses = [];
 
-            let enrolledQ;
-            let availableQ;
+            let enrolledQ, availableQ, completedQ;
+
             if (request.headers.authorization === undefined ){
                 availableQ =
                     database('courses').select('courses.id', 'courses.name', 'courses.type',
@@ -33,7 +34,7 @@ export default class CourseController {
                             return Promise.resolve();
                         });
 
-                Promise.all([availableQ]).then(() => {
+                availableQ.then(() => {
                     resolve({
                         'availableCourses': availableCourses
                     });
@@ -68,7 +69,9 @@ export default class CourseController {
                             let lastSubmissionQueries = [];
                             for (let i = 0; i < enrolledCourses.length; i++) {
                                 let oneDay = 24 * 60 * 60 * 1000;
-                                enrolledCourses[i].daysSinceEnrolled = Math.abs(+new Date() - enrolledCourses[i].enrolledAt) / oneDay;
+                                enrolledCourses[i].daysSinceEnrolled =
+                                        Math.abs(+new Date() - enrolledCourses[i].enrolledAt) / oneDay;
+
                                 lastSubmissionQueries.push(
                                     database('submissions')
                                         .select('exercises.name', 'exercises.slug', 'submissions.submittedAt', 'submissions.completedAt')
@@ -92,6 +95,17 @@ export default class CourseController {
                             }
                             return Promise.all(lastSubmissionQueries);
                         });
+                completedQ =
+                    database('course_enrolments')
+                        .select(
+                            'courses.id', 'courses.name', 'courses.type','courses.logo', 'courses.daysToComplete',
+                            'courses.shortDescription', 'courses.sequenceNum','course_enrolments.completedAt', 'course_enrolments.enrolledAt',
+                        )
+                        .innerJoin('courses', 'courses.id', 'course_enrolments.courseId')
+                        .where({'course_enrolments.courseStatus': 'completed'})
+                        .then((rows) => {
+                            completedCourses = rows;
+                        });
 
                 availableQ =
                     database('courses')
@@ -109,10 +123,11 @@ export default class CourseController {
                             return Promise.resolve();
                         });
 
-                Promise.all([enrolledQ, availableQ]).then(() => {
+                Promise.all([enrolledQ, availableQ, completedQ]).then(() => {
                     resolve({
-                        'enrolledCourses': enrolledCourses,
-                        'availableCourses': availableCourses
+                        enrolledCourses,
+                        availableCourses,
+                        completedCourses,
                     });
                 });
 

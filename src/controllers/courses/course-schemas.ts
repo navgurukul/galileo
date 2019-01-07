@@ -26,9 +26,13 @@ export const enrolledCourseSchema: Joi.ObjectSchema = courseSchema.keys({
         slug: Joi.string().allow(null),
         submittedAt: Joi.date().allow(null),
         completedAt: Joi.date().allow(null)
-    })
+    }),
 });
-
+export const completedCoursesSchema: Joi.ObjectSchema = courseSchema.keys({
+    completedAt: Joi.date().allow(null),
+    enrolledAt: Joi.date(),
+    daysToComplete: Joi.number(),
+});
 // export const enrolledOrFacilitatingCourseSchema: Joi.ObjectSchema = courseSchema.keys({
 //     enrolled: Joi.bool().allow(null),
 //     enrolledBatch: Joi.bool(),
@@ -57,6 +61,7 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
     // submissionId: Joi.number().allow(null),
     // submissionCompleteAt: Joi.date().allow(null)
 }).unknown();
+
 export const exerciseSchema = _exerciseSchema.keys({childExercises: Joi.array().items(_exerciseSchema)});
 
 export const courseSequenceSchema: Joi.ObjectSchema = Joi.object({
