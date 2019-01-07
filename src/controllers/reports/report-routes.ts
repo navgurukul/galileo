@@ -62,7 +62,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/reports/mentors/getMenteesCourseReport',
+        path: '/reports/courses',
         config: {
             description: 'List of all Mentees assgin to a Mentor.',
 
@@ -80,7 +80,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/reports/mentors/getMenteesExerciseReport/{courseId}',
+        path: '/reports/course/{courseId}',
         config: {
             description: 'List of all Mentees assgin to a Mentor.',
             validate: {

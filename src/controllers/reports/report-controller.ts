@@ -215,7 +215,7 @@ export default class ReportController {
                       } else {
                           let mentees = [],
                               course_enrolments = [];
-                              
+
                           const menteesQuery = database('users')
                                       .select('users.id', 'users.name', 'users.email')
                                       .innerJoin('mentors', 'mentors.mentee', 'users.id')
@@ -239,7 +239,7 @@ export default class ReportController {
                                           database.raw(totalExercisesQ),
 
                                           // mentee reports
-                                          'users.id as menteeId', 'users.name as menteeName', 'users.email as menteeEmail',
+                                          'users.name as menteeName', 'users.email as menteeEmail',
                                           'course_enrolments.courseStatus as menteeCourseStatus',
                                           database.raw(completedSubmissionsQ)
                                       )
@@ -256,7 +256,7 @@ export default class ReportController {
                                           'mentors.mentor': 1 //request.userId
                                       })
                                       .groupBy('course_enrolments.id')
-                                      .distinct('users.id')
+                                      .distinct('users.id as menteeId')
                                       .then((rows) => {
                                           course_enrolments = rows;
                                       });
@@ -272,7 +272,7 @@ export default class ReportController {
                                   if (courses[courseName] === undefined){
                                       courses[courseName] = {
                                           courseId,
-                                          studentEnrolled:[],
+                                          studentEnrolled: [],
                                       };
                                   }
                                   courses[courseName]['studentEnrolled'].push(userDetails);
