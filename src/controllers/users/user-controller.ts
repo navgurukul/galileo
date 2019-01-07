@@ -41,23 +41,23 @@ export default class UserController {
                     profilePicture: googleAuthPayload['picture'],
                     googleUserId: googleAuthPayload['sub']
                 };
-                
+
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                     .then((user) => {
                         return database('user_roles').select('*')
                                   .where({'user_roles.userId':user.id})
                                   .then((rows) => {
-                                        if(rows.length < 1){
-                                            return Promise.resolve({
-                                                shouldCreateRole: true,
-                                                user
-                                            });
-                                        } else {
-                                            return Promise.resolve({
-                                                shouldCreateRole: false,
-                                                user
-                                            });
-                                        }
+                                      if(rows.length < 1){
+                                          return Promise.resolve({
+                                              shouldCreateRole: true,
+                                              user
+                                          });
+                                      } else {
+                                          return Promise.resolve({
+                                              shouldCreateRole: false,
+                                              user
+                                          });
+                                      }
                                   });
                     })
                     .then((response) => {
@@ -68,14 +68,13 @@ export default class UserController {
                             // didn't have any user_roles
                             let whereClause = {
                                 userId: user.id
-                            }
+                            };
                             // if he is a facilitator
                             if(isFacilitator){
                                 whereClause.roles = 'facilitator';
-                            }
+                            };
 
-                            return database('user_roles')
-                                      .insert(whereClause)
+                            return database('user_roles').insert(whereClause)
                                       .then(() => {
                                           return Promise.resolve({
                                               ...user,
@@ -89,33 +88,33 @@ export default class UserController {
                             // update the facilitator from config files
                             let shouldCreateFacilitatorRole =
                                     database('user_roles').select('*')
-                                          .where({
-                                              'user_roles.userId': user.id,
-                                              'user_roles.roles':'facilitator'
-                                          })
-                                          .then((rows) => {
-                                              // if user had been added as f
-                                              // acilitator after joining SARAL
-                                              if(rows.length < 1 && isFacilitator){
-                                                  return Promise.resolve({createFacilitatorRole: true});
-                                              } else {
-                                                  return Promise.resolve({createFacilitatorRole: false});
-                                              }
-                                          });
+                                        .where({
+                                            'user_roles.userId': user.id,
+                                            'user_roles.roles':'facilitator'
+                                        })
+                                        .then((rows) => {
+                                            // if user had been added as f
+                                            // acilitator after joining SARAL
+                                            if(rows.length < 1 && isFacilitator){
+                                                return Promise.resolve({createFacilitatorRole: true});
+                                            } else {
+                                                return Promise.resolve({createFacilitatorRole: false});
+                                            }
+                                        });
                             // NOTE: Need to create a route which grants roles to users
 
                             return shouldCreateFacilitatorRole
                                       .then((rows) => {
-                                            if(createFacilitatorRole){
-                                                return database('user_roles').insert({
-                                                              'user_roles.userId': user.id,
-                                                              'user_roles.roles': 'facilitator',
-                                                          })
-                                                          .then((rows) => Promise.resolve());
+                                          if(createFacilitatorRole){
+                                              return database('user_roles').insert({
+                                                          'user_roles.userId': user.id,
+                                                          'user_roles.roles': 'facilitator',
+                                                        })
+                                                        .then((rows) => Promise.resolve());
 
-                                            } else {
-                                                 return Promise.resolve();
-                                            }
+                                          } else {
+                                               return Promise.resolve();
+                                          }
                                       })
                                       .then(() => {
                                           // get all the roles the user have
@@ -132,7 +131,7 @@ export default class UserController {
                                                 } else if (rows[i].roles === "admin") {
                                                     isAdmin = true;
                                                 } else if (rows[i].roles === "alumni") {
-                                                    isAlumni = true
+                                                    isAlumni = true;
                                                 }
                                             }
 
@@ -147,8 +146,8 @@ export default class UserController {
                     })
                     .then((user) => {
                         resolve({
-                          'user': user,
-                          'jwt': this.userModel.getJWTToken(user)
+                            'user': user,
+                            'jwt': this.userModel.getJWTToken(user)
                         });
                     });
             });
