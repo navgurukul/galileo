@@ -39,7 +39,7 @@ export default class UserController {
                     email: googleAuthPayload['email'],
                     name: googleAuthPayload['name'],
                     profilePicture: googleAuthPayload['picture'],
-                    googleUserId: googleAuthPayload['sub']
+                    googleUserId: googleAuthPayload['sub'],
                 };
 
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)

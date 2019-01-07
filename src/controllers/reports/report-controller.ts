@@ -211,10 +211,12 @@ export default class ReportController {
                   .then((rows) => {
                       if (rows.length < 1){
                         reject(Boom.expectationFailed("User doesn't have any mentee."));
+                        return Promise.reject("Rejected");
                       } else {
                           let mentees = [],
                               course_enrolments = [];
-                          let menteesQuery = database('users')
+                              
+                          const menteesQuery = database('users')
                                       .select('users.id', 'users.name', 'users.email')
                                       .innerJoin('mentors', 'mentors.mentee', 'users.id')
                                       .where({
@@ -223,21 +225,42 @@ export default class ReportController {
                                       .then((rows) => {
                                           mentees = rows;
                                       });
+
                           // get all the courses where the mentors menties have enrolled
-                          let menteesReportQuery = database('course_enrolments')
-                                      .select('courses.name as courseName','courses.id as courseId',
-                                              'users.id', 'users.name', 'users.email',
-                                              'course_enrolments.enrolled as isEnrolled', 'course_enrolments.completed as isCourseCompleted ')
+                          const totalExercisesQ = 'COUNT(CASE WHEN exercises.submissionType'
+                                                  + ' IS NOT NULL THEN 1 END) as totalExercises';
+                          const completedSubmissionsQ = 'COUNT(DISTINCT submissions.id) as completedSubmissions';
+
+                          const menteesReportQuery =
+                                  database('course_enrolments')
+                                      .select(
+                                          // course details
+                                          'courses.name as courseName', 'courses.id as courseId',
+                                          database.raw(totalExercisesQ),
+
+                                          // mentee reports
+                                          'users.id as menteeId', 'users.name as menteeName', 'users.email as menteeEmail',
+                                          'course_enrolments.courseStatus as menteeCourseStatus',
+                                          database.raw(completedSubmissionsQ)
+                                      )
                                       .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
                                       .rightJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
                                       .innerJoin('users', 'users.id', 'mentors.mentee')
+                                      .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
+                                      .leftJoin('submissions', function () {
+                                          this.on('submissions.userId', '=', 'mentors.mentee')
+                                              .andOn('submissions.exerciseId', '=', 'exercises.id')
+                                              .andOn('submissions.completed', '=', 1);
+                                      })
                                       .where({
                                           'mentors.mentor': 1 //request.userId
                                       })
+                                      .groupBy('course_enrolments.id')
                                       .distinct('users.id')
                                       .then((rows) => {
-                                        course_enrolments = rows;
+                                          course_enrolments = rows;
                                       });
+
                           // Add mentee list to be also sent
                           Promise.all([menteesReportQuery, menteesQuery]).then(() => {
 
@@ -248,25 +271,25 @@ export default class ReportController {
 
                                   if (courses[courseName] === undefined){
                                       courses[courseName] = {
-                                        courseId,
-                                        studentEnrolled:[],
+                                          courseId,
+                                          studentEnrolled:[],
                                       };
                                   }
                                   courses[courseName]['studentEnrolled'].push(userDetails);
-                                }
+                              }
 
-                              let enrolledCoursesReport = [];
+                              let coursesReport = [];
                               for(let courseName of Object.keys(courses)){
-                                let courseReport = {
-                                  courseName,
-                                  ...courses[courseName]
-                                }
-                                enrolledCoursesReport.push(courseReport);
+                                  let courseReport = {
+                                      courseName,
+                                      ...courses[courseName]
+                                  }
+                                  coursesReport.push(courseReport);
                               }
 
                               resolve({
-                                "data":enrolledCoursesReport,
-                                "userList":mentees,
+                                  "menteesCoursesReport": coursesReport,
+                                  "mentees": mentees,
                               });
                           });
                       }
@@ -277,95 +300,100 @@ export default class ReportController {
 
     public getMenteesExercisesReport(request, h){
       return new Promise((resolve, reject) => {
-        database('mentors').select('*')
-            .where({'mentors.mentor': request.userId})
-            .then(rows => {
-                if (rows.length < 1){
-                  reject(Boom.expectationFailed("User doesn't have any mentee"));
-                } else {
-                  database('courses')
-                      .select('courses.id as courseId')
-                      .where({
-                          'courses.id': request.params.courseId
-                      })
-                      .then((rows) => {
-                          // what if the courseId doesn't exist
-                          if (rows.length < 1){
-                              return reject(Boom.expectationFailed("CourseId doesn't exist please check the id."));
-                          } else{
-                              return Promise.resolve({courseId: rows[0].courseId})
-                          }
-
-                      })
-                      .then(({ courseId }) => {
-                          let mentees = [],
-                              menteeSubmissions = [],
-                              exercises = {};
-                          let menteesQuery = database('users')
-                                  .select('users.id', 'users.name', 'users.email')
-                                  .innerJoin('mentors', 'mentors.mentee', 'users.id')
-                                  .where({
-                                      'mentors.mentor': request.userId
-                                  })
-                                  .then((rows) => {
-                                      mentees = rows;
-                                  });
-                          let exerciseQuery =
-                                database('exercises')
-                                    .select(
-                                      'exercises.id as exerciseId', 'exercises.slug as exerciseSlug',
-                                      'exercises.sequenceNum as exerciseSequenceNum', 'exercises.name as exerciseName', 'exercises.submissionType as exerciseSubmissionType', 'exercises.githubLink as exerciseGithubLink', 'exercises.content as exerciseContent')
-                                    .where({
-                                        'exercises.courseId': courseId
-                                    })
-                                    .orderBy('exercises.sequenceNum', 'asc')
-                                    .then((rows) => {
-                                        for(let i = 0; i < rows.length; i++){
-                                            let exercise = rows[i];
-                                            exercises[exercise.exerciseId] = exercise;
-                                            exercises[exercise.exerciseId]['submissions'] = []
-                                        }
-                                    });
-
-                          Promise.all([menteesQuery, exerciseQuery]).then(() => {
-                                database('submissions')
-                                    .select(
-                                        'submissions.id as submissionId', 'submissions.state as submissionState',
-                                        'submissions.completed as submissionCompleted', 'submissions.exerciseId as exerciseId',
-                                        'users.id as menteeId', 'users.name as menteeName', 'users.email as menteeEmail'
-                                    )
-                                    .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                    .innerJoin('mentors', 'mentors.mentee', 'submissions.userId')
-                                    .innerJoin('users', 'users.id', 'mentors.mentee')
-                                    .where({
-                                        'exercises.courseId': courseId,
-                                        'mentors.mentor':request.userId
-                                    })
-                                    .then((rows) => {
-                                        console.log(rows);
-                                        // arrange the submissions of users exercise wise in exercises;
-                                        for(let i = 0; i < rows.length; i++){
-                                            let { exerciseId, ...submission } = rows[i];
-                                            exercises[exerciseId]['submissions'].push(submission)
-                                        }
-                                        // convert exercises from dictionary to list sorted by sequenceNum
-                                        for(let exerciseId of Object.keys(exercises)){
-                                            menteeSubmissions.push(exercises[exerciseId]);
-                                        }
-                                        menteeSubmissions.sort(function(a, b){
-                                          return a.exerciseSequenceNum - b.exerciseSequenceNum;
-                                        })
-                                        // console.log(exercises);
-                                        resolve({
-                                            "data": menteeSubmissions,
-                                            "userList": mentees,
-                                        });
-
-                                    });
+          database('mentors').select('*')
+              .where({
+                'mentors.mentor': 1 //request.userId
+              })
+              .then(rows => {
+                  if (rows.length < 1){
+                      reject(Boom.expectationFailed("User doesn't have any mentee"));
+                      return Promise.reject("Rejected");
+                  } else {
+                      return Promise.resolve();
+                  }
+              })
+              .then(() => {
+                    return database('courses').select('courses.id as courseId')
+                              .where({ 'courses.id': request.params.courseId })
+                              .then((rows) => {
+                                  // what if the courseId doesn't exist
+                                  if (rows.length < 1){
+                                      reject(Boom.expectationFailed("CourseId doesn't exist please check the id."));
+                                      return Promise.reject("Rejected");
+                                  } else{
+                                      return Promise.resolve({courseId: rows[0].courseId})
+                                  }
                               });
+              })
+              .then(({ courseId }) => {
+                  let mentees = [],
+                      menteeSubmissions = [],
+                      exercises = {};
+
+                  let menteesQuery = database('users')
+                          .select('users.id', 'users.name', 'users.email')
+                          .innerJoin('mentors', 'mentors.mentee', 'users.id')
+                          .where({
+                              'mentors.mentor': 1 //request.userId
+                          })
+                          .then((rows) => {
+                              mentees = rows;
+                          });
+
+                  let exerciseQuery =
+                        database('exercises')
+                            .select(
+                              'exercises.id as exerciseId', 'exercises.slug as exerciseSlug',
+                              'exercises.sequenceNum as exerciseSequenceNum', 'exercises.name as exerciseName', 'exercises.submissionType as exerciseSubmissionType',
+                              'exercises.githubLink as exerciseGithubLink', 'exercises.content as exerciseContent')
+                            .where({ 'exercises.courseId': courseId })
+                            .orderBy('exercises.sequenceNum', 'asc')
+                            .then((rows) => {
+                                for(let i = 0; i < rows.length; i++){
+                                    let exercise = rows[i];
+                                    exercises[exercise.exerciseId] = exercise;
+                                    exercises[exercise.exerciseId]['submissions'] = [];
+                                }
+                            });
+
+                  Promise.all([menteesQuery, exerciseQuery]).then(() => {
+                        database('submissions')
+                            .select(
+                                'submissions.id as submissionId', 'submissions.state as submissionState',
+                                'submissions.completed as submissionCompleted', 'submissions.exerciseId as exerciseId',
+                                'users.id as menteeId', 'users.name as menteeName', 'users.email as menteeEmail'
+                            )
+                            .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                            .innerJoin('mentors', 'mentors.mentee', 'submissions.userId')
+                            .innerJoin('users', 'users.id', 'mentors.mentee')
+                            .where({
+                                'exercises.courseId': courseId,
+                                'mentors.mentor': 1 //request.userId,
+                            })
+                            .then((rows) => {
+                                console.log(rows);
+                                // arrange the submissions of users exercise wise in exercises;
+                                for(let i = 0; i < rows.length; i++){
+                                    let { exerciseId, ...submission } = rows[i];
+                                    exercises[exerciseId]['submissions'].push(submission);
+                                }
+                                // convert exercises from dictionary to list sorted by sequenceNum
+                                for(let exerciseId of Object.keys(exercises)){
+                                    menteeSubmissions.push(exercises[exerciseId]);
+                                }
+                                // sorting them sequence wise
+                                menteeSubmissions.sort(function(a, b){
+                                    return a.exerciseSequenceNum - b.exerciseSequenceNum;
+                                })
+                                // console.log(exercises);
+                                resolve({
+                                    "menteesCourseReport": menteeSubmissions,
+                                    "mentees": mentees,
+                                });
+
+                            });
                       });
-                }
-            });
+              });
 
       });
     }
