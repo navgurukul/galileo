@@ -204,9 +204,10 @@ export default class ReportController {
 
     public getMenteesCoursesReport(request, h){
         return new Promise((resolve, reject) => {
+            request.userId = 1;
             database('mentors').select('*')
                   .where({
-                    'mentors.mentor': 1 //request.userId
+                    'mentors.mentor': request.userId
                   })
                   .then((rows) => {
                       if (rows.length < 1){
@@ -220,7 +221,7 @@ export default class ReportController {
                                       .select('users.id', 'users.name', 'users.email')
                                       .innerJoin('mentors', 'mentors.mentee', 'users.id')
                                       .where({
-                                          'mentors.mentor': 1 //request.userId
+                                          'mentors.mentor': request.userId
                                       })
                                       .then((rows) => {
                                           mentees = rows;
@@ -253,7 +254,7 @@ export default class ReportController {
                                               .andOn('submissions.completed', '=', 1);
                                       })
                                       .where({
-                                          'mentors.mentor': 1 //request.userId
+                                          'mentors.mentor': request.userId
                                       })
                                       .groupBy('course_enrolments.id')
                                       .distinct('users.id as menteeId')

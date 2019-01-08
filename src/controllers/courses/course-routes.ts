@@ -196,4 +196,27 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'POST',
+        path: '/courses/{courseId}/complete',
+        config: {
+            description: 'Updates the sequence number of all the courses.',
+            validate: {
+                params: {
+                    courseId: Joi.number().required(),
+                },
+                payload: {
+                    menteeId: Joi.number().required(),
+                }
+            },
+            response: {
+                schema: {
+                    "success": Joi.bool()
+                }
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.courseComplete
+        }
+    });
 }

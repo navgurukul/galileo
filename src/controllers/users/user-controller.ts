@@ -71,7 +71,7 @@ export default class UserController {
                             };
                             // if he is a facilitator
                             if(isFacilitator){
-                                whereClause.roles = 'facilitator';
+                                whereClause['roles'] = 'facilitator';
                             };
 
                             return database('user_roles').insert(whereClause)

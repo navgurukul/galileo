@@ -535,6 +535,128 @@ export default class CourseController {
                         });
               });
         });
-      }
+    }
+
+    public courseComplete(request, h){
+        // only facilitator of the mentee center or
+        // mentor of the mentee can mark the course complete
+        // request.userId = 1;
+        return new Promise((resolve, reject) => {
+            // check if the student id exist or not.
+            database('users')
+                .select('*')
+                .where({
+                    'users.id': request.payload.menteeId
+                })
+                .then((rows) => {
+                    if(rows.length < 1){
+                        reject(Boom.expectationFailed("The menteeId is "
+                                      + "invalid no student exist with the given menteeId."));
+                        return Promise.reject("Rejected");
+                    } else {
+                        return Promise.resolve(rows[0]);
+                    }
+                })
+                .then((mentee) => {
+                    // check if the is the mentor for the menteeId?
+                    return database('mentors')
+                              .select('*')
+                              .where({
+                                  'mentors.mentor': request.userId,
+                                  'mentors.mentee': mentee.id,
+                              })
+                              .then((rows) => {
+                                  if(rows.length < 1) {
+                                      return Promise.resolve({isMentor: false, mentee});
+                                  } else {
+                                      return Promise.resolve({isMentor: true, mentee});
+                                  }
+                              });
+                })
+                .then((response) => {
+                    if(!response.isMentor){
+                        const { mentee } = response;
+                        // check if he is the facilitator for the menteeId center?
+                        return database('user_roles').select('*')
+                                  .where({
+                                    'user_roles.userId': request.userId,
+                                    'user_roles.roles': 'facilitator',
+                                    'user_roles.center': mentee.center,
+                                  })
+                                  .orWhere({
+                                    'user_roles.userId': request.userId,
+                                    'user_roles.roles': 'facilitator',
+                                    'user_roles.center': 'all',
+                                  })
+                                  .then((rows) => {
+                                      let message = "You are not the facilitator for the given mentee's center"
+                                                    + " or the mentor for the given menteeId.";
+                                      if(rows.length < 1){
+                                          reject(Boom.expectationFailed(message));
+                                          return Promise.reject("Rejected");
+                                      } else {
+                                          return Promise.resolve()
+                                      }
+                                  });
+                    } else {
+                        // proceed if he user is the mentor of th givem menteeId.
+                        return Promise.resolve()
+                    }
+                })
+                .then(() => {
+                    // check if the course exist or not.
+                    return database('courses').select('*')
+                              .where({'courses.id': request.params.courseId})
+                              .then((rows) => {
+                                  if(rows.length < 1){
+                                      reject(Boom.expectationFailed("The course id doesn't exist."));
+                                      return Promise.reject("Rejected");
+                                  } else {
+                                      return Promise.resolve();
+                                  }
+                              });
+                })
+                .then(() => {
+                    // check if the student have enrolled in the course.
+                    return database('course_enrolments').select('*')
+                              .where({
+                                  'course_enrolments.studentId': request.payload.menteeId,
+                                  'course_enrolments.courseId': request.params.courseId,
+                              })
+                              .then((rows) => {
+                                  if(rows.length < 1){
+                                      reject(Boom.expectationFailed("The student is not enrolled in the course."));
+                                      return Promise.reject("Rejected");
+                                  } else if (rows[0].courseStatus === 'completed'){
+                                      reject(Boom.expectationFailed("The student have already "
+                                                    + "completed the course."));
+                                      return Promise.reject("Rejected");
+                                  }
+                                  else {
+                                      return Promise.resolve();
+                                  }
+                              });
+                })
+                .then(() => {
+                    // mark the course complete here.
+                    database('course_enrolments')
+                          .update({
+                              'course_enrolments.courseStatus':'completed',
+                              'course_enrolments.completedAt': new Date(),
+                          })
+                          .where({
+                              'course_enrolments.studentId': request.payload.menteeId,
+                              'course_enrolments.courseId': request.params.courseId,
+                          })
+                          .then((rows) => {
+                              resolve({
+                                  'success': true
+                              })
+                          })
+                });
+
+        });
+    }
+
 
 }
