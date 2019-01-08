@@ -100,31 +100,28 @@ export default class AssignmentController {
 
                                     // get the user center
                                     facilitatorIdQuery =
-                                        database('users').select('users.center as studentCenter')
-                                            .where({'users.id':request.userId})
-                                            .then((rows) => {
-                                                if (rows.length < 1){
-                                                    reject(Boom.expectationFailed("Student have no center assigned can't"
-                                                     + "submit assignment."));
-                                                    return Promise.reject("Rejected");
-                                                } else {
-                                                   const { studentCenter } = rows[0];
-                                                   return Promise.resolve(studentCenter);
-                                                }
-                                            })
-                                            .then((studentCenter) => {
-                                                // check if the user_roles exist as facilitator for that center
-                                                let query =
-                                                    database('user_roles')
-                                                       .select('userId as reviewerID')
-                                                       .where({
-                                                           'user_roles.center': studentCenter,
-                                                           'user_roles.roles':'facilitator',
-                                                       });
-                                                return query;
-                                            })
-                                            .then((rows) => {
-                                              if (rows.length < 1) {
+                                        database('users').select('users.center as studentCenter').where({
+                                            'users.id':request.userId
+                                        })
+                                        .then((rows) => {
+                                            if (rows.length < 1){
+                                                reject(Boom.expectationFailed("Student have no center assigned can't"
+                                                 + "submit assignment."));
+                                                return Promise.reject("Rejected");
+                                            } else {
+                                               const { studentCenter } = rows[0];
+                                               return Promise.resolve(studentCenter);
+                                            }
+                                        })
+                                        .then((studentCenter) => {
+                                            // check if the user_roles exist as facilitator for that center
+                                            return database('user_roles').select('userId as reviewerID').where({
+                                                'user_roles.center': studentCenter,
+                                                'user_roles.roles':'facilitator',
+                                            });
+                                        })
+                                        .then((rows) => {
+                                            if (rows.length < 1) {
                                                 const { facilitatorEmails } = this.configs;
 
                                                 // if no user roles exist than get facilitator from default facilitator
@@ -136,39 +133,43 @@ export default class AssignmentController {
                                                 const index =  (Math.random() * facilitatorEmails.length) | 0
                                                 let facilitatorEmail = facilitatorEmails[index];
 
-                                                return database('users')
-                                                            .select('users.id as reviewerID')
-                                                            .where({'users.email': facilitatorEmail})
+                                                return database('users').select('users.id as reviewerID').where({
+                                                    'users.email': facilitatorEmail
+                                                });
                                               } else {
                                                   return Promise.resolve(rows);
                                               }
-                                            })
-                                            .then((rows) => {
-                                              // if no facilitator exist than just
-                                              // throw error of no facilitator found for the center.
-                                                if(rows.length < 1){
-                                                      reject(Boom.expectationFailed("There is no facilitator "
-                                                            + "added on the platform."));
-                                                      return Promise.reject("Rejected")
-                                                } else {
-                                                      return Promise.resolve(rows);
-                                                }
-                                            });
+                                        })
+                                        .then((rows) => {
+                                          // if no facilitator exist than just
+                                          // throw error of no facilitator found for the center.
+                                            if(rows.length < 1){
+                                                reject(Boom.expectationFailed("There is no facilitator "
+                                                      + "added on the platform."));
+                                                return Promise.reject("Rejected")
+                                            } else {
+                                                return Promise.resolve(rows);
+                                            }
+                                        });
 
                                     // facilitatorIdQuery = database('courses')
                                     //     .select('courses.facilitator as reviewerID')
                                     //     .where({'courses.id':request.params.courseId});
 
                                     if (exercise.reviewType === 'peer') {
-                                        reviewerIdQuery = database('submissions').select('submissions.userId as reviewerID')
-                                            .innerJoin('course_enrolments', 'submissions.userId','course_enrolments.studentId')
-                                            .where({
-                                                'submissions.completed': 1,
-                                                'submissions.exerciseId': request.params.exerciseId,
-                                                'course_enrolments.courseId': request.params.courseId
-                                            })
-                                            .orderByRaw('RAND()')
-                                            .limit(1);
+                                        reviewerIdQuery =
+                                            database('submissions')
+                                                .select('submissions.userId as reviewerID')
+                                                .innerJoin(
+                                                  'course_enrolments', 'submissions.userId','course_enrolments.studentId'
+                                                )
+                                                .where({
+                                                    'submissions.completed': 1,
+                                                    'submissions.exerciseId': request.params.exerciseId,
+                                                    'course_enrolments.courseId': request.params.courseId
+                                                })
+                                                .orderByRaw('RAND()')
+                                                .limit(1);
 
                                     } else {
                                         reviewerIdQuery = facilitatorIdQuery;

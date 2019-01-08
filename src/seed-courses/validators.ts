@@ -15,7 +15,6 @@ var globals = require('./globals');
 
 import { parseNgMetaText } from './helpers';
 import { courseInfoSchema } from './schema';
-import { findFacilitator } from './database';
 
 import * as Configs from "../configurations";
 let serverConfigs = Configs.getServerConfigs();
@@ -100,27 +99,11 @@ export const validateCourseInfo = function() {
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
         courseInfo['logo'] = courseInfo['logo']?courseInfo['logo']:globals.defaultCourseLogo;
-        let email;
-        // assign the courses to Amar, Abhishek or Rishabh when there are no facilitator for the course
-        let facilitatorEmails = serverConfigs.facilitatorEmails;
 
-        // if there is no facilitator in config dev
-        if ((facilitatorEmails.length !== 0) || courseInfo['email'] !== undefined){
-            email = courseInfo['email'] || facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
-        } else {
-            email = null;
-            console.warn("Warning : Please add a facilitator emails in config json file.");
-        }
+        courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
+        globals.courseData['info'] = courseInfo;
 
-        return findFacilitator(email)
-                .then(({facilitator}) => {
-                    delete courseInfo['email'];
-                    courseInfo['facilitator'] = facilitator;
-                    courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
-                    globals.courseData['info'] = courseInfo;
-                    return Promise.resolve();
-                });
-
+        return Promise.resolve()
     }).catch( (err) => {
         console.log(err);
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");

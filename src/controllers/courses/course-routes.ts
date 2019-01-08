@@ -23,8 +23,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         config: {
             description: 'List of courses under 3 categories: \
                           1. User has enrolled in. \
-                          2. User is facilitating. \
-                          3. All courses (includes courses from 1 and 2.)',
+                          2. User has completed. \
+                          3. Courses that a user can do next.',
             response: {
                 schema: Joi.object({
                     "availableCourses": Joi.array().items(courseSchema),
