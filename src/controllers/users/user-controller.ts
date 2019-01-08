@@ -93,8 +93,8 @@ export default class UserController {
                                             'user_roles.roles': 'facilitator'
                                         })
                                         .then((rows) => {
-                                            // if user had been added as f
-                                            // acilitator after joining SARAL
+                                            // if user had been added as
+                                            // facilitator after joining SARAL
                                             if(rows.length < 1 && isFacilitator){
                                                 return Promise.resolve({createFacilitatorRole: true});
                                             } else {
@@ -106,7 +106,8 @@ export default class UserController {
                             return shouldCreateFacilitatorRole
                                       .then(({createFacilitatorRole}) => {
                                           if(createFacilitatorRole === true){
-                                              console.log(1)
+                                            // create the facilitator role for the user who is already
+                                            // in the platform but have been added as facilitator in config file.
                                               return database('user_roles')
                                                         .insert({
                                                           'user_roles.userId': user.id,
@@ -120,7 +121,8 @@ export default class UserController {
                                       })
                                       .then(() => {
                                           // get all the roles the user have
-                                          return database('user_roles').select('*')
+                                          return database('user_roles')
+                                                    .select('*')
                                                     .where({
                                                         'user_roles.userId': user.id,
                                                     });
