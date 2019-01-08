@@ -447,7 +447,8 @@ export default class CourseController {
                                    }
                                });
                        } else {
-                           return reject(Boom.expectationFailed("Minimum 2 courses are required to change thier sequence number."));
+                           reject(Boom.expectationFailed("Minimum 2 courses are required "
+                                        + "to change thier sequence number."));
                        }
 
                    }
@@ -457,81 +458,80 @@ export default class CourseController {
 
     public deleteCourse(request, h){
         return new Promise((resolve, reject) => {
-
             database('user_roles').select('roles')
               .where({
-                'userId': request.userId
+                  'userId': request.userId
               })
               .then((rows) => {
-                const isAdmin = rows[0].roles === 'admin' ? true : false;
-                return Promise.resolve(isAdmin);
+                  const isAdmin = rows[0].roles === 'admin' ? true : false;
+                  return Promise.resolve(isAdmin);
               })
               .then((isAdmin) => {
-                // only admin are allowed to delete the courses
-                if(isAdmin){
-                    const courseId = request.params.courseId;
-                    return database('courses').select('*')
-                      .where({id:courseId})
-                      .then((rows) => {
-                        // if the course for given id doesn't exist
-                        if (rows.length < 1){
-                            reject(Boom.expectationFailed(`courseId: ${courseId} doesn't exists.`));
-                            return Promise.reject("Rejected");
-                        } else {
-                            return Promise.resolve(rows[0]);
-                        }
-                      });
-                } else {
-                    reject(Boom.expectationFailed('Only Admins are allowed to delete the courses.'));
-                    return Promise.reject("Rejected");
-                }
+                  // only admin are allowed to delete the courses
+                  if(isAdmin){
+                      const courseId = request.params.courseId;
+                      return database('courses').select('*')
+                        .where({id:courseId})
+                        .then((rows) => {
+                            // if the course for given id doesn't exist
+                            if (rows.length < 1){
+                                reject(Boom.expectationFailed(`courseId: ${courseId} doesn't exists.`));
+                                return Promise.reject("Rejected");
+                            } else {
+                                return Promise.resolve(rows[0]);
+                            }
+                        });
+                  } else {
+                      reject(Boom.expectationFailed('Only Admins are allowed to delete the courses.'));
+                      return Promise.reject("Rejected");
+                  }
               })
               .then((course) => {
                   // delete all the enrollment of the course
-                  database('course_enrolments')
+                  return database('course_enrolments')
+                            .where({courseId:course.id}).delete()
+                            .then(() => {
+                              return Promise.resolve(course);
+                            });
+
+              })
+              .then((course) => {
+                    // delete all the submissions for each of the exercises
+                    // before deleting the exercises
+                    return database('exercises').select('*')
                         .where({courseId:course.id})
-                        .delete()
+                        .then((rows) => {
+                            let allSubmissionDeleteQuery = [];
+                            for(let i = 0; i < rows.length; i++){
+                              let submissionDeleteQuery =
+                                          database('submissions')
+                                              .select('*')
+                                              .where({exerciseId:rows[i].id})
+                                              .delete();
+
+                              allSubmissionDeleteQuery.push(submissionDeleteQuery);
+                            };
+                            return Promise.all(allSubmissionDeleteQuery).then(() => {
+                                  return Promise.resolve(course);
+                            });
+                        });
+              })
+              .then((course) => {
+                  //after deleting the submissions delete the exercise
+                  return database('exercises')
+                            .where({courseId:course.id}).delete()
+                            .then(() => {
+                                return Promise.resolve(course);
+                            });
+              })
+              .then((course) => {
+                    // after all that deleting delete the course
+                    database('courses')
+                        .where({id:course.id}).delete()
                         .then(() => {
-                          return Promise.resolve();
-                        })
-                        .then(() => {
-                          // delete all the submissions for each of the exercises
-                          // before deleting the exercises
-                          return database('exercises').select('*')
-                              .where({courseId:course.id})
-                              .then((rows) => {
-                                let allSubmissionDeleteQuery = [];
-                                for(let i = 0; i < rows.length; i++){
-                                  let submissionDeleteQuery = database('submissions')
-                                        .select('*')
-                                        .where({exerciseId:rows[i].id})
-                                        .delete();
-                                  allSubmissionDeleteQuery.push(submissionDeleteQuery);
-                                };
-                                return Promise.all(allSubmissionDeleteQuery)
-                                    .then(() => {
-                                      return Promise.resolve();
-                                    });
-                              })
-                              .then(() => {
-                                //after deleting the submissions delete the exercise
-                                return database('exercises')
-                                    .where({courseId:course.id})
-                                    .delete()
-                                    .then(() => {
-                                        return Promise.resolve();
-                                    });
-                              });
-                        })
-                        .then(() => {
-                            // after all that deleting delete the course
-                            database('courses').where({id:course.id})
-                                .delete()
-                                .then(() => {
-                                    resolve({
-                                        deleted:true
-                                    });
-                                });
+                            resolve({
+                                deleted:true
+                            });
                         });
               });
         });

@@ -63,7 +63,7 @@ export default class UserController {
                     .then((response) => {
                         const { shouldCreateRole, user } = response;
 
-                        if(shouldCreateRole === false){
+                        if(shouldCreateRole === true){
                             // when the user signup for the first time or
                             // didn't have any user_roles
                             let whereClause = {
@@ -90,7 +90,7 @@ export default class UserController {
                                     database('user_roles').select('*')
                                         .where({
                                             'user_roles.userId': user.id,
-                                            'user_roles.roles':'facilitator'
+                                            'user_roles.roles': 'facilitator'
                                         })
                                         .then((rows) => {
                                             // if user had been added as f
@@ -104,9 +104,11 @@ export default class UserController {
                             // NOTE: Need to create a route which grants roles to users
 
                             return shouldCreateFacilitatorRole
-                                      .then((rows) => {
-                                          if(createFacilitatorRole){
-                                              return database('user_roles').insert({
+                                      .then(({createFacilitatorRole}) => {
+                                          if(createFacilitatorRole === true){
+                                              console.log(1)
+                                              return database('user_roles')
+                                                        .insert({
                                                           'user_roles.userId': user.id,
                                                           'user_roles.roles': 'facilitator',
                                                         })
