@@ -93,7 +93,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     mentees: Joi.array().items(menteeSchema),
                 })
             },
-            // auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesExercisesReport,
         }

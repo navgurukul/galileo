@@ -204,103 +204,198 @@ export default class ReportController {
 
     public getMenteesCoursesReport(request, h){
         return new Promise((resolve, reject) => {
-            // request.userId = 7;
-            database('mentors').select('*')
-                  .where({
-                      'mentors.mentor': request.userId
-                  })
-                  .then((rows) => {
-                      if (rows.length < 1){
-                        reject(Boom.expectationFailed("User doesn't have any mentee."));
-                        return Promise.reject("Rejected");
-                      } else {
-                          let mentees = [],
-                              course_enrolments = [];
+            // request.userId = 1;
+            let mentees = [],
+                menteesCoursesReport = [];
 
-                          const menteesQuery = database('users')
-                                      .select('users.id', 'users.name', 'users.email')
-                                      .innerJoin('mentors', 'mentors.mentee', 'users.id')
-                                      .where({
-                                          'mentors.mentor': request.userId
-                                      })
-                                      .then((rows) => {
-                                          mentees = rows;
-                                      });
+            database('user_roles').select('*')
+                .where({
+                    'user_roles.userId': request.userId,
+                    'user_roles.roles': 'facilitator',
+                })
+                .then((rows) => {
+                  // check if he is a facilitator?
+                    if(rows.length < 1){
+                        return Promise.resolve({isFacilitator: false, center: null});
+                    } else {
+                        return Promise.resolve({isFacilitator: true, center: rows[0].center});
+                    }
+                })
+                .then((response) => {
+                  // if not check if he is mentor
+                    if(response.isFacilitator === true){
+                        return Promise.resolve({
+                            ...response,
+                            isMentor:false,
+                        });
+                    } else {
+                      // if not then reject the Request.
+                        return database('mentors').select('*').where({
+                            'mentors.mentor': request.userId
+                        })
+                        .then((rows) => {
+                            if(rows.length < 1){
+                                reject(Boom.expectationFailed("User is niether mentor for any student "
+                                                +"nor facilitator for any center"));
+                                return Promise.resolve({
+                                    isFacilitator: false,
+                                    isMentor:false,
+                                    center:null
+                                });
+                            } else {
+                                return Promise.resolve({
+                                    isFacilitator: false,
+                                    isMentor:true,
+                                    center:null
+                                });
+                            }
+                        });
+                    }
+                })
+                .then((response) => {
+                    // Query to get totalExercises which has submissionType != NULL and it's submission status
+                    const totalExercisesQ = 'COUNT(CASE WHEN exercises.submissionType '
+                                            +'IS NOT NULL THEN 1 END) as totalExercises';
+                    const completedSubmissionsQ = 'COUNT(DISTINCT submissions.id) as completedSubmissions';
 
-                          // get all the courses where the mentors menties have enrolled
-                          const totalExercisesQ = 'COUNT(CASE WHEN exercises.submissionType'
-                                                  + ' IS NOT NULL THEN 1 END) as totalExercises';
-                          const completedSubmissionsQ = 'COUNT(DISTINCT submissions.id) as completedSubmissions';
+                    let menteeQ, menteesReportQ;
+                    if (response.isFacilitator === true){
+                        // TODO: mentees are only who have the user_roles as student.
+                        let whereClause = {
+                            'user_roles.roles': 'student';
+                        }
+                        if (response.center !== "all"){
+                            whereClause['users.center'] = response.center;
+                        }
 
-                          const menteesReportQuery =
-                                  database('course_enrolments')
-                                      .select(
-                                          // course details
-                                          'courses.name as courseName', 'courses.id as courseId',
-                                          database.raw(totalExercisesQ),
+                        // if mentor then find all his mentee and then select there course Report
+                        menteeQ =
+                              database('users').select('users.id', 'users.name', 'users.email')
+                                  .innerJoin('user_roles', 'user_roles.userId', 'users.id')
+                                  .where(whereClause)
+                                  .then((rows) => {
+                                      mentees = rows;
+                                      return Promise.resolve();
+                                  });
 
-                                          // mentee reports
-                                          'users.name as menteeName', 'users.email as menteeEmail',
-                                          'course_enrolments.courseStatus as menteeCourseStatus',
-                                          database.raw(completedSubmissionsQ)
-                                      )
-                                      .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
-                                      .rightJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
-                                      .innerJoin('users', 'users.id', 'mentors.mentee')
-                                      .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
-                                      .leftJoin('submissions', function () {
-                                          this.on('submissions.userId', '=', 'mentors.mentee')
-                                              .andOn('submissions.exerciseId', '=', 'exercises.id')
-                                              .andOn('submissions.completed', '=', 1);
-                                      })
-                                      .where({
-                                          'mentors.mentor': request.userId
-                                      })
-                                      .groupBy('course_enrolments.id')
-                                      .distinct('users.id as menteeId')
-                                      .then((rows) => {
-                                          course_enrolments = rows;
-                                      });
+                        // query for the course report of the mentee assigned to the mentor
+                        menteesReportQ =
+                              database('course_enrolments').select(
+                                      // course details in which the mentee has enrolled
+                                      'courses.name as courseName', 'courses.id as courseId',
+                                      'course_enrolments.courseStatus as menteeCourseStatus',
+                                      database.raw(totalExercisesQ), database.raw(completedSubmissionsQ)
+                                      // mentees details
+                                      'users.name as menteeName', 'users.email as menteeEmail',
+                                  )
+                                  .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
+                                  .innerJoin('users', 'course_enrolments.studentId', 'users.id')
+                                  .innerJoin('user_roles', 'user_roles.userId', 'users.id')
+                                  .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
+                                  .leftJoin('submissions', function () {
+                                      this.on('submissions.userId', '=', 'users.id')
+                                          .andOn('submissions.exerciseId', '=', 'exercises.id')
+                                          .andOn('submissions.completed', '=', 1);
+                                  })
+                                  .where(whereClause)
+                                  .groupBy('course_enrolments.id')
+                                  .distinct('users.id as menteeId')
+                                  .then((rows) => {
+                                      menteesCoursesReport = rows;
+                                      return Promise.resolve();
+                                  });
 
-                          // Add mentee list to be also sent
-                          Promise.all([menteesReportQuery, menteesQuery]).then(() => {
+                        return Promise.all([menteeQ, menteesReportQ]).then((queries) => {
+                            return Promise.resolve(false);
+                        });
 
-                              // arranging student according to courses
-                              let courses = {};
-                              for(let i = 0; i < course_enrolments.length-1 ; i++){
-                                  const { courseName, courseId, ...userDetails } = course_enrolments[i];
+                    } else if (response.isMentor === true){
+                        // if mentor then find all his mentee and then select there course Report
+                        menteeQ =
+                              database('users').select('users.id', 'users.name', 'users.email')
+                                  .innerJoin('mentors', 'mentors.mentee', 'users.id')
+                                  .where({
+                                      'mentors.mentor': request.userId
+                                  })
+                                  .then((rows) => {
+                                      mentees = rows;
+                                      return Promise.resolve();
+                                  });
 
-                                  if (courses[courseName] === undefined){
-                                      courses[courseName] = {
-                                          courseId,
-                                          studentEnrolled: [],
-                                      };
-                                  }
-                                  courses[courseName]['studentEnrolled'].push(userDetails);
-                              }
+                        // query for the course report of the mentee assigned to the mentor
+                        menteesReportQ =
+                              database('course_enrolments').select(
+                                      // course details in which the mentee has enrolled
+                                      'courses.name as courseName', 'courses.id as courseId',
+                                      'course_enrolments.courseStatus as menteeCourseStatus',
+                                      database.raw(totalExercisesQ), database.raw(completedSubmissionsQ)
+                                      // mentees details
+                                      'users.name as menteeName', 'users.email as menteeEmail',
+                                  )
+                                  .innerJoin('courses', 'courses.id' , 'course_enrolments.courseId')
+                                  .innerJoin('mentors', 'course_enrolments.studentId', 'mentors.mentee')
+                                  .innerJoin('users', 'users.id', 'mentors.mentee')
+                                  .innerJoin('exercises', 'course_enrolments.courseId', 'exercises.courseId')
+                                  .leftJoin('submissions', function () {
+                                      this.on('submissions.userId', '=', 'mentors.mentee')
+                                          .andOn('submissions.exerciseId', '=', 'exercises.id')
+                                          .andOn('submissions.completed', '=', 1);
+                                  })
+                                  .where({
+                                      'mentors.mentor': request.userId
+                                  })
+                                  .groupBy('course_enrolments.id')
+                                  .distinct('users.id as menteeId')
+                                  .then((rows) => {
+                                      menteesCoursesReport = rows;
+                                      return Promise.resolve()
+                                  });
 
-                              let coursesReport = [];
-                              for(let courseName of Object.keys(courses)){
-                                  let courseReport = {
-                                      courseName,
-                                      ...courses[courseName]
-                                  }
-                                  coursesReport.push(courseReport);
-                              }
+                        return Promise.all([menteeQ, menteesReportQ]).then((queries) => {
+                            return Promise.resolve(false);
+                        });
 
-                              resolve({
-                                  "menteesCoursesReport": coursesReport,
-                                  "mentees": mentees,
-                              });
-                          });
+                    } else {
+                        return Promise.resolve(true);
+                    }
+                })
+                .then((error) => {
+                    if(!error){
+                      // arranging student according to courses
+                      let courses = {};
+                      for(let i = 0; i < menteesCoursesReport.length; i++){
+                          const { courseName, courseId, ...userDetails } = menteesCoursesReport[i];
+
+                          if (courses[courseName] === undefined){
+                              courses[courseName] = {
+                                  courseId,
+                                  studentEnrolled: [],
+                              };
+                          }
+                          courses[courseName]['studentEnrolled'].push(userDetails);
                       }
+
+                      menteesCoursesReport = [];
+                      for(let courseName of Object.keys(courses)){
+                          let courseReport = {
+                              courseName,
+                              ...courses[courseName]
+                          }
+                          menteesCoursesReport.push(courseReport);
+                      }
+
+                      resolve({
+                          "menteesCoursesReport": menteesCoursesReport,
+                          "mentees": mentees,
+                      });
+                    }
                 });
         });
     }
 
 
     public getMenteesExercisesReport(request, h){
-      request.userId = 7;
+      // request.userId = 7;
       return new Promise((resolve, reject) => {
           database('mentors').select('*')
               .where({

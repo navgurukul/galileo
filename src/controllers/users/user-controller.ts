@@ -66,15 +66,16 @@ export default class UserController {
                         if(shouldCreateRole === true){
                             // when the user signup for the first time or
                             // didn't have any user_roles
-                            let whereClause = {
+                            let userRoles = {
                                 userId: user.id
                             };
-                            // if he is a facilitator
+                            // if he/she is a facilitator
                             if(isFacilitator){
-                                whereClause['roles'] = 'facilitator';
+                                userRoles['roles'] = 'facilitator';
+                                userRoles['center'] = 'all';
                             };
 
-                            return database('user_roles').insert(whereClause)
+                            return database('user_roles').insert(userRoles)
                                       .then(() => {
                                           return Promise.resolve({
                                               ...user,
@@ -90,13 +91,24 @@ export default class UserController {
                                     database('user_roles').select('*')
                                         .where({
                                             'user_roles.userId': user.id,
-                                            'user_roles.roles': 'facilitator'
+                                            'user_roles.roles': 'facilitator',
+                                            'user_roles.center': 'all'
                                         })
                                         .then((rows) => {
-                                            // if user had been added as
-                                            // facilitator after joining SARAL
+                                            // if user had been added as facilitator after joining SARAL
                                             if(rows.length < 1 && isFacilitator){
                                                 return Promise.resolve({createFacilitatorRole: true});
+                                            } else if (rows.length > 1 && !isFacilitator){
+                                                // if he/she has been removed as facilitator from
+                                                // config file but is still a facilitator in the DB
+                                                return database('user_roles').where({
+                                                    'user_roles.roles':'facilitator',
+                                                    'user_roles.userId': user.id,
+                                                    'user_roles.center': 'all'
+                                                })
+                                                .delete()
+                                                .then(() => Promise.resolve({createFacilitatorRole: false}));
+
                                             } else {
                                                 return Promise.resolve({createFacilitatorRole: false});
                                             }
@@ -110,13 +122,15 @@ export default class UserController {
                                             // in the platform but have been added as facilitator in config file.
                                               return database('user_roles')
                                                         .insert({
-                                                          'user_roles.userId': user.id,
-                                                          'user_roles.roles': 'facilitator',
+                                                            'user_roles.userId': user.id,
+                                                            'user_roles.roles': 'facilitator',
+                                                            'user_roles.center': 'all',
                                                         })
                                                         .then((rows) => Promise.resolve());
 
                                           } else {
-                                               return Promise.resolve();
+                                              // TODO: just update the user_roles values.
+                                              return Promise.resolve();
                                           }
                                       })
                                       .then(() => {
