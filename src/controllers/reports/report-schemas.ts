@@ -1,7 +1,6 @@
 import * as Joi from "joi";
 
 const menteeProgressSchema: Joi.ObjectSchema = Joi.object({
-    totalExercises: Joi.number(),
     menteeName: Joi.string(),
     menteeEmail:Joi.string().email(),
     menteeCourseStatus: Joi.string().allow('completed', 'enroll', 'unenroll'),
@@ -12,6 +11,7 @@ const menteeProgressSchema: Joi.ObjectSchema = Joi.object({
 export const courseReportSchema: Joi.ObjectSchema = Joi.object({
     courseId: Joi.number(),
     courseName: Joi.string(),
+    totalExercises: Joi.number(),
     studentEnrolled: Joi.array().items(menteeProgressSchema)
 });
 

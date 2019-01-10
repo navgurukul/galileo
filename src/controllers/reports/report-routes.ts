@@ -81,7 +81,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/reports/course/{courseId}',
         config: {
             description: 'Progress report of exercises of a course for all the mentee assgin to a Mentor' +
-                          ' or a center to a facilitator.',
+                        ' or a center to a facilitator.',
             validate: {
                 params: {
                     courseId: Joi.number(),
