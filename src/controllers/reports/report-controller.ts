@@ -389,7 +389,7 @@ export default class ReportController {
 
 
     public getMenteesExercisesReport(request, h){
-        // request.userId = 1;
+        request.userId = 2;
         return new Promise((resolve, reject) => {
             let mentees = [],
                 menteeSubmissions = [],
@@ -433,7 +433,10 @@ export default class ReportController {
                     }
                 })
                 .then((response) => {
-                    return database('courses').select('courses.id as courseId')
+                    return database('courses').select(
+                        'courses.id as courseId', 'courses.name as courseName ', 'courses.type as courseType',
+                        'courses.logo as courseLogo', 'courses.shortDescription as courseShortDescription',
+                    )
                     .where({ 'courses.id': request.params.courseId })
                     .then((rows) => {
                         // what if the courseId doesn't exist
@@ -443,7 +446,7 @@ export default class ReportController {
                         } else{
                             return Promise.resolve({
                                 ...response,
-                                courseId: rows[0].courseId,
+                                courseData: rows[0],
                             })
                         }
                     });
@@ -488,7 +491,7 @@ export default class ReportController {
                             'exercises.submissionType as exerciseSubmissionType','exercises.githubLink as exerciseGithubLink',
                         )
                         .whereNotNull('exercises.submissionType')
-                        .andWhere({ 'exercises.courseId': response.courseId })
+                        .andWhere({ 'exercises.courseId': response.courseData.courseId })
                         .orderBy('exercises.sequenceNum', 'asc')
                         .then((rows) => {
                             for(let i = 0; i < rows.length; i++){
@@ -525,7 +528,7 @@ export default class ReportController {
                             .innerJoin('user_roles', 'user_roles.userId', 'users.id')
                             .where({
                                 ...whereClause,
-                                'exercises.courseId': response.courseId,
+                                'exercises.courseId': response.courseData.courseId,
                             });
                 } else {
                     submissionQ =
@@ -539,7 +542,7 @@ export default class ReportController {
                             .innerJoin('mentors', 'mentors.mentee', 'submissions.userId')
                             .innerJoin('users', 'users.id', 'mentors.mentee')
                             .where({
-                                'exercises.courseId': response.courseId,
+                                'exercises.courseId': response.courseData.courseId,
                                 'mentors.mentor': request.userId,
                             });
                 }
@@ -560,6 +563,7 @@ export default class ReportController {
                     })
                     // console.log(exercises);
                     resolve({
+                        ...response.courseData,
                         "menteesExercisesReport": menteeSubmissions,
                         "mentees": mentees,
                     });

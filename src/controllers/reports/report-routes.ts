@@ -1,10 +1,14 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import {IServerConfigurations} from "../../configurations";
-import * as Boom from "boom";
+// import * as Boom from "boom";
 
 import ReportController from "./report-controller";
-import { courseReportSchema, menteeSchema, exerciseReportSchema } from "./report-schemas";
+import { 
+    courseReportSchema, 
+    menteeSchema, 
+    exerciseReportSchema,
+} from "./report-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -89,11 +93,16 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             response: {
                 schema: Joi.object({
+                    courseId: Joi.number(),
+                    courseName: Joi.string(),
+                    courseType: Joi.string(),
+                    courseLogo: Joi.string(),
+                    courseShortDescription: Joi.string(),
                     menteesExercisesReport: Joi.array().items(exerciseReportSchema),
                     mentees: Joi.array().items(menteeSchema),
                 })
             },
-            auth: 'jwt',
+            // auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesExercisesReport,
         }

@@ -110,7 +110,7 @@ export default class CourseController {
                 availableQ =
                     database('courses')
                         .select('courses.id', 'courses.name', 'courses.type',
-                          'courses.logo', 'courses.shortDescription','courses.sequenceNum')
+                            'courses.logo', 'courses.shortDescription','courses.sequenceNum')
                         .where('courses.id', 'not in', database('courses').distinct()
                             .select('courses.id')
                             .join('course_enrolments', function () {
@@ -141,10 +141,10 @@ export default class CourseController {
             let courseId = parseInt(request.params.courseId, 10);
 
             let query = database('exercises')
-                          .select('exercises.id', 'exercises.name')
-                          .where({"exercises.courseId": courseId})
-                          .andWhere({"exercises.parentExerciseId": null})
-                          .orderBy("exercises.sequenceNum", "asc");
+                            .select('exercises.id', 'exercises.name')
+                            .where({"exercises.courseId": courseId})
+                            .andWhere({"exercises.parentExerciseId": null})
+                            .orderBy("exercises.sequenceNum", "asc");
 
             query.then((rows) => {
                 resolve({data: rows});
@@ -200,27 +200,27 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
             let exercises = [], query;
             if (request.headers.authorization === undefined){
-              query = database('exercises')
-                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                      'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType')
-                  .where({'exercises.courseId': request.params.courseId})
-                  .orderBy('exercises.sequenceNum', 'asc');
+                query = database('exercises')
+                    .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                        'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType')
+                    .where({'exercises.courseId': request.params.courseId})
+                    .orderBy('exercises.sequenceNum', 'asc');
 
             } else{
-              let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
-                  + 'AND userId = ' + request.userId + ' ORDER BY state ASC LIMIT 1)';
-              query = database('exercises')
-                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                        'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType',
-                        'submissions.state as submissionState','submissions.id as submissionId',
-                        'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
-                  .leftJoin('submissions', function () {
-                      this.on('submissions.id', '=',
-                          knex.raw(xyz)
-                      ).on('submissions.userId', '=', request.userId);
-                  })
-                  .where({'exercises.courseId': request.params.courseId})
-                  .orderBy('exercises.sequenceNum', 'asc');
+                let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
+                    + 'AND userId = ' + request.userId + ' ORDER BY state ASC LIMIT 1)';
+                query = database('exercises')
+                    .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                            'exercises.reviewType', 'exercises.githubLink', 'exercises.submissionType',
+                            'submissions.state as submissionState','submissions.id as submissionId',
+                            'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+                    .leftJoin('submissions', function () {
+                        this.on('submissions.id', '=',
+                            knex.raw(xyz)
+                        ).on('submissions.userId', '=', request.userId);
+                    })
+                    .where({'exercises.courseId': request.params.courseId})
+                    .orderBy('exercises.sequenceNum', 'asc');
             }
 
 
@@ -228,25 +228,25 @@ export default class CourseController {
             query.then((rows) => {
                 let exercise = rows[0];
                 for (let i = 0; i < rows.length; i++) {
-                   if (parseInt(exercise.sequenceNum, 10) < 100) {
+                    if (parseInt(exercise.sequenceNum, 10) < 100) {
+                            exercise = rows[i];
+                            if (!Number.isInteger(exercise.sequenceNum)) {
+                                let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
+                                exercises[parentIndex].childExercises.push(exercise);
+                            } else {
+                                exercise.childExercises = [];
+                                exercises.push(exercise);
+                        }
+                    } else {
                         exercise = rows[i];
-                        if (!Number.isInteger(exercise.sequenceNum)) {
-                            let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
-                            exercises[parentIndex].childExercises.push(exercise);
-                        } else {
+                        if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
+                            let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
+                                exercises[parentIndex].childExercises.push(exercise);
+                            } else {
                             exercise.childExercises = [];
                             exercises.push(exercise);
-                       }
-                   } else {
-                      exercise = rows[i];
-                      if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
-                         let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
-                            exercises[parentIndex].childExercises.push(exercise);
-                        } else {
-                           exercise.childExercises = [];
-                           exercises.push(exercise);
+                            }
                         }
-                    }
                 }
                 resolve({data: exercises});
             });
@@ -279,9 +279,13 @@ export default class CourseController {
             let exerciseQuery;
             if (request.headers.authorization === undefined){
                 exerciseQuery = database('exercises')
-                  .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                      'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
-                  .where({'exercises.slug': request.query.slug});
+                    .select(
+                        'exercises.id', 'exercises.parentExerciseId', 
+                        'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
+                        'exercises.reviewType', 'exercises.content', 
+                        'exercises.submissionType', 'exercises.githubLink'
+                    )
+                    .where({'exercises.slug': request.query.slug});
                 exerciseQuery.then((rows) => {
                     resolve(rows[0]);
                 });
@@ -305,20 +309,21 @@ export default class CourseController {
                     .select('users.center')
                     .where({'users.id': request.userId})
                     .then((rows) => {
-                        let usersCompletedExerciseQuery = database('users')
-                                  .select('users.id', 'users.name')
-                                  .innerJoin('submissions', 'submissions.userId', '=', 'users.id')
-                                  .innerJoin('exercises', function (){
-                                      this.on('exercises.id', '=', 'submissions.exerciseId');
-                                  })
-                                  .where({
-                                      'exercises.slug':request.query.slug,
-                                      // only those names who have completed the exercise
-                                      'submissions.completed':1,
-                                      'submissions.state':'completed',
-                                      // first priority to student from same center
-                                      'users.center':rows[0].center,
-                                  });
+                        let usersCompletedExerciseQuery = 
+                                database('users')
+                                    .select('users.id', 'users.name')
+                                    .innerJoin('submissions', 'submissions.userId', '=', 'users.id')
+                                    .innerJoin('exercises', function (){
+                                        this.on('exercises.id', '=', 'submissions.exerciseId');
+                                    })
+                                    .where({
+                                        'exercises.slug':request.query.slug,
+                                        // only those names who have completed the exercise
+                                        'submissions.completed':1,
+                                        'submissions.state':'completed',
+                                        // first priority to student from same center
+                                        'users.center':rows[0].center,
+                                    });
 
                         // select user from submission of same exercise
 
@@ -333,7 +338,7 @@ export default class CourseController {
                             };
                             resolve(response);
                         });
-                  });
+                    });
             }
         });
     }
@@ -397,79 +402,79 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
 
             database('user_roles').select('user_roles.roles')
-               .where({
-                   'userId': request.userId
-               })
-               .then((rows) => {
-                   if (rows[0].roles !== 'admin'){
-                     reject(Boom.expectationFailed('Admin are only allowed to change course sequence number.'));
-                     return Promise.resolve({isAdmin:false});
-                   } else {
-                     return Promise.resolve({isAdmin: true});
-                   }
-               })
-               .then((response) => {
-                   if(response.isAdmin === true){
-                       let allCoursesUpdatePromises = [],
-                           coursesData = request.payload.courses;
-                       // TODO: check if any 2 values are repeated or not?
+                .where({
+                    'userId': request.userId
+                })
+                .then((rows) => {
+                    if (rows[0].roles !== 'admin'){
+                        reject(Boom.expectationFailed('Admin are only allowed to change course sequence number.'));
+                        return Promise.resolve({isAdmin:false});
+                    } else {
+                        return Promise.resolve({isAdmin: true});
+                    }
+                })
+                .then((response) => {
+                    if(response.isAdmin === true){
+                        let allCoursesUpdatePromises = [],
+                            coursesData = request.payload.courses;
+                        // TODO: check if any 2 values are repeated or not?
 
-                       // Minimum 2 courses are required to change thier sequence number
-                       if (coursesData.length > 1){
-                           // iterate over each course data
-                           for(let i = 0; i < coursesData.length; i++){
-                             let courseUpdateQuery = database('courses')
-                                   .update({'sequenceNum': coursesData[i].sequenceNum})
-                                   .where({'id': coursesData[i].id})
-                                   .then( (count) => {
-                                       // if any row is not updated
-                                       if (count < 1){
-                                           reject(Boom.expectationFailed(`No courses found for the given Id: ${coursesData[i].id}.`));
-                                           return Promise.reject('Rejected');
-                                       } else {
-                                           return Promise.resolve();
-                                       }
-                                   });
-                             allCoursesUpdatePromises.push(courseUpdateQuery);
-                           }
-                           Promise.all(allCoursesUpdatePromises)
-                               .then((results) => {
-                                   return Promise.resolve(true);
-                               })
-                               .catch((error) => {
-                                   return Promise.resolve(false);
-                               })
-                               .then((success) => {
-                                   if (success){
-                                        resolve({
-                                            "success": success
-                                        });
-                                   }
-                               });
-                       } else {
-                           reject(Boom.expectationFailed("Minimum 2 courses are required "
-                                        + "to change thier sequence number."));
-                       }
+                        // Minimum 2 courses are required to change thier sequence number
+                        if (coursesData.length > 1){
+                            // iterate over each course data
+                            for(let i = 0; i < coursesData.length; i++){
+                                let courseUpdateQuery = database('courses')
+                                    .update({'sequenceNum': coursesData[i].sequenceNum})
+                                    .where({'id': coursesData[i].id})
+                                    .then( (count) => {
+                                        // if any row is not updated
+                                        if (count < 1){
+                                            reject(Boom.expectationFailed(`No courses found for the given Id: ${coursesData[i].id}.`));
+                                            return Promise.reject('Rejected');
+                                        } else {
+                                            return Promise.resolve();
+                                        }
+                                    });
+                                allCoursesUpdatePromises.push(courseUpdateQuery);
+                            }
+                            Promise.all(allCoursesUpdatePromises)
+                                .then((results) => {
+                                    return Promise.resolve(true);
+                                })
+                                .catch((error) => {
+                                    return Promise.resolve(false);
+                                })
+                                .then((success) => {
+                                    if (success){
+                                            resolve({
+                                                "success": success
+                                            });
+                                    }
+                                });
+                        } else {
+                            reject(Boom.expectationFailed("Minimum 2 courses are required "
+                                            + "to change thier sequence number."));
+                        }
 
-                   }
-               });
+                    }
+                });
         });
     }
 
     public deleteCourse(request, h){
         return new Promise((resolve, reject) => {
             database('user_roles').select('roles')
-              .where({
-                  'userId': request.userId
-              })
-              .then((rows) => {
-                  const isAdmin = rows[0].roles === 'admin' ? true : false;
-                  return Promise.resolve(isAdmin);
-              })
-              .then((isAdmin) => {
-                  // only admin are allowed to delete the courses
-                  if(isAdmin){
-                      const courseId = request.params.courseId;
+                .where({
+                    'userId': request.userId
+                })
+                .then((rows) => {
+                    const isAdmin = rows[0].roles === 'admin' ? true : false;
+                    return Promise.resolve(isAdmin);
+                })
+                .then((isAdmin) => {
+                    // only admin are allowed to delete the courses
+                    if(isAdmin){
+                        const courseId = request.params.courseId;
                       return database('courses').select('*')
                         .where({id:courseId})
                         .then((rows) => {
@@ -481,21 +486,21 @@ export default class CourseController {
                                 return Promise.resolve(rows[0]);
                             }
                         });
-                  } else {
-                      reject(Boom.expectationFailed('Only Admins are allowed to delete the courses.'));
-                      return Promise.reject("Rejected");
-                  }
-              })
-              .then((course) => {
-                  // delete all the enrollment of the course
-                  return database('course_enrolments')
-                            .where({courseId:course.id}).delete()
-                            .then(() => {
-                              return Promise.resolve(course);
+                    } else {
+                        reject(Boom.expectationFailed('Only Admins are allowed to delete the courses.'));
+                        return Promise.reject("Rejected");
+                    }
+                })
+                .then((course) => {
+                    // delete all the enrollment of the course
+                    return database('course_enrolments')
+                                .where({courseId:course.id}).delete()
+                                .then(() => {
+                                return Promise.resolve(course);
                             });
 
-              })
-              .then((course) => {
+                })
+                .then((course) => {
                     // delete all the submissions for each of the exercises
                     // before deleting the exercises
                     return database('exercises').select('*')
@@ -503,28 +508,28 @@ export default class CourseController {
                         .then((rows) => {
                             let allSubmissionDeleteQuery = [];
                             for(let i = 0; i < rows.length; i++){
-                              let submissionDeleteQuery =
-                                          database('submissions')
-                                              .select('*')
-                                              .where({exerciseId:rows[i].id})
-                                              .delete();
+                                let submissionDeleteQuery =
+                                            database('submissions')
+                                                .select('*')
+                                                .where({exerciseId:rows[i].id})
+                                                .delete();
 
-                              allSubmissionDeleteQuery.push(submissionDeleteQuery);
-                            };
-                            return Promise.all(allSubmissionDeleteQuery).then(() => {
-                                  return Promise.resolve(course);
+                                allSubmissionDeleteQuery.push(submissionDeleteQuery);
+                                };
+                                return Promise.all(allSubmissionDeleteQuery).then(() => {
+                                    return Promise.resolve(course);
                             });
                         });
-              })
-              .then((course) => {
-                  //after deleting the submissions delete the exercise
-                  return database('exercises')
+                })
+                .then((course) => {
+                    //after deleting the submissions delete the exercise
+                    return database('exercises')
                             .where({courseId:course.id}).delete()
                             .then(() => {
                                 return Promise.resolve(course);
                             });
-              })
-              .then((course) => {
+                })
+                .then((course) => {
                     // after all that deleting delete the course
                     database('courses')
                         .where({id:course.id}).delete()
@@ -533,7 +538,7 @@ export default class CourseController {
                                 deleted:true
                             });
                         });
-              });
+                });   
         });
     }
 
@@ -551,7 +556,7 @@ export default class CourseController {
                 .then((rows) => {
                     if(rows.length < 1){
                         reject(Boom.expectationFailed("The menteeId is "
-                                      + "invalid no student exist with the given menteeId."));
+                                    + "invalid no student exist with the given menteeId."));
                         return Promise.reject("Rejected");
                     } else {
                         return Promise.resolve(rows[0]);
@@ -560,44 +565,44 @@ export default class CourseController {
                 .then((mentee) => {
                     // check if the is the mentor for the menteeId?
                     return database('mentors')
-                              .select('*')
-                              .where({
-                                  'mentors.mentor': request.userId,
-                                  'mentors.mentee': mentee.id,
-                              })
-                              .then((rows) => {
-                                  if(rows.length < 1) {
-                                      return Promise.resolve({isMentor: false, mentee});
-                                  } else {
-                                      return Promise.resolve({isMentor: true, mentee});
-                                  }
-                              });
+                                .select('*')
+                                .where({
+                                    'mentors.mentor': request.userId,
+                                    'mentors.mentee': mentee.id,
+                                })
+                                .then((rows) => {
+                                    if(rows.length < 1) {
+                                        return Promise.resolve({isMentor: false, mentee});
+                                    } else {
+                                        return Promise.resolve({isMentor: true, mentee});
+                                    }
+                                });
                 })
                 .then((response) => {
                     if(!response.isMentor){
                         const { mentee } = response;
                         // check if he is the facilitator for the menteeId center?
                         return database('user_roles').select('*')
-                                  .where({
-                                    'user_roles.userId': request.userId,
-                                    'user_roles.roles': 'facilitator',
-                                    'user_roles.center': mentee.center,
-                                  })
-                                  .orWhere({
-                                    'user_roles.userId': request.userId,
-                                    'user_roles.roles': 'facilitator',
-                                    'user_roles.center': 'all',
-                                  })
-                                  .then((rows) => {
-                                      let message = "You are not the facilitator for the given mentee's center"
-                                                    + " or the mentor for the given menteeId.";
-                                      if(rows.length < 1){
-                                          reject(Boom.expectationFailed(message));
-                                          return Promise.reject("Rejected");
-                                      } else {
-                                          return Promise.resolve()
-                                      }
-                                  });
+                                    .where({
+                                        'user_roles.userId': request.userId,
+                                        'user_roles.roles': 'facilitator',
+                                        'user_roles.center': mentee.center,
+                                    })
+                                    .orWhere({
+                                        'user_roles.userId': request.userId,
+                                        'user_roles.roles': 'facilitator',
+                                        'user_roles.center': 'all',
+                                    })
+                                    .then((rows) => {
+                                        let message = "You are not the facilitator for the given mentee's center"
+                                                        + " or the mentor for the given menteeId.";
+                                        if(rows.length < 1){
+                                            reject(Boom.expectationFailed(message));
+                                            return Promise.reject("Rejected");
+                                        } else {
+                                            return Promise.resolve()
+                                        }
+                                    });
                     } else {
                         // proceed if he user is the mentor of th givem menteeId.
                         return Promise.resolve()
@@ -606,53 +611,53 @@ export default class CourseController {
                 .then(() => {
                     // check if the course exist or not.
                     return database('courses').select('*')
-                              .where({'courses.id': request.params.courseId})
-                              .then((rows) => {
-                                  if(rows.length < 1){
-                                      reject(Boom.expectationFailed("The course id doesn't exist."));
-                                      return Promise.reject("Rejected");
-                                  } else {
-                                      return Promise.resolve();
-                                  }
-                              });
+                                .where({'courses.id': request.params.courseId})
+                                .then((rows) => {
+                                    if(rows.length < 1){
+                                        reject(Boom.expectationFailed("The course id doesn't exist."));
+                                        return Promise.reject("Rejected");
+                                    } else {
+                                        return Promise.resolve();
+                                    }
+                                });
                 })
                 .then(() => {
                     // check if the student have enrolled in the course.
                     return database('course_enrolments').select('*')
-                              .where({
-                                  'course_enrolments.studentId': request.payload.menteeId,
-                                  'course_enrolments.courseId': request.params.courseId,
-                              })
-                              .then((rows) => {
-                                  if(rows.length < 1){
-                                      reject(Boom.expectationFailed("The student is not enrolled in the course."));
-                                      return Promise.reject("Rejected");
-                                  } else if (rows[0].courseStatus === 'completed'){
-                                      reject(Boom.expectationFailed("The student have already "
-                                                    + "completed the course."));
-                                      return Promise.reject("Rejected");
-                                  }
-                                  else {
-                                      return Promise.resolve();
-                                  }
-                              });
+                                .where({
+                                    'course_enrolments.studentId': request.payload.menteeId,
+                                    'course_enrolments.courseId': request.params.courseId,
+                                })
+                                .then((rows) => {
+                                    if(rows.length < 1){
+                                        reject(Boom.expectationFailed("The student is not enrolled in the course."));
+                                        return Promise.reject("Rejected");
+                                    } else if (rows[0].courseStatus === 'completed'){
+                                        reject(Boom.expectationFailed("The student have already "
+                                                        + "completed the course."));
+                                        return Promise.reject("Rejected");
+                                    }
+                                    else {
+                                        return Promise.resolve();
+                                    }
+                                });
                 })
                 .then(() => {
                     // mark the course complete here.
                     database('course_enrolments')
-                          .update({
-                              'course_enrolments.courseStatus':'completed',
-                              'course_enrolments.completedAt': new Date(),
-                          })
-                          .where({
-                              'course_enrolments.studentId': request.payload.menteeId,
-                              'course_enrolments.courseId': request.params.courseId,
-                          })
-                          .then((rows) => {
-                              resolve({
-                                  'success': true
-                              })
-                          })
+                            .update({
+                                'course_enrolments.courseStatus':'completed',
+                                'course_enrolments.completedAt': new Date(),
+                            })
+                            .where({
+                                'course_enrolments.studentId': request.payload.menteeId,
+                                'course_enrolments.courseId': request.params.courseId,
+                            })
+                            .then((rows) => {
+                                resolve({
+                                    'success': true
+                                })
+                            })
                 });
 
         });

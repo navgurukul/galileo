@@ -22,9 +22,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courses',
         config: {
             description: 'List of courses under 3 categories: \
-                          1. User has enrolled in. \
-                          2. User has completed. \
-                          3. Courses that a user can do next.',
+                            1. User has enrolled in. \
+                            2. User has completed. \
+                            3. Courses that a user can do next.',
             response: {
                 schema: Joi.object({
                     "availableCourses": Joi.array().items(courseSchema),
