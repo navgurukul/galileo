@@ -3,6 +3,7 @@ import * as Hapi from 'hapi';
 import * as knex from 'knex';
 
 import database from '../../';
+import {getIsSolutionAvailable} from '../../helpers/courseHelper';
 import { IServerConfigurations } from '../../configurations/index';
 
 
@@ -255,13 +256,24 @@ export default class CourseController {
         });
     }
 
+    public getSolutionByExerciseId(request, h) {
+        return new Promise((resolve, reject) => {
+            database('exercises')
+                .select('exercises.solution')
+                .where({'exercises.id': request.params.exerciseId})
+                .then((rows) => {
+                    resolve(rows);
+                });
+        });
+    }
+
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
             let exerciseQuery;
             if (request.headers.authorization === undefined){
                 exerciseQuery = database('exercises')
                   .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                      'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
+                      'exercises.reviewType', 'exercises.solution', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink')
                   .where({'exercises.slug': request.query.slug});
                 exerciseQuery.then((rows) => {
                     resolve(rows[0]);
@@ -272,7 +284,8 @@ export default class CourseController {
 
                 exerciseQuery = database('exercises')
                     .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-                        'exercises.reviewType', 'exercises.content', 'exercises.submissionType', 'exercises.githubLink',
+                        'exercises.reviewType', 'exercises.solution', 'exercises.content', 'exercises.submissionType', 
+                        'exercises.githubLink',
                         'submissions.state as submissionState', 'submissions.id as submissionId',
                         'submissions.completedAt as submissionCompleteAt')
                     .leftJoin('submissions', function () {
@@ -303,13 +316,15 @@ export default class CourseController {
                         // select user from submission of same exercise
 
                         Promise.all([usersCompletedExerciseQuery, exerciseQuery]).then((queries) => {
-                            let exercise, usersCompletedExercise;
+                            let exercise, usersCompletedExercise, isSolutionAvailable;
                             exercise = queries[1][0];
+                            isSolutionAvailable = getIsSolutionAvailable(exercise);
                             usersCompletedExercise = queries[0];
 
                             let response = {
                                 ...exercise,
-                                usersCompletedExercise:usersCompletedExercise
+                                usersCompletedExercise:usersCompletedExercise,
+                                ifSolution: isSolutionAvailable
                             };
                             resolve(response);
                         });

@@ -90,35 +90,42 @@ export const findFacilitator = function(email) {
 
 export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
+    let solution;
     for (let i = 0; i < exercises.length; i++) {
-        let exerciseObj = {
-            courseId: courseId,
-            name: exercises[i]['name'],
-            slug: exercises[i]['slug'],
-            sequenceNum: exercises[i]['sequenceNum'],
-            reviewType: 'peer',//exercises[i]['completionMethod'],
-            content: exercises[i]['content'],
-            submissionType: exercises[i]['submissionType'],
-            githubLink: exercises[i]['githubLink']
-        };
+        if (!(exercises[i]["isSolutionFile"])) {
+            solution = null;
+            if (i<(exercises.length-1) && exercises[i+1]["isSolutionFile"]) {
+                solution = exercises[i+1]["content"];
+            }
+            let exerciseObj = {
+                courseId: courseId,
+                name: exercises[i]['name'],
+                slug: exercises[i]['slug'],
+                sequenceNum: exercises[i]['sequenceNum'],
+                reviewType: 'peer',//exercises[i]['completionMethod'],
+                content: exercises[i]['content'],
+                solution: solution,
+                submissionType: exercises[i]['submissionType'],
+                githubLink: exercises[i]['githubLink']
+            };
 
-        let query;
-        if (!promiseObj) {
-            query = _generateExerciseAddOrUpdateQuery(exerciseObj);
-        } else {
-            promiseObj.then( (exerciseId) => {
-                exerciseObj['parentExerciseId'] = exerciseId;
+            let query;
+            if (!promiseObj) {
                 query = _generateExerciseAddOrUpdateQuery(exerciseObj);
-                return query;
-            });
+            } else {
+                promiseObj.then( (exerciseId) => {
+                    exerciseObj['parentExerciseId'] = exerciseId;
+                    query = _generateExerciseAddOrUpdateQuery(exerciseObj);
+                    return query;
+                });
+            }
+    
+            if (exercises[i].childExercises && exercises[i].childExercises.length > 0){
+                addOrUpdateExercises(exercises[i].childExercises, courseId, query);
+            }
+    
+            exInsertQs.push(query);
         }
-
-        if (exercises[i].childExercises && exercises[i].childExercises.length > 0){
-            addOrUpdateExercises(exercises[i].childExercises, courseId, query);
-        }
-
-        exInsertQs.push(query);
-
     }
     return exInsertQs;
 };
