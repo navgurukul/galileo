@@ -76,6 +76,7 @@ CREATE TABLE `exercises` (
   `sequenceNum` float unsigned DEFAULT NULL,
   `reviewType` enum('manual','peer','facilitator','automatic') DEFAULT 'manual',
   `content` longtext,
+  `solution` longtext,
   `githubLink` varchar(300) DEFAULT NULL,
   `submissionType` enum('number','text','text_large','attachments','url') DEFAULT NULL,
   PRIMARY KEY (`id`),
