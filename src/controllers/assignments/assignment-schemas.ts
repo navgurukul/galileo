@@ -15,12 +15,12 @@ export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
     reviewerName: Joi.string().allow(null),
     reviewerId: Joi.number().allow(null),
     reviewerProfilePicture: Joi.string().uri().allow(null),
-    isReviewerFacilitator: Joi.bool().allow(null),
+    // isReviewerFacilitator: Joi.bool().allow(null),
     // Submitter Details
     submitterName: Joi.string(),
     submitterId: Joi.number(),
     submitterProfilePicture: Joi.string().uri(),
-    isSubmitterFacilitator: Joi.bool()
+    // isSubmitterFacilitator: Joi.bool()
 });
 
 export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({

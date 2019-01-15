@@ -1,11 +1,13 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import {IServerConfigurations} from "../../configurations";
-import * as Boom from "boom";
+// import * as Boom from "boom";
 
 import ReportController from "./report-controller";
-import {
-    menteesReportSchema
+import { 
+    courseReportSchema, 
+    menteeSchema, 
+    exerciseReportSchema,
 } from "./report-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
@@ -59,23 +61,50 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: reportController.getStudentReport,
         }
     });
-    
+
     server.route({
         method: 'GET',
-        path: '/reports/users/getMenteesReport',
+        path: '/reports/courses',
         config: {
-            description: 'List of all Mentees assgin to a Mentor.',
+            description: 'Progress report of courses for all the mentee assgin to a Mentor or a center to a facilitator.',
 
             response: {
                 schema: Joi.object({
-                    data: Joi.array().items(menteesReportSchema)
-                          .description("List of Mentees for the current user.")
+                    menteesCoursesReport: Joi.array().items(courseReportSchema),
+                    mentees: Joi.array().items(menteeSchema),
                 })
             },
             auth: 'jwt',
             tags: ['api'],
-            handler: reportController.getMenteesReport,
+            handler: reportController.getMenteesCoursesReport,
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/reports/course/{courseId}',
+        config: {
+            description: 'Progress report of exercises of a course for all the mentee assgin to a Mentor' +
+                        ' or a center to a facilitator.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                }
+            },
+            response: {
+                schema: Joi.object({
+                    courseId: Joi.number(),
+                    courseName: Joi.string(),
+                    courseType: Joi.string(),
+                    courseLogo: Joi.string(),
+                    courseShortDescription: Joi.string(),
+                    menteesExercisesReport: Joi.array().items(exerciseReportSchema),
+                    mentees: Joi.array().items(menteeSchema),
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.getMenteesExercisesReport,
+        }
+    });
 }

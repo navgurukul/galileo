@@ -45,48 +45,6 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     return query;
 };
 
-export const findFacilitator = function(email) {
-    return database('users')
-              .select('users.id')
-              .where({
-                  'users.email': email
-              })
-              .then((rows) => {
-                  if (rows.length < 1){
-                      // if there is user in the platform for the given facilitator email in the course
-                      // then select the default facilitatorEmail from configurations
-
-                      let facilitatorEmails = serverConfigs.facilitatorEmails;
-                      if (facilitatorEmails.length !== 0){
-                          let facilitatorEmail = facilitatorEmails[((Math.random() * facilitatorEmails.length)|0)];
-
-                          return database('users')
-                                  .select('users.id')
-                                  .where({
-                                    'users.email':facilitatorEmail
-                                  })
-                                  .then((response) => {
-                                    if (response.length >= 1){
-                                      return Promise.resolve({facilitator:response[0].id});
-                                    } else {
-                                      // if there is no data for the given email on the platform
-                                      console.warn("Warning: Please sign-in using the given"
-                                          + "facilitator emails in config to submit assignment.");
-                                      return Promise.resolve({facilitator:null});
-                                    }
-                                  });
-
-                      } else {
-                        // if there is no facilitator in the config
-                        return Promise.resolve({facilitator: null});
-                      }
-
-                  } else {
-                      return Promise.resolve({facilitator:rows[0].id});
-                  }
-        });
-};
-
 
 export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
@@ -141,15 +99,13 @@ export const addOrUpdateCourse = function() {
                 return Promise.resolve(newSequenceNum);
             }).then( (newSequenceNum) => {
                 if (row == null) {
-                    return database('courses')
-                    .insert({
+                    return database('courses').insert({
                         'type': globals.courseData['info']['type'],
                         'name': globals.courseData['info']['name'],
                         'logo': globals.courseData['info']['logo'],
                         'shortDescription': globals.courseData['info']['shortDescription'],
                         'daysToComplete': globals.courseData['info']['daysToComplete'],
                         'sequenceNum': newSequenceNum,
-                        'facilitator': globals.courseData['info']['facilitator']
                         // 'notes': globals.courseData['notes'],
                     })
                     .then( (rows) => {
@@ -159,20 +115,19 @@ export const addOrUpdateCourse = function() {
                     const { id:courseId, sequenceNum } = row;
 
                     return database('courses')
-                    .where({ 'name': globals.courseData['info']['name'] })
-                    .update({
-                        // Not updating `type` and `name` as assuming they won't change
-                        'logo': globals.courseData['info']['logo'],
-                        'shortDescription': globals.courseData['info']['shortDescription'],
-                        'daysToComplete': globals.courseData['info']['daysToComplete'],
-                        'facilitator': globals.courseData['info']['facilitator'],
-                        // Updating course sequenceNum as maximum of existing sequenceNum+1
-                        // when it is null or else just leave it.
-                        'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
-                    })
-                    .then( () => {
-                        return Promise.resolve(courseId);
-                    });
+                              .where({ 'name': globals.courseData['info']['name'] })
+                              .update({
+                                  // Not updating `type` and `name` as assuming they won't change
+                                  'logo': globals.courseData['info']['logo'],
+                                  'shortDescription': globals.courseData['info']['shortDescription'],
+                                  'daysToComplete': globals.courseData['info']['daysToComplete'],
+                                  // Updating course sequenceNum as maximum of existing sequenceNum+1
+                                  // when it is null or else just leave it.
+                                  'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
+                              })
+                              .then( () => {
+                                  return Promise.resolve(courseId);
+                              });
                 }
             });
     });
