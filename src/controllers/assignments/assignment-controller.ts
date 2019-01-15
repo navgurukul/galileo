@@ -18,7 +18,7 @@ function generateUID() {
     return firstPart + secondPart;
 }
 
-// #TODO: Add support for tracking assignmnt completion time.
+// TODO: Add support for tracking assignmnt completion time.
 
 export default class AssignmentController {
 
@@ -72,7 +72,7 @@ export default class AssignmentController {
                             .then((exercise) => {
                                 let facilitatorIdQuery;
                                 if (exercise.reviewType === 'manual') {
-                                      return Promise.resolve({
+                                    return Promise.resolve({
                                         exerciseId: request.params.exerciseId,
                                         userId: request.userId,
                                         completed: 1,
@@ -106,11 +106,11 @@ export default class AssignmentController {
                                         .then((rows) => {
                                             if (rows.length < 1){
                                                 reject(Boom.expectationFailed("Student have no center assigned can't"
-                                                 + "submit assignment."));
+                                                    + "submit assignment."));
                                                 return Promise.reject("Rejected");
                                             } else {
-                                               const { studentCenter } = rows[0];
-                                               return Promise.resolve(studentCenter);
+                                                const { studentCenter } = rows[0];
+                                                return Promise.resolve(studentCenter);
                                             }
                                         })
                                         .then((studentCenter) => {
@@ -130,23 +130,23 @@ export default class AssignmentController {
                                                     return Promise.reject("Rejected");
                                                 }
 
-                                                const index =  (Math.random() * facilitatorEmails.length) | 0
+                                                const index =  (Math.random() * facilitatorEmails.length) | 0;
                                                 let facilitatorEmail = facilitatorEmails[index];
 
                                                 return database('users').select('users.id as reviewerID').where({
                                                     'users.email': facilitatorEmail
                                                 });
-                                              } else {
-                                                  return Promise.resolve(rows);
-                                              }
+                                            } else {
+                                                return Promise.resolve(rows);
+                                            }
                                         })
                                         .then((rows) => {
-                                          // if no facilitator exist than just
-                                          // throw error of no facilitator found for the center.
+                                            // if no facilitator exist than just
+                                            // throw error of no facilitator found for the center.
                                             if(rows.length < 1){
                                                 reject(Boom.expectationFailed("There is no facilitator "
-                                                      + "added on the platform."));
-                                                return Promise.reject("Rejected")
+                                                    + "added on the platform."));
+                                                return Promise.reject("Rejected");
                                             } else {
                                                 return Promise.resolve(rows);
                                             }
@@ -161,7 +161,7 @@ export default class AssignmentController {
                                             database('submissions')
                                                 .select('submissions.userId as reviewerID')
                                                 .innerJoin(
-                                                  'course_enrolments', 'submissions.userId','course_enrolments.studentId'
+                                                    'course_enrolments', 'submissions.userId','course_enrolments.studentId'
                                                 )
                                                 .where({
                                                     'submissions.completed': 1,
@@ -176,28 +176,28 @@ export default class AssignmentController {
                                     }
 
                                     return reviewerIdQuery.then((rows) => {
-                                              let reviewerId;
-                                              if (rows.length < 1 && exercise.reviewType === 'peer') {
-                                                  return facilitatorIdQuery.then((rows) => {
-                                                      reviewerId = rows[0].reviewerID;
-                                                      return Promise.resolve({reviewerId: reviewerId});
-                                                  });
-                                              } else {
-                                                  let reviewerId = rows[0].reviewerID;
-                                                  return Promise.resolve({reviewerId: reviewerId});
-                                              }
-                                        })
-                                          .then((response) => {
-                                                return Promise.resolve({
-                                                  exerciseId: request.params.exerciseId,
-                                                  userId: request.userId,
-                                                  submitterNotes: request.payload.notes,
-                                                  // files: JSON.stringify(request.payload.files),
-                                                  state: 'pending',
-                                                  completed: 0,
-                                                  peerReviewerId: response.reviewerId,
-                                              });
+                                            let reviewerId;
+                                            if (rows.length < 1 && exercise.reviewType === 'peer') {
+                                                return facilitatorIdQuery.then((rows) => {
+                                                    reviewerId = rows[0].reviewerID;
+                                                    return Promise.resolve({reviewerId: reviewerId});
+                                                });
+                                            } else {
+                                                let reviewerId = rows[0].reviewerID;
+                                                return Promise.resolve({reviewerId: reviewerId});
+                                            }
+                                    })
+                                    .then((response) => {
+                                        return Promise.resolve({
+                                            exerciseId: request.params.exerciseId,
+                                            userId: request.userId,
+                                            submitterNotes: request.payload.notes,
+                                            // files: JSON.stringify(request.payload.files),
+                                            state: 'pending',
+                                            completed: 0,
+                                            peerReviewerId: response.reviewerId,
                                         });
+                                    });
                                 }
 
 
@@ -209,59 +209,59 @@ export default class AssignmentController {
                                 if (count >= 1){
                                     submissionInsertQuery =
                                             database('submissions').select(`submissions.id`)
-                                                  .where({
-                                                      'submissions.userId': request.userId,
-                                                      'exerciseId': request.params.exerciseId,
-                                                  })
-                                                  .update(queryData)
-                                                  .then((row) => {
-                                                      return Promise.resolve({
-                                                          reviewerId: queryData.peerReviewerId,
-                                                          studentId: queryData.userId
-                                                      });
-                                                  });
+                                                    .where({
+                                                        'submissions.userId': request.userId,
+                                                        'exerciseId': request.params.exerciseId,
+                                                    })
+                                                    .update(queryData)
+                                                    .then((row) => {
+                                                        return Promise.resolve({
+                                                            reviewerId: queryData.peerReviewerId,
+                                                            studentId: queryData.userId
+                                                        });
+                                                    });
                                 } else{
                                     submissionInsertQuery =
-                                          database('submissions').insert(queryData)
-                                              .then((rows) => {
-                                                  return Promise.resolve({
-                                                      reviewerId: queryData.peerReviewerId,
-                                                      studentId: queryData.userId
-                                                  });
-                                              });
+                                            database('submissions').insert(queryData)
+                                                .then((rows) => {
+                                                    return Promise.resolve({
+                                                        reviewerId: queryData.peerReviewerId,
+                                                        studentId: queryData.userId
+                                                    });
+                                                });
                                 }
 
                                 submissionInsertQuery.then((response) => {
                                     let studentQuery =
-                                          database('users').select('users.email', 'users.name')
-                                              .where({'users.id': response.studentId})
-                                              .then((rows) => {
-                                                  student = rows[0];
-                                                  return Promise.resolve();
-                                              });
+                                            database('users').select('users.email', 'users.name')
+                                                .where({'users.id': response.studentId})
+                                                .then((rows) => {
+                                                    student = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
                                     let reviewerQuery =
-                                          database('users').select('users.email', 'users.name')
-                                              .where({'users.id': response.reviewerId})
-                                              .then((rows) => {
-                                                  reviewer = rows[0];
-                                                  return Promise.resolve();
-                                              });
+                                            database('users').select('users.email', 'users.name')
+                                                .where({'users.id': response.reviewerId})
+                                                .then((rows) => {
+                                                    reviewer = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
                                     return Promise.all([studentQuery, reviewerQuery])
-                                          .then(() => {
-                                              return database('submissions')
-                                                        .select(
-                                                          // Submissions table fields
-                                                          'submissions.id as submissionId', 'exercises.name as exerciseName',
-                                                          'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed'
-                                                        )
-                                                      .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                                      .where({
-                                                            'submissions.userId': request.userId,
-                                                            'exerciseId': request.params.exerciseId
-                                                      });
-                                          });
+                                            .then(() => {
+                                                return database('submissions')
+                                                            .select(
+                                                            // Submissions table fields
+                                                            'submissions.id as submissionId', 'exercises.name as exerciseName',
+                                                            'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed'
+                                                            )
+                                                        .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                        .where({
+                                                                'submissions.userId': request.userId,
+                                                                'exerciseId': request.params.exerciseId
+                                                        });
+                                            });
                                 })
                                 .then((rows) => {
                                     sendAssignmentReviewPendingEmail(student, reviewer, rows[0]);
@@ -312,55 +312,59 @@ export default class AssignmentController {
     }
 
     public getExerciseSubmissions(request, h) {
-      return new Promise((resolve, reject) => {
-                  let submissionQuery =
-                      database('submissions')
-                          .select(
-                              // Submissions table fields
-                              'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
-                              'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
-                              'submissions.completedAt',
-                              // Reviewer details
-                              'reviewUsers.name as reviewerName', 'reviewUsers.id as reviewerId',
-                              'reviewUsers.profilePicture as reviewerProfilePicture',
-                              // 'reviewUsers.facilitator as isReviewerFacilitator',
-                              // Submitter Details
-                              'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
-                              // 'users.facilitator as isSubmitterFacilitator'
-                          )
-                          .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
-                          .leftJoin('users', 'submissions.userId', 'users.id');
+        return new Promise((resolve, reject) => {
+                    let submissionQuery =
+                        database('submissions')
+                            .select(
+                                // Submissions table fields
+                                'submissions.id', 'submissions.exerciseId', 'submissions.submittedAt', 'submissions.submitterNotes',
+                                'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed',
+                                'submissions.completedAt',
+                                // Reviewer details
+                                'reviewUsers.name as reviewerName', 'reviewUsers.id as reviewerId',
+                                'reviewUsers.profilePicture as reviewerProfilePicture',
+                                // 'reviewUsers.facilitator as isReviewerFacilitator',
+                                // Submitter Details
+                                'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
+                                // 'users.facilitator as isSubmitterFacilitator'
+                            )
+                            .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
+                            .leftJoin('users', 'submissions.userId', 'users.id');
 
-                  let whereClause = {
-                      'submissions.exerciseId': request.params.exerciseId
-                  };
-                  if (request.query.submissionUsers === 'current') {
-                      whereClause['submissions.userId'] = request.userId;
-                  }
-                  if (request.query.submissionState !== 'all') {
-                      whereClause['submissions.state'] = request.query.submissionState;
-                  }
+                    let whereClause = {
+                        'submissions.exerciseId': request.params.exerciseId
+                    };
+                    if (request.query.submissionUsers === 'current') {
+                        whereClause['submissions.userId'] = request.userId;
+                    }
+                    if (request.query.submissionState !== 'all') {
+                        whereClause['submissions.state'] = request.query.submissionState;
+                    }
 
-                  submissionQuery.where(whereClause)
-                      .then((rows) => {
-                          let submissions = [];
-                          for (let i = 0; i < rows.length; i++) {
-                              let submission = rows[i];
-                              if (submission.files !== null) {
-                                  submission.files = JSON.parse(submission.files);
-                              }
-                              submissions.push(submission);
-                          }
-                          resolve({"data": submissions});
-                      });
-              });
+                    submissionQuery.where(whereClause)
+                        .then((rows) => {
+                            let submissions = [];
+                            for (let i = 0; i < rows.length; i++) {
+                                let submission = rows[i];
+                                if (submission.files !== null) {
+                                    submission.files = JSON.parse(submission.files);
+                                }
+                                submissions.push(submission);
+                            }
+                            resolve({"data": submissions});
+                        });
+                });
 
     }
 
     public getExerciseSubmissionById(request, h) {
         return new Promise((resolve, reject) => {
             database('submissions')
-                .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt','submissions.submitterNotes', 'submissions.files', 'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName', 'users.id as reviwerId', 'users.profilePicture as reviewerProfilePicture')
+                .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 
+                        'submissions.submittedAt','submissions.submitterNotes', 'submissions.files', 
+                        'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 
+                        'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName', 
+                        'users.id as reviwerId', 'users.profilePicture as reviewerProfilePicture')
                 // ,'users.facilitator as isReviewerFacilitator')
                 .leftJoin('users', 'submissions.peerReviewerId', 'users.id')
                 .where({'submissions.id': request.params.submissionId})
@@ -394,13 +398,13 @@ export default class AssignmentController {
                     if(developerEmails.indexOf(rows[0].email) > -1){
                         // Show all the Peer Review to the user when the User is Developer.
                         return Promise.resolve({
-                          whereClause:{}
+                            whereClause:{}
                         });
                     }
                     // if not a developer show him the assignmnt assign to him for reviewing
                     return Promise.resolve({
                         whereClause:{
-                          'submissions.peerReviewerId': request.userId
+                            'submissions.peerReviewerId': request.userId
                         }
                     });
                 })
@@ -477,26 +481,26 @@ export default class AssignmentController {
                         .update(updateFields)
                         .where({id: request.params.submissionId})
                         .then((rows) => {
-                          let student, reviewer;
-                          let studentQ = database('users').select('*')
-                                            .where({
-                                                'users.id': submission.userId
-                                            })
-                                            .then((rows) => {
-                                                student = rows[0];
-                                                return Promise.resolve();
-                                            });
+                            let student, reviewer;
+                            let studentQ = database('users').select('*')
+                                                .where({
+                                                    'users.id': submission.userId
+                                                })
+                                                .then((rows) => {
+                                                    student = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
-                          let reviewerQ = database('users').select('*')
-                                            .where({
-                                                'users.id': submission.userId
-                                            })
-                                            .then((rows) => {
-                                                reviewer = rows[0];
-                                                return Promise.resolve();
-                                            });
+                            let reviewerQ = database('users').select('*')
+                                                .where({
+                                                    'users.id': submission.userId
+                                                })
+                                                .then((rows) => {
+                                                    reviewer = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
-                          return Promise.all([studentQ, reviewerQ])
+                            return Promise.all([studentQ, reviewerQ])
                                     .then(() => {
                                         // send email for submission review completion
                                         return database('submissions')

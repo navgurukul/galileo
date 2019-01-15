@@ -255,7 +255,8 @@ export default class ReportController {
                         // TODO: mentees are only who have the user_roles as student.
                         let whereClause = {
                             'user_roles.roles': 'student'
-                        }
+                        };
+
                         if (response.center !== "all"){
                             whereClause['users.center'] = response.center;
                         }
@@ -340,7 +341,7 @@ export default class ReportController {
                                 .distinct('users.id as menteeId')
                                 .then((rows) => {
                                     menteesCoursesReport = rows;
-                                    return Promise.resolve()
+                                    return Promise.resolve();
                                 });
 
                         return Promise.all([menteeQ, menteesReportQ]).then((queries) => {
@@ -374,8 +375,8 @@ export default class ReportController {
                     for(let courseName of Object.keys(courses)){
                         let courseReport = {
                             courseName,
-                            ...courses[courseName]
-                        }
+                            ...courses[courseName],
+                        };
                         menteesCoursesReport.push(courseReport);
                     }
 
@@ -447,7 +448,7 @@ export default class ReportController {
                             return Promise.resolve({
                                 ...response,
                                 courseData: rows[0],
-                            })
+                            });
                         }
                     });
                 })
@@ -502,8 +503,8 @@ export default class ReportController {
                         });
 
                 return Promise.all([exerciseQ, menteeQ]).then(() => {
-                    return Promise.resolve(response)
-                })
+                    return Promise.resolve(response);
+                });
             })
             .then((response) => {
                 let submissionQ;
@@ -560,16 +561,16 @@ export default class ReportController {
                     // sorting them sequence wise
                     menteeSubmissions.sort(function(a, b){
                         return a.exerciseSequenceNum - b.exerciseSequenceNum;
-                    })
+                    });
                     // console.log(exercises);
                     resolve({
                         ...response.courseData,
                         "menteesExercisesReport": menteeSubmissions,
                         "mentees": mentees,
                     });
-                })
+                });
 
-            })
+            });
         });
     }
 }

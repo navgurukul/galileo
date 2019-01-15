@@ -52,7 +52,7 @@ export default class CourseController {
                         .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
                         .innerJoin('exercises', function(){
                             // count only those exercises which have submissionType != null
-                            this.on('course_enrolments.courseId', '=', 'exercises.courseId')
+                            this.on('course_enrolments.courseId', '=', 'exercises.courseId');
                         })
                         .leftJoin('submissions', function () {
                             this.on('submissions.userId', '=', request.userId)
@@ -99,7 +99,8 @@ export default class CourseController {
                     database('course_enrolments')
                         .select(
                             'courses.id', 'courses.name', 'courses.type','courses.logo', 'courses.daysToComplete',
-                            'courses.shortDescription', 'courses.sequenceNum','course_enrolments.completedAt', 'course_enrolments.enrolledAt',
+                            'courses.shortDescription', 'courses.sequenceNum',
+                            'course_enrolments.completedAt', 'course_enrolments.enrolledAt',
                         )
                         .innerJoin('courses', 'courses.id', 'course_enrolments.courseId')
                         .where({'course_enrolments.courseStatus': 'completed'})
@@ -600,12 +601,12 @@ export default class CourseController {
                                             reject(Boom.expectationFailed(message));
                                             return Promise.reject("Rejected");
                                         } else {
-                                            return Promise.resolve()
+                                            return Promise.resolve();
                                         }
                                     });
                     } else {
                         // proceed if he user is the mentor of th givem menteeId.
-                        return Promise.resolve()
+                        return Promise.resolve();
                     }
                 })
                 .then(() => {
@@ -656,8 +657,8 @@ export default class CourseController {
                             .then((rows) => {
                                 resolve({
                                     'success': true
-                                })
-                            })
+                                });
+                            });
                 });
 
         });

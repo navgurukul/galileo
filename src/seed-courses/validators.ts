@@ -103,7 +103,7 @@ export const validateCourseInfo = function() {
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
 
-        return Promise.resolve()
+        return Promise.resolve();
     }).catch( (err) => {
         console.log(err);
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
