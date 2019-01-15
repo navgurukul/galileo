@@ -532,4 +532,92 @@ export default class CourseController {
         });
       }
 
+      public getCourseRelationList(request, h) {
+        return new Promise((resolve, reject) => {
+            let query = database('course_relation')
+                .select('*');
+            query.then((rows) => {
+                if (rows.length > 0) {
+                    resolve({ data: rows });
+                } else {
+                    reject(Boom.expectationFailed('Not added any course dependencies for the courses....'));
+                }
+            });
+        });
+    }
+
+    public deleteCourseRelation(request, h) {
+        return new Promise((resolve, reject) => {
+            database('course_relation').select('*')
+                .where({
+                    'courseId': request.params.courseId,
+                    'reliesOn': request.params.reliesOn
+                })
+                .then((rows) => {
+                    if (rows.length > 0) {
+                        database('course_relation')
+                            .where({
+                                'courseId': request.params.courseId,
+                                'reliesOn': request.params.reliesOn
+                            }).delete()
+                            .then(() => {
+                                resolve({
+                                    deleted: true
+                                });
+                            });
+                    } else {
+                        reject(Boom.expectationFailed('Course Dependency to the corresponding course id does not exists.'));
+
+                    }
+                });
+        });
+    }
+
+    public addCourseRelation(request, h) {
+        return new Promise((resolve, reject) => {
+            database('user_roles').select('roles')
+                .where({
+                    'userId': request.params.userId
+                })
+                .then((rows) => {
+                    const isAdmin = rows[0].roles === 'admin' ? true : false;
+                    return Promise.resolve(isAdmin);
+                })
+                .then((isAdmin) => {
+                    // only admin are allowed to add the courses
+                    if (isAdmin) {
+                        database('course_relation').select('*')
+                            .where({
+                                'courseId': request.params.courseId,
+                                'reliesOn': request.params.reliesOn
+                            })
+                            .then((rows) => {
+                                if (rows.length > 0) {
+                                    reject(Boom.expectationFailed('Course Dependency to the corresponding course id already exists.'));
+                                    return Promise.resolve({ alreadyAddedCourseDependency: true });
+                                } else {
+                                    return Promise.resolve({ alreadyAddedCourseDependency: false });
+                                }
+                            })
+                            .then((response) => {
+                                if (response.alreadyAddedCourseDependency === false) {
+                                    database('course_relation').insert({
+                                        courseId: request.params.courseId,
+                                        reliesOn: request.params.reliesOn
+                                    })
+                                        .then((response) => {
+                                            resolve({
+                                                'Added': true,
+                                            });
+                                        });
+                                }
+                            });
+                    } else {
+                        reject(Boom.expectationFailed('Only Admins are allowed to add the course dependencies.'));
+                        return Promise.reject("Rejected");
+                    }
+                });
+        });
+    }
+
 }

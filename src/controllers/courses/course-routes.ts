@@ -214,4 +214,64 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'POST',
+        path: '/courseRelation/{userId}/{courseId}/{reliesOn}/add',
+        config: {
+            description: 'Add course relation in the course with the given ID.',
+            validate: {
+                params: {
+                    userId: Joi.number(),
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
+                }
+            },
+            response: {
+                // schema: {
+                //     "enrolled": Joi.bool()
+                // }
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.addCourseRelation
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courseRelation',
+        config: {
+            description: 'Get complete list of course relations for all the courses',
+            response: {
+                schema: Joi.object({
+                    "data": Joi.array().items(exerciseSchema)
+                })
+            },
+            tags: ['api'],
+            handler: courseController.getCourseRelationList
+        }
+    });
+
+    server.route({
+        method: 'DELETE',
+        path: '/courseRelation/{courseId}/{reliesOn}/delete',
+        config: {
+            description: 'Delete the courseRelation with the given course id.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number()
+                }
+            },
+            response: {
+                schema: {
+                    "deleted": Joi.bool()
+                }
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.deleteCourseRelation
+        }
+    });
+
 }

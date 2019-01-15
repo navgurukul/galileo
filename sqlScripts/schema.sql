@@ -190,6 +190,15 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `googleUserId` (`googleUserId`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE `course_relation` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `courseId` int(11) unsigned DEFAULT NULL,
+  `reliesOn` int(11) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
