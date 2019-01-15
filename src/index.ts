@@ -23,7 +23,7 @@ const serverConfigs = Configs.getServerConfigs();
 const server = Server.init(serverConfigs, databaseConfig)
     .then((server) => {
         if (!module.parent) {
-          // console.log("yahan"); 
+            // console.log("yahan"); 
             server.start(() => {
                 console.log('Server running at:', server.info.uri);
             });
