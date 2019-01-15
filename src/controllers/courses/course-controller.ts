@@ -659,6 +659,7 @@ export default class CourseController {
                                     'success': true
                                 });
                             });
+
                 });
 
         });

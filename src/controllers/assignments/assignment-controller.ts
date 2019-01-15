@@ -111,6 +111,7 @@ export default class AssignmentController {
                                             } else {
                                                 const { studentCenter } = rows[0];
                                                 return Promise.resolve(studentCenter);
+
                                             }
                                         })
                                         .then((studentCenter) => {
@@ -131,6 +132,7 @@ export default class AssignmentController {
                                                 }
 
                                                 const index =  (Math.random() * facilitatorEmails.length) | 0;
+
                                                 let facilitatorEmail = facilitatorEmails[index];
 
                                                 return database('users').select('users.id as reviewerID').where({
@@ -161,7 +163,8 @@ export default class AssignmentController {
                                             database('submissions')
                                                 .select('submissions.userId as reviewerID')
                                                 .innerJoin(
-                                                    'course_enrolments', 'submissions.userId','course_enrolments.studentId'
+                                                    'course_enrolments', 'submissions.userId',
+                                                    'course_enrolments.studentId'
                                                 )
                                                 .where({
                                                     'submissions.completed': 1,
@@ -229,6 +232,7 @@ export default class AssignmentController {
                                                         studentId: queryData.userId
                                                     });
                                                 });
+
                                 }
 
                                 submissionInsertQuery.then((response) => {
@@ -262,6 +266,7 @@ export default class AssignmentController {
                                                                 'exerciseId': request.params.exerciseId
                                                         });
                                             });
+
                                 })
                                 .then((rows) => {
                                     sendAssignmentReviewPendingEmail(student, reviewer, rows[0]);
@@ -365,7 +370,7 @@ export default class AssignmentController {
                         'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 
                         'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviwerName', 
                         'users.id as reviwerId', 'users.profilePicture as reviewerProfilePicture')
-                // ,'users.facilitator as isReviewerFacilitator')
+               // ,'users.facilitator as isReviewerFacilitator')
                 .leftJoin('users', 'submissions.peerReviewerId', 'users.id')
                 .where({'submissions.id': request.params.submissionId})
                 .then((rows) => {

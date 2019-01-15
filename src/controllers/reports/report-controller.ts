@@ -257,7 +257,7 @@ export default class ReportController {
                             'user_roles.roles': 'student'
                         };
 
-                        if (response.center !== "all"){
+                    if (response.center !== "all"){
                             whereClause['users.center'] = response.center;
                         }
 
@@ -314,7 +314,7 @@ export default class ReportController {
                                     mentees = rows;
                                     return Promise.resolve();
                                 });
-
+                                
                         // query for the course report of the mentee assigned to the mentor
                         menteesReportQ =
                             database('course_enrolments').select(
@@ -379,6 +379,7 @@ export default class ReportController {
                         };
                         menteesCoursesReport.push(courseReport);
                     }
+
 
                     resolve({
                         "menteesCoursesReport": menteesCoursesReport,
@@ -505,6 +506,7 @@ export default class ReportController {
                 return Promise.all([exerciseQ, menteeQ]).then(() => {
                     return Promise.resolve(response);
                 });
+
             })
             .then((response) => {
                 let submissionQ;
@@ -562,6 +564,7 @@ export default class ReportController {
                     menteeSubmissions.sort(function(a, b){
                         return a.exerciseSequenceNum - b.exerciseSequenceNum;
                     });
+
                     // console.log(exercises);
                     resolve({
                         ...response.courseData,
@@ -571,6 +574,7 @@ export default class ReportController {
                 });
 
             });
+
         });
     }
 }
