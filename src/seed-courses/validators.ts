@@ -55,7 +55,7 @@ export const validateSequenceNumber = function(exercises, depthLevel?) {
             let childExsValidated = validateSequenceNumber(exercises[i], depthLevel+1);
             if (!childExsValidated) {
                 showErrorAndExit("Child ecourseDirxercises of Sequence Number "
-                      + exercises[i].sequenceNum + " are not in the sequential order.");
+                    + exercises[i].sequenceNum + " are not in the sequential order.");
             }
         }
     }
@@ -103,7 +103,8 @@ export const validateCourseInfo = function() {
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
 
-        return Promise.resolve()
+        return Promise.resolve();
+
     }).catch( (err) => {
         console.log(err);
         showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
