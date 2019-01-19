@@ -335,7 +335,7 @@ export default class AssignmentController {
                         'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
                         'users.facilitator as isSubmitterFacilitator'
                     )
-                    .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
+                    // .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
                     .leftJoin('users', 'submissions.userId', 'users.id');
 
             let whereClause = {
