@@ -87,7 +87,6 @@ export const findFacilitator = function(email) {
         });
 };
 
-
 export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
     let exInsertQs = [];
     let solution;
@@ -148,15 +147,13 @@ export const addOrUpdateCourse = function() {
                 return Promise.resolve(newSequenceNum);
             }).then( (newSequenceNum) => {
                 if (row == null) {
-                    return database('courses')
-                    .insert({
+                    return database('courses').insert({
                         'type': globals.courseData['info']['type'],
                         'name': globals.courseData['info']['name'],
                         'logo': globals.courseData['info']['logo'],
                         'shortDescription': globals.courseData['info']['shortDescription'],
                         'daysToComplete': globals.courseData['info']['daysToComplete'],
                         'sequenceNum': newSequenceNum,
-                        'facilitator': globals.courseData['info']['facilitator']
                         // 'notes': globals.courseData['notes'],
                     })
                     .then( (rows) => {
@@ -166,20 +163,19 @@ export const addOrUpdateCourse = function() {
                     const { id:courseId, sequenceNum } = row;
 
                     return database('courses')
-                    .where({ 'name': globals.courseData['info']['name'] })
-                    .update({
-                        // Not updating `type` and `name` as assuming they won't change
-                        'logo': globals.courseData['info']['logo'],
-                        'shortDescription': globals.courseData['info']['shortDescription'],
-                        'daysToComplete': globals.courseData['info']['daysToComplete'],
-                        'facilitator': globals.courseData['info']['facilitator'],
-                        // Updating course sequenceNum as maximum of existing sequenceNum+1
-                        // when it is null or else just leave it.
-                        'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
-                    })
-                    .then( () => {
-                        return Promise.resolve(courseId);
-                    });
+                              .where({ 'name': globals.courseData['info']['name'] })
+                              .update({
+                                  // Not updating `type` and `name` as assuming they won't change
+                                  'logo': globals.courseData['info']['logo'],
+                                  'shortDescription': globals.courseData['info']['shortDescription'],
+                                  'daysToComplete': globals.courseData['info']['daysToComplete'],
+                                  // Updating course sequenceNum as maximum of existing sequenceNum+1
+                                  // when it is null or else just leave it.
+                                  'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
+                              })
+                              .then( () => {
+                                  return Promise.resolve(courseId);
+                              });
                 }
             });
     });
