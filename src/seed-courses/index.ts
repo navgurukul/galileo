@@ -36,9 +36,10 @@ import { exerciseInfoSchema, courseInfoSchema } from './schema';
 validateCourseDirParam()
     .then( () => {
         // Check if the details/info.md file is correct
-        return validateCourseInfo();
+        return validateCourseInfo(); 
     }).then( () => {
         // Get a list of files and validate their sequence numbers
+        //all the code related to info.md goes here.
         globals.sequenceNumbers = getSequenceNumbers(globals.courseDir);
         globals.exercises = getCurriculumExerciseFiles(globals.courseDir);
         // validateSequenceNumber(globals.exercises);
@@ -46,7 +47,6 @@ validateCourseDirParam()
         globals.exercises = getAllExercises(globals.exercises);
         return Promise.resolve(globals.exercises);
     }).then( () => {
-
         //TODO: This is a hackish solution to get shit done. Needs to be re-factored later on.
         //Rishabh is responsible for this mess.
 

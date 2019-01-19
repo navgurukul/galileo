@@ -112,6 +112,26 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/courses/{exerciseId}/solution',
+        config: {
+            description: 'gets the solution by exercies Id.',
+            validate: {
+                params: {
+                    exerciseId: Joi.number(),
+                }
+            },
+
+            // auth: {
+            //     strategy: 'jwt',
+            //     mode: 'optional'
+            // },
+            tags: ['api'],
+            handler: courseController.getSolutionByExerciseId
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/courses/{courseId}/notes',
         config: {
             description: 'Get any additional notes attached with the course.',
@@ -198,6 +218,65 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
+        path: '/courseRelation/{userId}/{courseId}/{reliesOn}/add',
+        config: {
+            description: 'Add course relation in the course with the given ID.',
+            validate: {
+                params: {
+                    userId: Joi.number(),
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
+                }
+            },
+            response: {
+                // schema: {
+                //     "enrolled": Joi.bool()
+                // }
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.addCourseRelation
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courseRelation',
+        config: {
+            description: 'Get complete list of course relations for all the courses',
+            response: {
+                schema: Joi.object({
+                    "data": Joi.array().items(exerciseSchema)
+                })
+            },
+            tags: ['api'],
+            handler: courseController.getCourseRelationList
+        }
+    });
+
+    server.route({
+        method: 'DELETE',
+        path: '/courseRelation/{courseId}/{reliesOn}/delete',
+        config: {
+            description: 'Delete the courseRelation with the given course id.',
+            validate: {
+                params: {
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number()
+                }
+            },
+            response: {
+              schema: {
+                "deleted": Joi.bool()
+              }
+            },
+            tags: ['api'],
+            handler: courseController.deleteCourseRelation
+        }
+    });
+
+    server.route({
+        method: 'POST',
         path: '/courses/{courseId}/complete',
         config: {
             description: 'Updates the sequence number of all the courses.',
@@ -214,7 +293,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "success": Joi.bool()
                 }
             },
-            // auth: 'jwt',
             tags: ['api'],
             handler: courseController.courseComplete
         }
