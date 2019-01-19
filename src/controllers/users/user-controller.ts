@@ -21,8 +21,9 @@ export default class UserController {
     }
 
     public loginUser(request, h) {
-        // let auth = new GoogleAuth;
-        // let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+        let auth = new GoogleAuth;
+        let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+
         return new Promise((resolve, reject) => {
 
             client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
@@ -169,7 +170,7 @@ export default class UserController {
                         });
                     });
             });
-        // });
+        });
     }
 
     public getUserInfo(request, h) {

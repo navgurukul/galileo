@@ -62,7 +62,7 @@ gulp.task('configs', (cb) => {
 /**
  * Build the project.
  */
-gulp.task('build', ['tslint', 'compile', 'configs'], () => {
+gulp.task('build', ['compile', 'configs'], () => {
     console.log('Building the project ...');
 });
 

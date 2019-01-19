@@ -375,7 +375,7 @@ export default class AssignmentController {
                             resolve({"data": submissions});
                         });
                 });
-
+        });
     }
 
     public getExerciseSubmissionById(request, h) {
