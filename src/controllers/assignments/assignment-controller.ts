@@ -237,45 +237,22 @@ export default class AssignmentController {
 
                                 submissionInsertQuery.then((response) => {
                                     let studentQuery  = database('users')
-                                          .select('users.email', 'users.name')
-                                          .where({
-                                              'users.id': response.studentId
-                                          })
-                                          .then(rows => {
-                                              student = rows[0];
-                                              return Promise.resolve();
-                                          });
-
-                                    let reviewerQuery = database('users')
-                                          .select('users.email', 'users.name')
-                                          .where({
-                                              'users.id': response.reviewerId
-                                          })
-                                          .then((rows) => {
-                                              reviewer = rows[0];
-                                              return Promise.resolve();
-                                          });
-
-                                    return Promise.all([studentQuery, reviewerQuery])
-                                          .then(() => {
-                                            return database('submissions')
-                                                .select(
-                                                  // Submissions table fields
-                                                  'submissions.id as submissionId', 'exercises.name as exerciseName',
-                                                  'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed')
-                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                                .where({
-                                                      'submissions.userId': request.userId,
-                                                      'exerciseId': request.params.exerciseId
-                                                });
+                                        .select('users.email', 'users.name')
+                                        .where({
+                                            'users.id': response.studentId
+                                        })
+                                        .then(rows => {
+                                            student = rows[0];
+                                            return Promise.resolve();
+                                        });
 
                                     let reviewerQuery =
-                                            database('users').select('users.email', 'users.name')
-                                                .where({'users.id': response.reviewerId})
-                                                .then((rows) => {
-                                                    reviewer = rows[0];
-                                                    return Promise.resolve();
-                                                });
+                                        database('users').select('users.email', 'users.name')
+                                            .where({'users.id': response.reviewerId})
+                                            .then((rows) => {
+                                                reviewer = rows[0];
+                                                return Promise.resolve();
+                                            });
 
                                     return Promise.all([studentQuery, reviewerQuery])
                                             .then(() => {
