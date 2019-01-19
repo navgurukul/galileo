@@ -330,12 +330,12 @@ export default class AssignmentController {
                         // Reviewer details
                         'reviewUsers.name as reviewerName', 'reviewUsers.id as reviewerId',
                         'reviewUsers.profilePicture as reviewerProfilePicture',
-                        'reviewUsers.facilitator as isReviewerFacilitator',
+                        // 'reviewUsers.facilitator as isReviewerFacilitator',
                         // Submitter Details
                         'users.name as submitterName', 'users.id as submitterId', 'users.profilePicture as submitterProfilePicture',
-                        'users.facilitator as isSubmitterFacilitator'
+                        // 'users.facilitator as isSubmitterFacilitator'
                     )
-                    // .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
+                    .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
                     .leftJoin('users', 'submissions.userId', 'users.id');
 
             let whereClause = {
