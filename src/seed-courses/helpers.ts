@@ -31,7 +31,7 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
             insideInnerList = true;
         } else if(tokens[i]["type"]==="list_end" && inside===true  && insideInnerList === true) {
             insideInnerList = false;
-        } else if (tokens[i]["type"]==="list_start" && !(tokens[i-1]["text"].indexOf('.md')>-1)) { //the lsi
+        } else if (tokens[i]["type"]==="list_start" && tokens[i-1]["text"]!=null && !(tokens[i-1]["text"].indexOf('.md')>-1)) { //the lsi
             inside=true;
             l2=0;
         } else if (tokens[i]["type"]==="list_start" && (tokens[i-1]["text"].indexOf('.md')>-1)) { //the lsi
