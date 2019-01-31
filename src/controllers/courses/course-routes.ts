@@ -4,13 +4,13 @@ import {IServerConfigurations} from "../../configurations";
 
 import CourseController from "./course-controller";
 import {
-          courseSchema,
-          enrolledCourseSchema,
-          completedCoursesSchema,
-          exerciseSchema,
-          topicSchema,
-          courseSequenceSchema,
-        } from "./course-schemas";
+            courseSchema,
+            enrolledCourseSchema,
+            completedCoursesSchema,
+            exerciseSchema,
+            topicSchema,
+            courseSequenceSchema,
+    } from "./course-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -218,22 +218,22 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courseRelation/{userId}/{courseId}/{reliesOn}/add',
+        path: '/courseRelation/{courseId}/{reliesOn}/add',
         config: {
             description: 'Add course relation in the course with the given ID.',
             validate: {
                 params: {
-                    userId: Joi.number(),
+                    // userId: Joi.number(),
                     courseId: Joi.number(),
                     reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
                 }
             },
             response: {
-                // schema: {
-                //     "enrolled": Joi.bool()
-                // }
+                schema: {
+                    "Added": Joi.bool()
+                }
             },
-            // auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.addCourseRelation
         }
@@ -266,9 +266,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-              schema: {
-                "deleted": Joi.bool()
-              }
+                schema: {
+                    "deleted": Joi.bool()
+                }
             },
             tags: ['api'],
             handler: courseController.deleteCourseRelation

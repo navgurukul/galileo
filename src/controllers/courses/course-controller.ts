@@ -28,8 +28,12 @@ export default class CourseController {
 
             if (request.headers.authorization === undefined ){
                 availableQ =
-                    database('courses').select('courses.id', 'courses.name', 'courses.type',
-                        'courses.logo', 'courses.shortDescription', 'courses.sequenceNum')
+                    database('courses')
+                        .select(
+                            'courses.id', 'courses.name', 'courses.type',
+                            'courses.logo', 'courses.shortDescription', 
+                            'courses.sequenceNum'
+                        )
                         .then((rows) => {
                             availableCourses = rows;
                             return Promise.resolve();
@@ -44,12 +48,14 @@ export default class CourseController {
             } else if (request.headers.authorization !== ""){
                 enrolledQ =
                     database('course_enrolments')
-                        .select('courses.id', 'courses.name', 'courses.type',
+                        .select(
+                            'courses.id', 'courses.name', 'courses.type',
                             'courses.logo', 'courses.daysToComplete',
                             'courses.shortDescription', 'courses.sequenceNum',
                             database.raw('MIN(course_enrolments.enrolledAt) as enrolledAt'),
                             database.raw('COUNT(CASE WHEN exercises.submissionType IS NOT NULL THEN 1 END) as totalExercises'),
-                            database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions'))
+                            database.raw('COUNT(DISTINCT submissions.id) as completedSubmissions')
+                        )
                         .innerJoin('courses', 'course_enrolments.courseId', '=', 'courses.id')
                         .innerJoin('exercises', function(){
                             // count only those exercises which have submissionType != null
@@ -469,7 +475,7 @@ export default class CourseController {
                                 });
                         } else {
                             reject(Boom.expectationFailed("Minimum 2 courses are required "
-                                            + "to change thier sequence number."));
+                                            + "to change their sequence number."));
                         }
 
                     }
@@ -681,10 +687,10 @@ export default class CourseController {
     }
 
 
-      public getCourseRelationList(request, h) {
+    public getCourseRelationList(request, h) {
         return new Promise((resolve, reject) => {
-            let query = database('course_relation')
-                .select('*');
+            let query = database('course_relation').select('*');
+
             query.then((rows) => {
                 if (rows.length > 0) {
                     resolve({ data: rows });
@@ -726,7 +732,7 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
             database('user_roles').select('roles')
                 .where({
-                    'userId': request.params.userId
+                    'userId': request.userId
                 })
                 .then((rows) => {
                     const isAdmin = rows[0].roles === 'admin' ? true : false;
@@ -750,10 +756,11 @@ export default class CourseController {
                             })
                             .then((response) => {
                                 if (response.alreadyAddedCourseDependency === false) {
-                                    database('course_relation').insert({
-                                        courseId: request.params.courseId,
-                                        reliesOn: request.params.reliesOn
-                                    })
+                                    database('course_relation')
+                                        .insert({
+                                            courseId: request.params.courseId,
+                                            reliesOn: request.params.reliesOn
+                                        })
                                         .then((response) => {
                                             resolve({
                                                 'Added': true,

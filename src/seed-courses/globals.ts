@@ -7,8 +7,7 @@ var courseDir, // Path of the course directory relative to this file
     revSeqNumbers = {},
     toReadFiles = [],
     courseId,
-    defaultCourseLogo = "http://navgurukul.org/img/sqlogo.jpg",
-    defaultFacilators = ["amar17@navgurukul.org", 'a@navgurukul.org'];
+    defaultCourseLogo = "http://navgurukul.org/img/sqlogo.jpg";
 
 export {
   courseDir,
@@ -19,5 +18,5 @@ export {
   revSeqNumbers,
   toReadFiles,
   courseId,
-  defaultFacilators,
+  defaultCourseLogo
 }

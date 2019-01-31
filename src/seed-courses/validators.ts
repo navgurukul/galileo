@@ -4,7 +4,6 @@ declare var module: any;
 
 import { showErrorAndExit } from "./utils";
 
-import * as colors from "colors";
 import * as fs from "fs-extra";
 import * as marked from "marked";
 import * as Joi from "joi";
@@ -16,8 +15,6 @@ var globals = require('./globals');
 import { parseNgMetaText } from './helpers';
 import { courseInfoSchema } from './schema';
 
-import * as Configs from "../configurations";
-let serverConfigs = Configs.getServerConfigs();
 
 // Given a sequence number this method will return the next logical sequence number.
 // This doesn't need to be the real order, but the next logical sequence number.
@@ -98,7 +95,7 @@ export const validateCourseInfo = function() {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
         let courseInfo = parseNgMetaText(tokens[0]['text']);
-        courseInfo['logo'] = courseInfo['logo']?courseInfo['logo']:globals.defaultCourseLogo;
+        courseInfo['logo'] = courseInfo['logo'] ? courseInfo['logo'] : globals.defaultCourseLogo;
 
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
