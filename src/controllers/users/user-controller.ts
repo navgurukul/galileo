@@ -21,11 +21,12 @@ export default class UserController {
     }
 
     public loginUser(request, h) {
-        let auth = new GoogleAuth;
-        let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+        //let auth = new GoogleAuth;
+        //let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
 
         return new Promise((resolve, reject) => {
-
+            let auth = new GoogleAuth;
+            let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
             client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
                 if (error) {
                     return console.error(error);
@@ -170,7 +171,7 @@ export default class UserController {
                         });
                     });
             });
-        });
+         });
     }
 
     public getUserInfo(request, h) {

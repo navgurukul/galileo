@@ -4,7 +4,10 @@ import * as knex from 'knex';
 
 import database from '../../';
 import {getIsSolutionAvailable} from '../../helpers/courseHelper';
+import {manipulateResultSet} from '../../helpers/courseHelper';
 import { IServerConfigurations } from '../../configurations/index';
+import * as Configs from "../../configurations";
+var _ = require('underscore');
 
 
 export default class CourseController {
@@ -20,6 +23,18 @@ export default class CourseController {
 
     public getCoursesList(request, h) {
         return new Promise((resolve, reject) => {
+
+            let courseConfig = Configs.getCourseConfigs();
+            //let enrolledCourses = [];
+            //let availableCourses = [];
+            let totalExercisesPerCourse = [];
+            let exerciseCompeletedPerCourse = [];
+            let courseReliesOn=[];
+            let courseReliesOnQ;
+            let exerciseCompeletedPerCourseQ;
+            let TotalExercisesPerCourseQ;
+            //let enrolledQ;
+            //let availableQ;
             let enrolledCourses = [],
                 availableCourses = [],
                 completedCourses = [];
@@ -108,7 +123,8 @@ export default class CourseController {
                         .then((rows) => {
                             completedCourses = rows;
                         });
-
+                
+                /* **get the list of courses that the user is not already enrolled in** */        
                 availableQ =
                     database('courses')
                         .select('courses.id', 'courses.name', 'courses.type',
@@ -125,18 +141,72 @@ export default class CourseController {
                             return Promise.resolve();
                         });
 
-                Promise.all([enrolledQ, availableQ, completedQ]).then(() => {
+                  /* **get the list of exercises available in each course** */              
+                        TotalExercisesPerCourseQ = database('exercises')
+                        .select( 'exercises.courseId',
+                        database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
+                        .then((rows) => {
+                            totalExercisesPerCourse = rows;
+                        console.log('totalExercisesPerCourse start');
+                        console.log(totalExercisesPerCourse);
+                        console.log('totalExercisesPerCourse end');
+                            return Promise.resolve();
+                        });
+                    
+                  /* **get the exercises completed in each course by the given user ** */      
+                        exerciseCompeletedPerCourseQ =
+                        database('exercises')
+                            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
+                            'exercises.courseId')
+                            .where('exercises.id', 'in', database('submissions') 
+                            .select('submissions.exerciseId').where({'submissions.completed':1})// ****change this with the enum value*****// 
+                            .andWhere('submissions.userId', '=', 9) //******replace 9 with request.userId*****//
+                            ).groupBy('exercises.courseId')
+                            .then((rows) => {
+                                exerciseCompeletedPerCourse = rows;
+                                //console.log('exerciseCompeletedPerCourse response start');
+                                //console.log(exerciseCompeletedPerCourse);
+                                //console.log('exerciseCompeletedPerCourse response end');
+                                return Promise.resolve();
+                            });
+                            
+                    /* **get the course dependeny list ** */              
+                            courseReliesOnQ =
+                            database('course_relation')
+                                .select(
+                                'course_relation.courseId', 'course_relation.reliesOn'
+                                )
+                                .then((rows) => {
+                                    courseReliesOn = rows;
+                                console.log('courseReliesOn response start');
+                                console.log(exerciseCompeletedPerCourse);
+                                console.log('courseReliesOn response end');
+                                    return Promise.resolve();
+                                });
+
+                /* ** Perform operations on the data received above to filter the courses that the user 
+                is not eligible to watch in the code block below  ** */
+                Promise.all([enrolledQ, availableQ, completedQ,exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, courseReliesOnQ]).then(() => {
+                    
+                    let courseEligibleToView = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
+                        availableCourses, courseConfig.courseCompleteionCriteria);
+                        console.log('courseEligibleToView start');
+                        console.log(courseEligibleToView);
+                        console.log('courseEligibleToView end');
                     resolve({
                         enrolledCourses,
-                        availableCourses,
+                        courseEligibleToView,
                         completedCourses,
+                        //'enrolledCourses': enrolledCourses,
+                        //'availableCourses': courseEligibleToView
+
                     });
                 });
 
             }
         });
-    }
-
+    }   
+    
     public getCourseTopics(request, h) {
         return new Promise((resolve, reject) => {
             let exercises = [];
@@ -386,32 +456,172 @@ export default class CourseController {
                 })
                 .then((response) => {
                     if (response.alreadyEnrolled === false) {
-                        database('courses')
-                            .select('courses.id as courseId')
-                            .where({
-                                'courses.id':request.params.courseId
-                            })
-                            .then((rows) => {
-                                if (rows.length > 0) {
-                                    return Promise.resolve(rows[0]);
-                                } else {
-                                    reject(Boom.expectationFailed('The course for given id doesn\'t exists.'));
-                                }
-                            })
-                            .then(({courseId}) => {
-                                database('course_enrolments').insert({
-                                    studentId: request.userId,
-                                    courseId: courseId
+                        this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((isStudentEligible) => {
+                            if(isStudentEligible) {
+                                database('courses')
+                                .select('courses.id as courseId')
+                                .where({
+                                    'courses.id':request.params.courseId
                                 })
-                                .then((response) => {
-                                    resolve({
-                                        'enrolled': true,
-                                    });
+                                .then((rows) => {
+                                    if (rows.length > 0) {
+                                        return Promise.resolve(rows[0]);
+                                    } else {
+                                        reject(Boom.expectationFailed('The course for given id doesn\'t exists.'));
+                                    }
+                                })
+                                .then(({courseId}) => {
+                                    database('course_enrolments').insert({
+                                        studentId: request.userId,
+                                        courseId: courseId
+                                    })
+                                      .then((response) => {
+                                        resolve({
+                                            'enrolled': true,
+                                        });
+                                      });
                                 });
-                            });
+                            } else {
+                                reject(Boom.expectationFailed('student has not met the completion threshold for the dependent courses'));
+                            }
+                        });
                     }
                 });
         });
+    }
+    // public enrollInCourse(request, h) {
+    //     //console.log('###########################');
+    //     //this.isStudentEligibleToEnroll(request.userId, request.params.courseId);
+    //     //return;
+    //     return new Promise((resolve, reject) => {
+
+    //         database('course_enrolments').select('*')
+    //             .where({
+    //                 'studentId': request.userId,
+    //                 'courseId': request.params.courseId
+    //             })
+    //             .then((rows) => {
+    //                 if (rows.length > 0) {
+    //                     reject(Boom.expectationFailed('An enrolment against the user ID already exists.'));
+    //                     return Promise.resolve({alreadyEnrolled: true});
+    //                 } else {
+    //                     return Promise.resolve({alreadyEnrolled: false});
+    //                 }
+    //             })
+    //             .then((response) => {
+    //                 if (response.alreadyEnrolled === false) {
+    //                     // if(this.isStudentEligibleToEnroll(request.userId, request.params.courseId)) {
+    //                     //     console.log('aaaaaa');
+    //                     //     return Promise.resolve({studentCanBeEnrolled: true});
+    //                     // } else {
+    //                     //     console.log('bbbbbbbbbbbb');
+    //                     //     reject(Boom.expectationFailed('the course does not atistfy dependency'));
+    //                     // }
+    //                     this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((data) => {
+    //                         console.log('data');
+    //                         console.log(data);
+    //                     });
+    //                 }
+    //             })
+    //             .then((response) => {
+    //                 if (response.alreadyEnrolled === true) {
+    //                     database('courses')
+    //                         .select('courses.id as courseId')
+    //                         .where({
+    //                             'courses.id':request.params.courseId
+    //                         })
+    //                         .then((rows) => {
+    //                             if (rows.length > 0) {
+    //                                 return Promise.resolve(rows[0]);
+    //                             } else {
+    //                                 reject(Boom.expectationFailed('The course for given id doesn\'t exists.'));
+    //                             }
+    //                         })
+    //                         .then(({courseId}) => {
+    //                             database('course_enrolments').insert({
+    //                                 studentId: request.userId,
+    //                                 courseId: courseId
+    //                             })
+    //                               .then((response) => {
+    //                                 resolve({
+    //                                     'enrolled': true,
+    //                                 });
+    //                               });
+    //                         });
+    //                 }
+    //             });
+    //     });
+    // }
+
+
+    //performing a similar check in the enroll API as in courses API.
+    //to prevent a student from enrolling in a course by making a direct Api call through  
+    async isStudentEligibleToEnroll(studentId, courseId){
+        //let isEligibleToEnrollInCourse = false; 
+        let TotalExercisesPerCourseQ;
+        let exerciseCompeletedPerCourseQ;
+        let courseReliesOnQ;
+        let availableQ;
+        let courseConfig = Configs.getCourseConfigs();
+        TotalExercisesPerCourseQ = database('exercises')
+        .select( 'exercises.courseId',
+        database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
+        .then((rows) => {
+            return Promise.resolve(rows);
+        });
+        
+        exerciseCompeletedPerCourseQ =
+        database('exercises')
+            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
+            'exercises.courseId')
+            .where('exercises.id', 'in', database('submissions') //replace 9 with request.userId
+            .select('submissions.exerciseId').where({'submissions.completed':1})
+            .andWhere('submissions.userId', '=', 9) 
+            ).groupBy('exercises.courseId')
+            .then((rows) => {
+                return Promise.resolve(rows);
+            });
+        
+            courseReliesOnQ =
+            database('course_relation')
+                .select(
+                'course_relation.courseId', 'course_relation.reliesOn'
+                )
+                .then((rows) => {
+                    return Promise.resolve(rows);
+                });
+
+                availableQ =
+                database('courses')
+                    .select('courses.id', 'courses.name', 'courses.type',
+                      'courses.logo', 'courses.shortDescription','courses.sequenceNum')
+                    .where('courses.id', 'not in', database('courses').distinct()
+                        .select('courses.id')
+                        .join('course_enrolments', function () {
+                            this.on('courses.id', '=', 'course_enrolments.courseId')
+                                .andOn('course_enrolments.studentId', '=', studentId);
+                        })
+                    )
+                    .then((rows) => {
+                        return Promise.resolve(rows);
+                    });
+
+                    let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
+                        courseReliesOnQ]).then((resolvedValues) => {
+                        console.log('inside .allllll');
+                        let availableCourses = resolvedValues[0];
+                        let exerciseCompeletedPerCourse = resolvedValues[1];
+                        let totalExercisesPerCourse = resolvedValues[2];
+                        let courseReliesOn = courseReliesOnQ[3];
+                        let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
+                        courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
+                        console.log('coursesEligibleToEnrollIn');
+                        console.log(coursesEligibleToEnrollIn);
+                         return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
+                    });
+                    
+                    let result = await a;
+                    return result;
     }
     // Update all courses using default sequenceNum
     public updateCourseSequence(request, h){

@@ -280,7 +280,7 @@ export default class AssignmentController {
         });
     }
 
-    public uploadExerciseAssignment(request: Hapi.request, reply: Hapi.IReply) {
+    public uploadExerciseAssignment(request, h) {
         // NEEd to be rewritten for s3: TODO
 
         // let gcs = GoogleCloudStorage({
@@ -399,7 +399,7 @@ export default class AssignmentController {
 
     }
 
-    public getPeerReviewRequests(request: Hapi.Request, reply: Hapi.IReply) {
+    public getPeerReviewRequests(request, h) {
         return new Promise((resolve, reject) => {
             // Hackish Solution to show all the review to the Developer.
             let developerEmails = [

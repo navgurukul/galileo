@@ -35,6 +35,11 @@ export interface IDataConfiguration {
     };
 }
 
+export interface CouseConfigurations {
+    courseCompleteionCriteria: number;
+}
+
+
 export function checkConfigEnvironment(): void {
     if (!!configs.get("database") === false) {
         console.error('Check GALILEO_ENV variable');
@@ -51,4 +56,9 @@ export function getDatabaseConfig(): IDataConfiguration {
 export function getServerConfigs(): IServerConfigurations {
     checkConfigEnvironment();
     return configs.get("server");
+}
+
+export function getCourseConfigs(): CouseConfigurations {
+    checkConfigEnvironment();
+    return configs.get("courseConfig");
 }

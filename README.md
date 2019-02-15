@@ -50,7 +50,7 @@ Made using hapi.js, the repository uses mysql database.
 * *npm install yarn* (required for installing dev-dependencies)
 * *yarn install* (install dependencies and dev-dependencies from package.json)
 * *npm run setup* (install nuget packages & typings)
-* Install python and setup it's enviroment variable for pip and python3.
+* Install python and setup it's enviroment variable for pip and python3(pip is installed along with python3, ).
 * *pip install awscli* (required aws sdk)
 
 **Configuration**
@@ -64,6 +64,8 @@ Made using hapi.js, the repository uses mysql database.
 * *aws configure* (to setup aws-sdk provide the keyId, SecretKey and region which has access to upload images to AWS).
 
 **DB SETUP**
+* download mysql from https://www.mysql.com/products/workbench/. 
+* 
 * Create a database *davinci*, add the access credentials of the database to your `config` file.
 * Import schema.sql to import the database schema.
 * `bash courseUpdateWindows.sh all` in git Bash to import all the courses to your local database.
