@@ -21,7 +21,6 @@ function generateUID() {
 // TODO: Add support for tracking assignmnt completion time.
 
 export default class AssignmentController {
-
     private configs: IServerConfigurations;
     private database: any;
 
@@ -39,6 +38,9 @@ export default class AssignmentController {
                     'courseId': request.params.courseId,
                 })
                 .then((rows) => {
+                    /**
+                     * student can only submit the assignment of the courses in which they are enrolled.
+                     */
                     if (rows.length > 0) {
                         return Promise.resolve({canSubmit: true});
                     } else {
@@ -49,6 +51,7 @@ export default class AssignmentController {
                 .then((response) => {
                     if (response.canSubmit === true) {
                         let count, student, reviewer;
+                        /** Validate the exerciseId does the exercise exist or not not */
                         database('exercises').select()
                             .where('id', request.params.exerciseId)
                             .then((rows) => {
@@ -70,7 +73,9 @@ export default class AssignmentController {
                                 });
                             })
                             .then((exercise) => {
-                                let facilitatorIdQuery;
+                                // let facilitatorIdQuery;
+
+                                /** Not in work */
                                 if (exercise.reviewType === 'manual') {
                                     return Promise.resolve({
                                         exerciseId: request.params.exerciseId,
@@ -80,7 +85,7 @@ export default class AssignmentController {
                                         completedAt: new Date()
                                     });
                                 }
-
+                                /** Not in work */
                                 else if (exercise.reviewType === 'automatic') {
                                     return Promise.resolve({
                                         exerciseId: request.params.exerciseId,
@@ -98,12 +103,13 @@ export default class AssignmentController {
 
                                     let reviewerIdQuery, facilitatorIdQuery;
 
-                                    // get the user center
+                                    /** Finding the facilitator of the student center */
                                     facilitatorIdQuery =
                                         database('users').select('users.center as studentCenter').where({
                                             'users.id':request.userId
                                         })
                                         .then((rows) => {
+                                            /** Find the student center. */
                                             if (rows.length < 1){
                                                 reject(Boom.expectationFailed("Student have no center assigned can't"
                                                     + "submit assignment."));
@@ -115,7 +121,7 @@ export default class AssignmentController {
                                             }
                                         })
                                         .then((studentCenter) => {
-                                            // check if the user_roles exist as facilitator for that center
+                                            /** Find the facilitor of the student. */
                                             return database('user_roles').select('userId as reviewerID').where({
                                                 'user_roles.center': studentCenter,
                                                 'user_roles.roles':'facilitator',
@@ -125,7 +131,10 @@ export default class AssignmentController {
                                             if (rows.length < 1) {
                                                 const { facilitatorEmails } = this.configs;
 
-                                                // if no user roles exist than get facilitator from default facilitator
+                                                /** 
+                                                 * If there is no facilitator then assign the assigment
+                                                 * to the default Facilitator.
+                                                 */
                                                 if(facilitatorEmails.length < 1){
                                                     reject(Boom.expectationFailed("No facilitators in config add them."));
                                                     return Promise.reject("Rejected");
@@ -153,11 +162,10 @@ export default class AssignmentController {
                                                 return Promise.resolve(rows);
                                             }
                                         });
-
-                                    // facilitatorIdQuery = database('courses')
-                                    //     .select('courses.facilitator as reviewerID')
-                                    //     .where({'courses.id':request.params.courseId});
-
+                                    /** 
+                                     * if any student has already completed the assignment,
+                                     * then assign the assignment to the student.
+                                     */
                                     if (exercise.reviewType === 'peer') {
                                         reviewerIdQuery =
                                             database('submissions')
@@ -179,6 +187,7 @@ export default class AssignmentController {
                                     }
 
                                     return reviewerIdQuery.then((rows) => {
+                                            /** extracting the reviewerId */
                                             let reviewerId;
                                             if (rows.length < 1 && exercise.reviewType === 'peer') {
                                                 return facilitatorIdQuery.then((rows) => {
@@ -206,10 +215,13 @@ export default class AssignmentController {
 
                             })
                             .then((queryData) => {
-                                // checks if we need to update existing submission of student
-                                // or create a new submission
+                                /**
+                                 * Create a new submission if there doesn't exist one 
+                                 * or if exist update it as a complete new assignment.
+                                 */
                                 let submissionInsertQuery;
                                 if (count >= 1){
+                                    // update the existing submssion.
                                     submissionInsertQuery =
                                             database('submissions').select(`submissions.id`)
                                                     .where({
@@ -224,6 +236,7 @@ export default class AssignmentController {
                                                         });
                                                     });
                                 } else{
+                                    // create a new submission.
                                     submissionInsertQuery =
                                             database('submissions').insert(queryData)
                                                 .then((rows) => {
@@ -234,8 +247,12 @@ export default class AssignmentController {
                                                 });
 
                                 }
-
+                                
                                 submissionInsertQuery.then((response) => {
+                                    /**
+                                     * Finding the student and the reviewer details to send the
+                                     * email to them about assignment submission.
+                                     */
                                     let studentQuery  = database('users')
                                         .select('users.email', 'users.name')
                                         .where({
@@ -258,19 +275,23 @@ export default class AssignmentController {
                                             .then(() => {
                                                 return database('submissions')
                                                             .select(
-                                                            // Submissions table fields
-                                                            'submissions.id as submissionId', 'exercises.name as exerciseName',
-                                                            'exercises.slug as exerciseSlug', 'submissions.state', 'submissions.completed'
+                                                                // Submissions table fields
+                                                                'submissions.id as submissionId', 
+                                                                'exercises.name as exerciseName',
+                                                                'exercises.slug as exerciseSlug', 
+                                                                'submissions.state', 
+                                                                'submissions.completed'
                                                             )
-                                                        .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                                        .where({
-                                                                'submissions.userId': request.userId,
-                                                                'exerciseId': request.params.exerciseId
-                                                        });
+                                                            .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                            .where({
+                                                                    'submissions.userId': request.userId,
+                                                                    'exerciseId': request.params.exerciseId
+                                                            });
                                             });
 
                                 })
                                 .then((rows) => {
+                                    // send email using aws to the student and the reviewer
                                     sendAssignmentReviewPendingEmail(student, reviewer, rows[0]);
                                     resolve(rows[0]);
                                 });
@@ -320,6 +341,7 @@ export default class AssignmentController {
 
     public getExerciseSubmissions(request, h) {
         return new Promise((resolve, reject) => {
+            // query to find all the submission of particular exerciseId
             let submissionQuery =
                 database('submissions')
                     .select(
@@ -338,18 +360,24 @@ export default class AssignmentController {
                     .leftJoin(database.raw('users reviewUsers'), 'submissions.peerReviewerId', 'reviewUsers.id')
                     .leftJoin('users', 'submissions.userId', 'users.id');
 
+            // Clauses to search the exercisesId
             let whereClause = {
                 'submissions.exerciseId': request.params.exerciseId
             };
+
+            // Wether to search submissions of the current user or not.
             if (request.query.submissionUsers === 'current') {
                 whereClause['submissions.userId'] = request.userId;
             }
+
+            // the state of the submissions of the student.
             if (request.query.submissionState !== 'all') {
                 whereClause['submissions.state'] = request.query.submissionState;
             }
 
             submissionQuery.where(whereClause)
                 .then((rows) => {
+                    // parsing the files
                     let submissions = [];
                     for (let i = 0; i < rows.length; i++) {
                         let submission = rows[i];
@@ -358,33 +386,21 @@ export default class AssignmentController {
                         }
                         submissions.push(submission);
                     }
-                    if (request.query.submissionState !== 'all') {
-                        whereClause['submissions.state'] = request.query.submissionState;
-                    }
 
-                    submissionQuery.where(whereClause)
-                        .then((rows) => {
-                            let submissions = [];
-                            for (let i = 0; i < rows.length; i++) {
-                                let submission = rows[i];
-                                if (submission.files !== null) {
-                                    submission.files = JSON.parse(submission.files);
-                                }
-                                submissions.push(submission);
-                            }
-                            resolve({"data": submissions});
-                        });
+                    resolve({"data": submissions});
                 });
-        });
-    }
+            });
+    };
 
     public getExerciseSubmissionById(request, h) {
         return new Promise((resolve, reject) => {
+            // for searching single assignment submission by submissionId
             database('submissions')
                 .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 
                         'submissions.submittedAt','submissions.submitterNotes', 'submissions.files', 
                         'submissions.notesReviewer', 'submissions.state', 'submissions.completed', 
-                        'submissions.completedAt', 'submissions.submittedAt', 'users.name as reviewerName', 
+                        'submissions.completedAt', 'submissions.submittedAt', 
+                        'users.name as reviewerName', 
                         'users.id as reviewerId', 'users.profilePicture as reviewerProfilePicture')
                 .leftJoin('users', 'submissions.peerReviewerId', 'users.id')
                 .where({'submissions.id': request.params.submissionId})
@@ -418,7 +434,7 @@ export default class AssignmentController {
                     if(developerEmails.indexOf(rows[0].email) > -1){
                         // Show all the Peer Review to the user when the User is Developer.
                         return Promise.resolve({
-                          whereClause:{}
+                            whereClause:{}
                         });
                     }
                     // if not a developer show him the assignmnt assign to him for reviewing
@@ -428,7 +444,8 @@ export default class AssignmentController {
                         }
                     });
                 })
-                // Hackish solution till here.
+                // *************** Hackish solution till here ********************.
+
                 .then((response) => {
                     database('submissions')
                     .select(
@@ -453,7 +470,7 @@ export default class AssignmentController {
                         for (let i = 0; i < rows.length; i++) {
                             let submission = rows[i];
                             if (submission.files !== null) {
-                            submission.files = JSON.parse(submission.files);
+                                submission.files = JSON.parse(submission.files);
                             }
                             submissions.push(submission);
                         }
@@ -466,15 +483,18 @@ export default class AssignmentController {
 
     public editPeerReviewRequest(request, h) {
         return new Promise((resolve, reject) => {
+            // submitting the review of the submitted assiugnment
             database('submissions')
                 .select('*')
                 .where({'id': request.params.submissionId})
                 .then((rows) => {
+                    // validate the submissionId
                     if (rows.length < 1) {
                         reject(Boom.notFound("A submission with the given ID does not exist."));
                         return Promise.reject("Rejected");
                     }
                     let submission = rows[0];
+                    // submissions once reviewed shouldn't be reviewed again.
                     if (submission.state !== 'pending') {
                         reject(Boom.expectationFailed("The given submission has already been reviewed."));
                         return Promise.reject("Rejected");
@@ -497,43 +517,48 @@ export default class AssignmentController {
                     return Promise.resolve({updateFields, submission});
                 })
                 .then(({updateFields, submission}) => {
+                    // Updating the submission with the reviewers review.
                     database('submissions')
                         .update(updateFields)
                         .where({id: request.params.submissionId})
                         .then((rows) => {
-                          let student, reviewer;
-                          let studentQ = database('users').select('*')
-                                            .where({
-                                                'users.id': submission.userId
-                                            })
-                                            .then((rows) => {
-                                                student = rows[0];
-                                                return Promise.resolve();
-                                            });
+                            /**
+                             *  Finding the student and the reviewer details to send email
+                             * to them about the assignment review.
+                            */
+                            let student, reviewer;
+                            let studentQ = database('users').select('*')
+                                                .where({
+                                                    'users.id': submission.userId
+                                                })
+                                                .then((rows) => {
+                                                    student = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
-                          let reviewerQ = database('users').select('*')
-                                            .where({
-                                                'users.id': submission.userId
-                                            })
-                                            .then((rows) => {
-                                                reviewer = rows[0];
-                                                return Promise.resolve();
-                                            });
+                            let reviewerQ = database('users').select('*')
+                                                .where({
+                                                    'users.id': submission.userId
+                                                })
+                                                .then((rows) => {
+                                                    reviewer = rows[0];
+                                                    return Promise.resolve();
+                                                });
 
-                          return Promise.all([studentQ, reviewerQ])
-                                    .then(() => {
-                                        // send email for submission review completion
-                                        return database('submissions')
-                                            .select('exercises.courseId', 'exercises.slug',
-                                                    'exercises.name')
-                                            .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                            .where({
-                                                'submissions.id': submission.id
-                                            })
-                                            .then((rows) => {
-                                                return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
-                                            });
-                                    });
+                            return Promise.all([studentQ, reviewerQ])
+                                        .then(() => {
+                                            // send email for submission review completion
+                                            return database('submissions')
+                                                .select('exercises.courseId', 'exercises.slug',
+                                                        'exercises.name')
+                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                .where({
+                                                    'submissions.id': submission.id
+                                                })
+                                                .then((rows) => {
+                                                    return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
+                                                });
+                                        });
                         })
                         .then(() => {
                             resolve({'success': true});

@@ -47,20 +47,20 @@ export default class UserController {
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
                     .then((user) => {
                         return database('user_roles').select('*')
-                                  .where({'user_roles.userId':user.id})
-                                  .then((rows) => {
-                                      if(rows.length < 1){
-                                          return Promise.resolve({
-                                              shouldCreateRole: true,
-                                              user
-                                          });
-                                      } else {
-                                          return Promise.resolve({
-                                              shouldCreateRole: false,
-                                              user
-                                          });
-                                      }
-                                  });
+                                .where({'user_roles.userId':user.id})
+                                .then((rows) => {
+                                    if(rows.length < 1){
+                                        return Promise.resolve({
+                                            shouldCreateRole: true,
+                                            user
+                                        });
+                                    } else {
+                                        return Promise.resolve({
+                                            shouldCreateRole: false,
+                                            user
+                                        });
+                                    }
+                                });
                     })
                     .then((response) => {
                         const { shouldCreateRole, user } = response;
@@ -78,14 +78,14 @@ export default class UserController {
                             };
 
                             return database('user_roles').insert(userRoles)
-                                      .then(() => {
-                                          return Promise.resolve({
-                                              ...user,
-                                              isAdmin,
-                                              isFacilitator,
-                                              isAlumni,
-                                          });
-                                      });
+                                    .then(() => {
+                                        return Promise.resolve({
+                                            ...user,
+                                            isAdmin,
+                                            isFacilitator,
+                                            isAlumni,
+                                        });
+                                    });
 
                         } else {
                             // update the facilitator from config files
@@ -100,68 +100,70 @@ export default class UserController {
                                             // if user had been added as facilitator after joining SARAL
                                             if(rows.length < 1 && isFacilitator){
                                                 return Promise.resolve({createFacilitatorRole: true});
-                                            } else if (rows.length > 1 && !isFacilitator){
-                                                // if he/she has been removed as facilitator from
-                                                // config file but is still a facilitator in the DB
-                                                return database('user_roles').where({
-                                                    'user_roles.roles':'facilitator',
-                                                    'user_roles.userId': user.id,
-                                                    'user_roles.center': 'all'
-                                                })
-                                                .delete()
-                                                .then(() => Promise.resolve({createFacilitatorRole: false}));
+                                            } 
+                                            // else if (rows.length > 1 && !isFacilitator){
+                                            //     // if he/she has been removed as facilitator from
+                                            //     // config file but is still a facilitator in the DB
+                                            //     return database('user_roles').where({
+                                            //         'user_roles.roles':'facilitator',
+                                            //         'user_roles.userId': user.id,
+                                            //         'user_roles.center': 'all'
+                                            //     })
+                                            //     .delete()
+                                            //     .then(() => Promise.resolve({createFacilitatorRole: false}));
 
-                                            } else {
+                                            // } 
+                                            else {
                                                 return Promise.resolve({createFacilitatorRole: false});
                                             }
                                         });
                             // NOTE: Need to create a route which grants roles to users
 
                             return shouldCreateFacilitatorRole
-                                      .then(({createFacilitatorRole}) => {
-                                          if(createFacilitatorRole === true){
-                                            // create the facilitator role for the user who is already
-                                            // in the platform but have been added as facilitator in config file.
-                                              return database('user_roles')
-                                                        .insert({
-                                                            'user_roles.userId': user.id,
-                                                            'user_roles.roles': 'facilitator',
-                                                            'user_roles.center': 'all',
-                                                        })
-                                                        .then((rows) => Promise.resolve());
-
-                                          } else {
-                                              // TODO: just update the user_roles values.
-                                              return Promise.resolve();
-                                          }
-                                      })
-                                      .then(() => {
-                                          // get all the roles the user have
-                                          return database('user_roles')
-                                                    .select('*')
-                                                    .where({
+                                    .then(({createFacilitatorRole}) => {
+                                        if(createFacilitatorRole === true){
+                                        // create the facilitator role for the user who is already
+                                        // in the platform but have been added as facilitator in config file.
+                                            return database('user_roles')
+                                                    .insert({
                                                         'user_roles.userId': user.id,
-                                                    });
-                                      })
-                                      .then((rows) => {
-                                            // get the roles of the users
-                                            for(let i = 0; i < rows.length; i++){
-                                                if (rows[i].roles === "facilitator"){
-                                                    isFacilitator = true;
-                                                } else if (rows[i].roles === "admin") {
-                                                    isAdmin = true;
-                                                } else if (rows[i].roles === "alumni") {
-                                                    isAlumni = true;
-                                                }
-                                            }
+                                                        'user_roles.roles': 'facilitator',
+                                                        'user_roles.center': 'all',
+                                                    })
+                                                    .then((rows) => Promise.resolve());
 
-                                            return Promise.resolve({
-                                                ...user,
-                                                isFacilitator,
-                                                isAdmin,
-                                                isAlumni,
-                                            });
-                                      });
+                                        } else {
+                                            // TODO: just update the user_roles values.
+                                            return Promise.resolve();
+                                        }
+                                    })
+                                    .then(() => {
+                                        // get all the roles the user have
+                                        return database('user_roles')
+                                                .select('*')
+                                                .where({
+                                                    'user_roles.userId': user.id,
+                                                });
+                                    })
+                                    .then((rows) => {
+                                        // get the roles of the users
+                                        for(let i = 0; i < rows.length; i++){
+                                            if (rows[i].roles === "facilitator"){
+                                                isFacilitator = true;
+                                            } else if (rows[i].roles === "admin") {
+                                                isAdmin = true;
+                                            } else if (rows[i].roles === "alumni") {
+                                                isAlumni = true;
+                                            }
+                                        }
+
+                                        return Promise.resolve({
+                                            ...user,
+                                            isFacilitator,
+                                            isAdmin,
+                                            isAlumni,
+                                        });
+                                    });
                         }
                     })
                     .then((user) => {

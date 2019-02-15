@@ -1,10 +1,10 @@
 declare var require: any;
 declare var module: any;
 
-import * as colors from "colors";
-import * as fs from "fs-extra";
-import * as marked from "marked";
-import * as Joi from "joi";
+// import * as colors from "colors";
+// import * as fs from "fs-extra";
+// import * as marked from "marked";
+// import * as Joi from "joi";
 import database from '../index';
 // import * as GoogleCloudStorage from "@google-cloud/storage";
 import * as process from 'process';
@@ -12,11 +12,11 @@ import * as process from 'process';
 var globals = require('./globals');
 
 import { getSequenceNumbers, getCurriculumExerciseFiles, getAllExercises, uploadImagesAndUpdateContent } from './helpers';
-import { generateUID } from './utils';
+// import { generateUID } from './utils';
 
-import { validateSequenceNumber, validateCourseDirParam, validateCourseInfo } from './validators';
+import { validateCourseDirParam, validateCourseInfo } from './validators';
 import { addOrUpdateExercises, addOrUpdateCourse, deleteExercises } from './database';
-import { exerciseInfoSchema, courseInfoSchema } from './schema';
+// import { exerciseInfoSchema, courseInfoSchema } from './schema';
 
 
  /********************
@@ -75,7 +75,7 @@ validateCourseDirParam()
         // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
         setTimeout(function() {
             database.destroy();
-        	  process.exit();
+        	process.exit();
         }, 3000); // waiting for no obvious reason; otherwise code breaks
     }).catch((err) => {
         // Throw an error in case of one.

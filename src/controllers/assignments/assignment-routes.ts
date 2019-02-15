@@ -1,11 +1,11 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
 import {IServerConfigurations} from "../../configurations";
-import * as Boom from "boom";
+// import * as Boom from "boom";
 const Readable = require('stream').Readable;
 
 import AssignmentController from "./assignment-controller";
-import {exerciseSubmission, peerReviewSubmission, postSubmission} from "./assignment-schemas";
+import {exerciseSubmission, postSubmission} from "./assignment-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -97,10 +97,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-                 schema: Joi.object({
-                     data: Joi.array().items(exerciseSubmission)
-                           .description("List of submissions.")
-                 })
+                schema: Joi.object({
+                    data: Joi.array().items(exerciseSubmission)
+                        .description("List of submissions.")
+                })
             },
             auth: 'jwt',
             tags: ['api'],

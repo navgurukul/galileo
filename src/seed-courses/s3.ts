@@ -26,7 +26,7 @@ export function parseAndUploadImage(imageText: string, sequenceNum: string, path
     var s3 = new AWS.S3();
     var myBucket = 'saralng';
 
-    let localReadStream = fs.createReadStream(completePath);
+    // let localReadStream = fs.createReadStream(completePath);
     let dir = globals.courseData['info']['name' ] + '/' + sequenceNum;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
@@ -34,21 +34,21 @@ export function parseAndUploadImage(imageText: string, sequenceNum: string, path
 
     return new Promise((resolve, reject) => {
         fs.readFile(completePath, function (err,data) {
-          if (err) {
-             return console.log(err);
-          }
+            if (err) {
+                return console.log(err);
+            }
 
-          let extn = completePath.split('.').pop();
-          let contentType = 'application/octet-stream';
-          if (extn === 'html') {
-              contentType = "text/html";
-          } else if (extn === 'css') {
-              contentType = "text/css";
-          } else if (extn === 'js') {
-              contentType = "application/javascript";
-          } else if (extn === 'png' || extn === 'jpg' || extn === 'gif') {
-              contentType = "image/" + extn;
-          }
+            let extn = completePath.split('.').pop();
+            let contentType = 'application/octet-stream';
+            if (extn === 'html') {
+                contentType = "text/html";
+            } else if (extn === 'css') {
+                contentType = "text/css";
+            } else if (extn === 'js') {
+                contentType = "application/javascript";
+            } else if (extn === 'png' || extn === 'jpg' || extn === 'gif') {
+                contentType = "image/" + extn;
+            }
 
         	var params = {Bucket: myBucket, Key: filePath, Body: data, ContentType: contentType};
         	s3.upload(params, function(err, data) {
