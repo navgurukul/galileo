@@ -6,10 +6,10 @@ export const userSchema: Joi.ObjectSchema = Joi.object({
     email: Joi.string().email(),
     profilePicture: Joi.string().uri(),
     googleUserId: Joi.string(),
-    facilitator: Joi.bool(),
+    isFacilitator: Joi.bool(),
     isAdmin: Joi.bool(),
-    center: Joi.string().allow(null),
     isAlumni: Joi.bool().allow(null).default(false),
+    center: Joi.string().allow(null),
 });
 
 export const noteSchema: Joi.ObjectSchema = Joi.object({
