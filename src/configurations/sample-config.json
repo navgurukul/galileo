@@ -37,5 +37,8 @@
       "facilitatorEmails":[
       ],
       "defaultBatchId":1
-   }
+   },
+   "courseConfig":{
+      "courseCompleteionCriteria": 70
+    }
 }
