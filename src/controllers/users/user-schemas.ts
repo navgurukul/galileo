@@ -18,3 +18,16 @@ export const noteSchema: Joi.ObjectSchema = Joi.object({
     createdAt: Joi.date().required(),
     name: Joi.string().required(),
 });
+
+
+export const userRoleSchema: Joi.ObjectSchema = Joi.object({
+    id: Joi.number(),
+    name: Joi.string(),
+    email: Joi.string().email(),
+    profilePicture: Joi.string().uri().allow(null),
+    googleUserId: Joi.string(),
+    roles:Joi.string(),
+    center: Joi.string(),
+    mentor: Joi.allow(null),
+    mentee: Joi.number().allow(null),
+});
