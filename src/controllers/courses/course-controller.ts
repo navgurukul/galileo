@@ -36,7 +36,7 @@ export default class CourseController {
             //let enrolledQ;
             //let availableQ;
             let enrolledCourses = [],
-                availableCourses = [],
+                allAvailableCourses = [],
                 completedCourses = [];
 
             let enrolledQ, availableQ, completedQ;
@@ -50,13 +50,13 @@ export default class CourseController {
                             'courses.sequenceNum'
                         )
                         .then((rows) => {
-                            availableCourses = rows;
+                            allAvailableCourses = rows;
                             return Promise.resolve();
                         });
 
                 availableQ.then(() => {
                     resolve({
-                        'availableCourses': availableCourses
+                        'availableCourses': allAvailableCourses
                     });
                 });
 
@@ -143,7 +143,7 @@ export default class CourseController {
                             })
                         )
                         .then((rows) => {
-                            availableCourses = rows;
+                            allAvailableCourses = rows;
                             return Promise.resolve();
                         });
 
@@ -194,14 +194,14 @@ export default class CourseController {
                 is not eligible to watch in the code block below  ** */
                 Promise.all([enrolledQ, availableQ, completedQ,exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, courseReliesOnQ]).then(() => {
                     
-                    let courseEligibleToView = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
-                        availableCourses, courseConfig.courseCompleteionCriteria);
+                    let availableCourses = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
+                        allAvailableCourses, courseConfig.courseCompleteionCriteria);
                         console.log('courseEligibleToView start');
-                        console.log(courseEligibleToView);
+                        console.log(availableCourses);
                         console.log('courseEligibleToView end');
                     resolve({
                         enrolledCourses,
-                        courseEligibleToView,
+                        availableCourses,
                         completedCourses,
                         //'enrolledCourses': enrolledCourses,
                         //'availableCourses': courseEligibleToView
