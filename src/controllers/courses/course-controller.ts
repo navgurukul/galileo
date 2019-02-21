@@ -25,16 +25,12 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
 
             let courseConfig = Configs.getCourseConfigs();
-            //let enrolledCourses = [];
-            //let availableCourses = [];
             let totalExercisesPerCourse = [];
             let exerciseCompeletedPerCourse = [];
             let courseReliesOn=[];
             let courseReliesOnQ;
             let exerciseCompeletedPerCourseQ;
             let TotalExercisesPerCourseQ;
-            //let enrolledQ;
-            //let availableQ;
             let enrolledCourses = [],
                 allAvailableCourses = [],
                 completedCourses = [];
@@ -153,9 +149,6 @@ export default class CourseController {
                         database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
                         .then((rows) => {
                             totalExercisesPerCourse = rows;
-                        console.log('totalExercisesPerCourse start');
-                        console.log(totalExercisesPerCourse);
-                        console.log('totalExercisesPerCourse end');
                             return Promise.resolve();
                         });
                     
@@ -170,9 +163,6 @@ export default class CourseController {
                             ).groupBy('exercises.courseId')
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
-                                //console.log('exerciseCompeletedPerCourse response start');
-                                //console.log(exerciseCompeletedPerCourse);
-                                //console.log('exerciseCompeletedPerCourse response end');
                                 return Promise.resolve();
                             });
                             
@@ -202,10 +192,7 @@ export default class CourseController {
                     resolve({
                         enrolledCourses,
                         availableCourses,
-                        completedCourses,
-                        //'enrolledCourses': enrolledCourses,
-                        //'availableCourses': courseEligibleToView
-
+                        completedCourses
                     });
                 });
 
