@@ -174,9 +174,6 @@ export default class CourseController {
                                 )
                                 .then((rows) => {
                                     courseReliesOn = rows;
-                                console.log('courseReliesOn response start');
-                                console.log(exerciseCompeletedPerCourse);
-                                console.log('courseReliesOn response end');
                                     return Promise.resolve();
                                 });
 
@@ -186,9 +183,6 @@ export default class CourseController {
                     
                     let availableCourses = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
-                        console.log('courseEligibleToView start');
-                        console.log(availableCourses);
-                        console.log('courseEligibleToView end');
                     resolve({
                         enrolledCourses,
                         availableCourses,
@@ -601,15 +595,15 @@ export default class CourseController {
 
                     let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
                         courseReliesOnQ]).then((resolvedValues) => {
-                        console.log('inside .allllll');
+                        //console.log('inside .allllll');
                         let availableCourses = resolvedValues[0];
                         let exerciseCompeletedPerCourse = resolvedValues[1];
                         let totalExercisesPerCourse = resolvedValues[2];
                         let courseReliesOn = courseReliesOnQ[3];
                         let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
                         courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
-                        console.log('coursesEligibleToEnrollIn');
-                        console.log(coursesEligibleToEnrollIn);
+                        //console.log('coursesEligibleToEnrollIn');
+                        //console.log(coursesEligibleToEnrollIn);
                          return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
                     });
                     
