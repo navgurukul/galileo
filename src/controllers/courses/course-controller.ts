@@ -25,16 +25,12 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
 
             let courseConfig = Configs.getCourseConfigs();
-            //let enrolledCourses = [];
-            //let availableCourses = [];
             let totalExercisesPerCourse = [];
             let exerciseCompeletedPerCourse = [];
             let courseReliesOn = [];
             let courseReliesOnQ;
             let exerciseCompeletedPerCourseQ;
             let TotalExercisesPerCourseQ;
-            //let enrolledQ;
-            //let availableQ;
             let enrolledCourses = [],
                 allAvailableCourses = [],
                 completedCourses = [];
@@ -151,22 +147,22 @@ export default class CourseController {
                 TotalExercisesPerCourseQ = database('exercises')
                     .select('exercises.courseId',
                         database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
-                    .then((rows) => {
-                        totalExercisesPerCourse = rows;
-                        console.log('totalExercisesPerCourse start');
-                        console.log(totalExercisesPerCourse);
-                        console.log('totalExercisesPerCourse end');
-                        return Promise.resolve();
-                    });
 
-                /* **get the exercises completed in each course by the given user ** */
-                exerciseCompeletedPerCourseQ =
-                    database('exercises')
-                        .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'),
+                        .then((rows) => {
+                            totalExercisesPerCourse = rows;
+                            return Promise.resolve();
+                        });
+                    
+                  /* **get the exercises completed in each course by the given user ** */      
+                        exerciseCompeletedPerCourseQ =
+                        database('exercises')
+                            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
+
                             'exercises.courseId')
                         .where('exercises.id', 'in', database('submissions')
                             .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
                             .andWhere('submissions.userId', '=', 9) //******replace 9 with request.userId*****//
+<<<<<<< HEAD
                         ).groupBy('exercises.courseId')
                         .then((rows) => {
                             exerciseCompeletedPerCourse = rows;
@@ -189,6 +185,24 @@ export default class CourseController {
                             console.log('courseReliesOn response end');
                             return Promise.resolve();
                         });
+=======
+                            ).groupBy('exercises.courseId')
+                            .then((rows) => {
+                                exerciseCompeletedPerCourse = rows;
+                                return Promise.resolve();
+                            });
+                            
+                    /* **get the course dependeny list ** */              
+                            courseReliesOnQ =
+                            database('course_relation')
+                                .select(
+                                'course_relation.courseId', 'course_relation.reliesOn'
+                                )
+                                .then((rows) => {
+                                    courseReliesOn = rows;
+                                    return Promise.resolve();
+                                });
+>>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
@@ -196,16 +210,16 @@ export default class CourseController {
 
                     let availableCourses = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
+<<<<<<< HEAD
                     console.log('courseEligibleToView start');
                     console.log(availableCourses);
                     console.log('courseEligibleToView end');
+=======
+>>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
                     resolve({
                         enrolledCourses,
                         availableCourses,
-                        completedCourses,
-                        //'enrolledCourses': enrolledCourses,
-                        //'availableCourses': courseEligibleToView
-
+                        completedCourses
                     });
                 });
 
@@ -612,22 +626,24 @@ export default class CourseController {
                     return Promise.resolve(rows);
                 });
 
-        let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ,
-            courseReliesOnQ]).then((resolvedValues) => {
-                console.log('inside .allllll');
-                let availableCourses = resolvedValues[0];
-                let exerciseCompeletedPerCourse = resolvedValues[1];
-                let totalExercisesPerCourse = resolvedValues[2];
-                let courseReliesOn = courseReliesOnQ[3];
-                let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse,
-                    courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
-                console.log('coursesEligibleToEnrollIn');
-                console.log(coursesEligibleToEnrollIn);
-                return _.where(coursesEligibleToEnrollIn, { id: courseId }).length > 0 ? true : false;
-            });
 
-        let result = await a;
-        return result;
+                    let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
+                        courseReliesOnQ]).then((resolvedValues) => {
+                        //console.log('inside .allllll');
+                        let availableCourses = resolvedValues[0];
+                        let exerciseCompeletedPerCourse = resolvedValues[1];
+                        let totalExercisesPerCourse = resolvedValues[2];
+                        let courseReliesOn = courseReliesOnQ[3];
+                        let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
+                        courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
+                        //console.log('coursesEligibleToEnrollIn');
+                        //console.log(coursesEligibleToEnrollIn);
+                         return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
+                    });
+                    
+                    let result = await a;
+                    return result;
+
     }
     // Update all courses using default sequenceNum
     public updateCourseSequence(request, h) {
