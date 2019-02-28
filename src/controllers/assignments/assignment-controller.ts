@@ -487,13 +487,12 @@ export default class AssignmentController {
         return new Promise((resolve, reject) => {
             // submitting the review of the submitted assiugnment
 
-            const usersId = 32;
+
             database('submissions')
-                .select('*')
+                .select('submissions.id', 'submissions.userId', 'submissions.state', 'submissions.peerReviewerId', 'mentors.mentor', 'users.center')
                 .innerJoin('mentors', 'userId', 'mentee')
                 .innerJoin('users', 'submissions.userId', 'users.id')
-                .where({ 'submissions.id': request.params.submissionId })
-                .then((rows) => {
+                .where({ 'submissions.id': request.params.submissionId }).then((rows) => {
 
                     // validate the submissionId
                     if (rows.length < 1) {
@@ -518,7 +517,7 @@ export default class AssignmentController {
                             'roles': 'facilitator',
                             'center': submission.center
                         }).then((rows) => {
-
+                            let usersId = request.userId;
                             let usersFacilator = rows[0];
                             //console.log(usersFacilator.userId);
 
@@ -541,7 +540,7 @@ export default class AssignmentController {
                             } else {
 
 
-                                reject(Boom.notFound("A submission with the given ID does not exist."));
+                                reject(Boom.notFound("User is not authorize to do so."));
                                 return Promise.reject("Rejected");
                             }
 
@@ -588,6 +587,7 @@ export default class AssignmentController {
 
                             return Promise.all([studentQ, reviewerQ])
                                 .then(() => {
+
                                     // send email for submission review completion
                                     return database('submissions')
                                         .select('exercises.courseId', 'exercises.slug',
@@ -597,6 +597,7 @@ export default class AssignmentController {
                                             'submissions.id': submission.id
                                         })
                                         .then((rows) => {
+
                                             return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
                                         });
                                 });

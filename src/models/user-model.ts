@@ -25,7 +25,7 @@ export class UserModel extends DBTable {
 
     public getJWTToken(user) {
         let token = Jwt.sign(
-            {email: user.email, id: user.id},
+            {email: user.email, id: user.id,isAdmin:user.isAdmin,isFacilitator:user.isFacilitator,isAlumni: user.isAlumni},
             this.configs.jwtSecret,
             {expiresIn: this.configs.jwtExpiration}
         );

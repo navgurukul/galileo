@@ -318,6 +318,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 })
 
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getStudentsWithoutMentorList
         }
@@ -346,6 +347,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 })
 
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getStudentsWithMentorList
         }
@@ -374,6 +376,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 schema: Joi.array()
 
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getMentorsOrMenteesList
         }
@@ -397,7 +400,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "deleted": Joi.bool()
                 }
             },
-            // auth: 'jwt',
+             auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteMentorMentee
         }
@@ -423,7 +426,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "deleted": Joi.bool()
                 }
             },
-            // auth: 'jwt',
+             auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteMentorMenteeByidOrEmail
         }

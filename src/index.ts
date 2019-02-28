@@ -27,7 +27,55 @@ const server = Server.init(serverConfigs, databaseConfig)
             server.start(() => {
                 console.log('Server running at:', server.info.uri);
             });
-            // Sentry.init({ dsn: 'https://a1a49265285241f781446519bf331848@sentry.io/1331317' });
+            //Sentry.init({ dsn: 'https://a1a49265285241f781446519bf331848@sentry.io/1331317' });
+            Sentry.init({ dsn: 'https://90e428e8f30142948830e321d5fd382c@sentry.io/1398087' });
+
+            
+            server.events.on('request', (request, event, tags) => {
+
+
+
+                if (tags.error) {
+
+                    // Sentry.captureMessage('Something went wrong');
+                    // Sentry.captureMessage(`${event.error ? event.error.message : 'unknown'}`);
+                    // console.log(`koushik Request ${event.request} error: ${event.error ? event.error.message : 'unknown'}`);
+                    // console.log( event );
+                    if(event.error.stack!=undefined){
+                    let stack = event.error.stack;
+                    var subStr = stack.match("\n(.*)\n");
+                    }else{
+                        subStr[0]='unknown';
+                    }
+                    let additionalData = {
+                        url: request.url.path,
+                        logedinId:request.userId,
+                        requestType:request.method,
+                        requestParam:request.params,
+                        requestQuery:request.query,
+                        requestPayload:request.payload,
+                        time: new Date(event.timestamp),
+                        line: subStr[0],
+                        errorPayload: event.error.output.payload,
+                        message: event.error ? event.error.message : 'unknown'
+                    };
+                    //Sentry.captureException(event.error, { extra: { detailName: 'Detail value' } });
+
+                    // let level = 'info';
+
+                    Sentry.withScope(scope => {
+                        Object.keys(additionalData).forEach((key) => {
+                            scope.setExtra(key, additionalData[key]);
+                        });
+                        // scope.setLevel(level);
+                        Sentry.captureMessage(event.error ? event.error.message : 'unknown');
+                    });
+                    
+                }
+            });
+
+
+
             console.log("Running server from parent :)");
         } else {
             console.log("Not running the `server because it is not run through parent module.");
