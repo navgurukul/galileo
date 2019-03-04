@@ -24,7 +24,6 @@
          "bell",
          "jwt-auth",
          "swagger",
-         "hapi-sentry"
       ],
       "googleAuth":{
          "clientId":"googleAppClientId",

@@ -58,7 +58,7 @@ const server = Server.init(serverConfigs, databaseConfig)
                         line: subStr[0],
                         errorPayload: event.error.output.payload,
                         message: event.error ? event.error.message : 'unknown',
-                        env: process.env.GALILEO_ENV
+                        environment: process.env.GALILEO_ENV
                     };
                     //Sentry.captureException(event.error, { extra: { detailName: 'Detail value' } });
 
