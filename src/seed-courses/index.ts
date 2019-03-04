@@ -53,7 +53,7 @@ let p = validateCourseDirParam()
         .then(() => {
             // Get a list of files and validate their sequence numbers
             //all the code related to info.md goes here.
-            globals.sequenceNumbers = getSequenceNumbers(globals);
+            globals.sequenceNumbers = getSequenceNumbers(globals.courseDir);
             globals.exercises = getCurriculumExerciseFiles(globals.courseDir);
             // validateSequenceNumber(globals.exercises);
             // Get the exercise content from the files
