@@ -485,12 +485,11 @@ export default class AssignmentController {
     public editPeerReviewRequest(request, h) {
 
         return new Promise((resolve, reject) => {
-            // submitting the review of the submitted assiugnment
-
-
+            // submitting the review of the submitted assignment
+            
             database('submissions')
                 .select('submissions.id', 'submissions.userId', 'submissions.state', 'submissions.peerReviewerId', 'mentors.mentor', 'users.center')
-                .innerJoin('mentors', 'userId', 'mentee')
+                .leftJoin('mentors', 'userId', 'mentee')
                 .innerJoin('users', 'submissions.userId', 'users.id')
                 .where({ 'submissions.id': request.params.submissionId }).then((rows) => {
 
@@ -515,26 +514,31 @@ export default class AssignmentController {
                     return database('user_roles').select('*')
                         .where({
                             'roles': 'facilitator',
-                            'center': submission.center
-                        }).then((rows) => {
+                        })
+                        .whereIn(
+                            'center', [submission.center, 'all'] // or where the center is all
+                        )
+                        .then((rows) => {
+
                             let usersId = request.userId;
-                            let usersFacilator = rows[0];
+
+                            let usersFacilatorId = rows[0]? rows[0].userId: null;
                             //console.log(usersFacilator.userId);
 
                             if (
                                 usersId === submission.peerReviewerId
                                 || usersId === submission.mentor
-                                || usersId === usersFacilator.userId
+                                || usersId === usersFacilatorId
                             ) {
                                 if (request.payload.approved) {
                                     updateFields['completed'] = 1;
                                     updateFields['state'] = 'completed';
                                     updateFields['completedAt'] = new Date();
-                                    updateFields['completedBy'] = usersId;
+                                    updateFields['markCompletedBy'] = usersId;
                                 } else {
                                     updateFields['completed'] = 0;
                                     updateFields['state'] = 'rejected';
-                                    updateFields['completedBy'] = usersId;
+                                    updateFields['markCompletedBy'] = usersId;
                                 }
 
                             } else {

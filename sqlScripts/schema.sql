@@ -179,7 +179,7 @@ CREATE TABLE `user_roles` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `userId` int(10) unsigned DEFAULT NULL,
   `roles` enum('admin','alumni','student','facilitator') DEFAULT 'student',
-  `center` enum('dharamshala','banagalore','all') DEFAULT NULL,
+  `center` enum('dharamshala','bangalore','all') DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_role_ibfk_1_idx` (`userId`),
   CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
