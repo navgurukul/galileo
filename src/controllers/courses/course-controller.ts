@@ -154,46 +154,21 @@ export default class CourseController {
                         });
                     
                   /* **get the exercises completed in each course by the given user ** */      
-                        exerciseCompeletedPerCourseQ =
+                exerciseCompeletedPerCourseQ =
                         database('exercises')
                             .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
-
                             'exercises.courseId')
-                        .where('exercises.id', 'in', database('submissions')
+                            .where('exercises.id', 'in', database('submissions')
                             .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
-                            .andWhere('submissions.userId', '=', 9) //******replace 9 with request.userId*****//
-<<<<<<< HEAD
-                        ).groupBy('exercises.courseId')
-                        .then((rows) => {
-                            exerciseCompeletedPerCourse = rows;
-                            //console.log('exerciseCompeletedPerCourse response start');
-                            //console.log(exerciseCompeletedPerCourse);
-                            //console.log('exerciseCompeletedPerCourse response end');
-                            return Promise.resolve();
-                        });
-
-                /* **get the course dependeny list ** */
-                courseReliesOnQ =
-                    database('course_relation')
-                        .select(
-                            'course_relation.courseId', 'course_relation.reliesOn'
-                        )
-                        .then((rows) => {
-                            courseReliesOn = rows;
-                            console.log('courseReliesOn response start');
-                            console.log(exerciseCompeletedPerCourse);
-                            console.log('courseReliesOn response end');
-                            return Promise.resolve();
-                        });
-=======
-                            ).groupBy('exercises.courseId')
+                            .andWhere('submissions.userId', '=', request.userId)
+                            .groupBy('exercises.courseId')
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
                                 return Promise.resolve();
                             });
                             
                     /* **get the course dependeny list ** */              
-                            courseReliesOnQ =
+                courseReliesOnQ =
                             database('course_relation')
                                 .select(
                                 'course_relation.courseId', 'course_relation.reliesOn'
@@ -202,7 +177,6 @@ export default class CourseController {
                                     courseReliesOn = rows;
                                     return Promise.resolve();
                                 });
->>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
@@ -210,12 +184,6 @@ export default class CourseController {
 
                     let availableCourses = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
-<<<<<<< HEAD
-                    console.log('courseEligibleToView start');
-                    console.log(availableCourses);
-                    console.log('courseEligibleToView end');
-=======
->>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
                     resolve({
                         enrolledCourses,
                         availableCourses,
@@ -638,7 +606,7 @@ export default class CourseController {
                         courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
                         //console.log('coursesEligibleToEnrollIn');
                         //console.log(coursesEligibleToEnrollIn);
-                         return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
+                        return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
                     });
                     
                     let result = await a;
@@ -924,7 +892,10 @@ export default class CourseController {
                 if (rows.length > 0) {
                     resolve({ data: rows });
                 } else {
-                    reject(Boom.expectationFailed('Not added any course dependencies for the courses....'));
+                    resolve({
+                        data : [] ,
+                        message: 'Not added any course dependencies for the courses...'
+                    });
                 }
             });
         });
@@ -932,28 +903,44 @@ export default class CourseController {
 
     public deleteCourseRelation(request, h) {
         return new Promise((resolve, reject) => {
-            database('course_relation').select('*')
-                .where({
-                    'courseId': request.params.courseId,
-                    'reliesOn': request.params.reliesOn
-                })
-                .then((rows) => {
-                    if (rows.length > 0) {
-                        database('course_relation')
-                            .where({
-                                'courseId': request.params.courseId,
-                                'reliesOn': request.params.reliesOn
-                            }).delete()
-                            .then(() => {
-                                resolve({
-                                    deleted: true
+            database('user_roles').select('roles')
+            .where({
+                'userId': request.userId
+            })
+            .then((rows) => {
+                const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
+                return Promise.resolve(isAdmin);
+            })
+            .then((isAdmin) => {
+                // only admin are allowed to add the courses
+                if (isAdmin) {
+                    database('course_relation').select('*')
+                    .where({
+                        'courseId': request.params.courseId,
+                        'reliesOn': request.params.reliesOn
+                    })
+                    .then((rows) => {
+                        if (rows.length > 0) {
+                            database('course_relation')
+                                .where({
+                                    'courseId': request.params.courseId,
+                                    'reliesOn': request.params.reliesOn
+                                }).delete()
+                                .then(() => {
+                                    resolve({
+                                        deleted: true
+                                    });
                                 });
-                            });
-                    } else {
-                        reject(Boom.expectationFailed('Course Dependency to the corresponding course id does not exists.'));
+                        } else {
+                            reject(Boom.expectationFailed('Course Dependency to the corresponding course id does not exists.'));
+                        }
+                    });
+                } else {
+                    reject(Boom.expectationFailed('Only Admins are allowed to add the course dependencies.'));
+                    return Promise.reject("Rejected");
+                }
+            });
 
-                    }
-                });
         });
     }
 
