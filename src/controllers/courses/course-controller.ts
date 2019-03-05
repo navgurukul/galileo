@@ -1412,7 +1412,7 @@ export default class CourseController {
 
         return new Promise((resolve, reject) => {
 
-            database('user_roles').select('roles')
+            database('user_roles').select('roles','center')
                 .where({
                     'userId': request.userId
                 }).then((rows) => {
@@ -1422,10 +1422,10 @@ export default class CourseController {
                     const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
                     const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
 
-                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole ,rows});
 
 
-                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole ,rolesResult}) => {
 
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
@@ -1433,8 +1433,9 @@ export default class CourseController {
                         const mentorId = request.payload.mentorId;
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
-
-
+                        console.log(rolesResult);
+                        return false;
+                        
 
 
                         return database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
@@ -1450,7 +1451,10 @@ export default class CourseController {
 
                                 if (mentorEmail !== undefined)
                                     this.where({ 'users.email': mentorEmail })
-                            }).then((rows) => {
+                            }).whereIn('users.center',[])
+                            
+                            
+                            .then((rows) => {
                                 // if the course for given id doesn't exist
                                 if (rows.length < 1) {
                                     reject(Boom.expectationFailed(`This record doesn't exists.`));
