@@ -1,9 +1,9 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import {IServerConfigurations} from "../../configurations";
+import { IServerConfigurations } from "../../configurations";
 
 import UserController from "./user-controller";
-import {noteSchema, userSchema} from "./user-schemas";
+import { noteSchema, userSchema } from "./user-schemas";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -80,6 +80,48 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: userController.getUserInfo,
         }
     });
+
+    server.route({
+        method: 'PUT',
+        path: '/users/{userId}',
+        config: {
+            description: 'upadte user info by ID.',
+            auth: 'jwt',
+            validate: {
+                params: {
+                    userId: Joi.number().required(),
+                },
+                payload: {
+                    githubLink: Joi.string().allow(null).uri(),
+                    linkedinLink: Joi.string().allow(null).uri(),
+                    mediumLink: Joi.string().allow(null).uri(),
+                    uploadImage:Joi.string().allow(null)
+                }
+
+            },
+            // response: {
+            //     user: userSchema
+            // },
+            response: {
+
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '200': {
+                            'description': 'User found.'
+                        },
+                        '404': {
+                            'description': 'User not found.'
+                        }
+                    }
+                }
+            },
+            tags: ['api'],
+            handler: userController.updateUserInfo,
+        }
+    });
+
 
     server.route({
         method: 'POST',

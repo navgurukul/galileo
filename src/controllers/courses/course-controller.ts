@@ -162,30 +162,6 @@ export default class CourseController {
                         .where('exercises.id', 'in', database('submissions')
                             .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
                             .andWhere('submissions.userId', '=', 9) //******replace 9 with request.userId*****//
-<<<<<<< HEAD
-                        ).groupBy('exercises.courseId')
-                        .then((rows) => {
-                            exerciseCompeletedPerCourse = rows;
-                            //console.log('exerciseCompeletedPerCourse response start');
-                            //console.log(exerciseCompeletedPerCourse);
-                            //console.log('exerciseCompeletedPerCourse response end');
-                            return Promise.resolve();
-                        });
-
-                /* **get the course dependeny list ** */
-                courseReliesOnQ =
-                    database('course_relation')
-                        .select(
-                            'course_relation.courseId', 'course_relation.reliesOn'
-                        )
-                        .then((rows) => {
-                            courseReliesOn = rows;
-                            console.log('courseReliesOn response start');
-                            console.log(exerciseCompeletedPerCourse);
-                            console.log('courseReliesOn response end');
-                            return Promise.resolve();
-                        });
-=======
                             ).groupBy('exercises.courseId')
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
@@ -202,7 +178,6 @@ export default class CourseController {
                                     courseReliesOn = rows;
                                     return Promise.resolve();
                                 });
->>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
@@ -210,12 +185,6 @@ export default class CourseController {
 
                     let availableCourses = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
-<<<<<<< HEAD
-                    console.log('courseEligibleToView start');
-                    console.log(availableCourses);
-                    console.log('courseEligibleToView end');
-=======
->>>>>>> bb8b3e83cb88e9700e0c6adc11ee0dd3c732fa41
                     resolve({
                         enrolledCourses,
                         availableCourses,
