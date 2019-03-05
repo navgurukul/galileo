@@ -1,4 +1,6 @@
 var _ = require('underscore');
+import * as Configs from "../configurations";
+import database from "../";
 
 export const getIsSolutionAvailable=function (exercise) {
     let isSolutionAvailable = true;
@@ -11,6 +13,28 @@ export const getIsSolutionAvailable=function (exercise) {
 
 export const manipulateResultSet=function (totalExercisesperCourse, exrcisesCompletedPerCourse, courseReliesOn, availableCourses,
      CourseCompletionCriteria) {
+    // console.log('totalExercisesperCourse');
+    // console.log(totalExercisesperCourse);
+    // console.log('totalExercisesperCourse');
+
+    // console.log('exrcisesCompletedPerCourse');
+    // console.log(exrcisesCompletedPerCourse);
+    // console.log('exrcisesCompletedPerCourse');
+
+
+    // console.log('courseReliesOn');
+    // console.log(courseReliesOn);
+    // console.log('courseReliesOn');
+
+
+    // console.log('availableCourses');
+    // console.log(availableCourses);
+    // console.log('availableCourses');
+
+    // console.log('CourseCompletionCriteria');
+    // console.log(CourseCompletionCriteria);
+    // console.log('CourseCompletionCriteria');
+
     /* **Merge totalExercisesperCourse,  exrcisesCompletedPerCourse to generate a single array ** */    
     let mergedArrs = [...totalExercisesperCourse, ...exrcisesCompletedPerCourse];
     let courseCompletionPecentage;
@@ -18,7 +42,6 @@ export const manipulateResultSet=function (totalExercisesperCourse, exrcisesComp
     const noDuplicate=arr=>[...new Set(arr)];
     const allIds=mergedArrs.map(ele=>ele.courseId);
     const ids=noDuplicate(allIds);
-
     /* **result array contains total number of exercises in each course and the exercises completed per course** */
     const result=ids.map(id=>
         mergedArrs.reduce((self,item)=>{
@@ -38,6 +61,9 @@ export const manipulateResultSet=function (totalExercisesperCourse, exrcisesComp
         }
         return course;
     });
+     console.log('courseExerciseDetails');
+    console.log(courseExerciseDetails);
+    console.log('courseExerciseDetails');
    let id;
    let coursesWithDependecncy = _.uniq(_.pluck(courseReliesOn, 'courseId'));
    let groupListBycourseId =  _.groupBy(courseReliesOn, 'courseId');
@@ -90,4 +116,74 @@ export const listToTree =function (list) {
     }
     
     return roots;
-}
+};
+
+export const  isStudentEligibleToEnroll= async function(studentId, courseId){
+        let TotalExercisesPerCourseQ;
+        let exerciseCompeletedPerCourseQ;
+        let courseReliesOnQ;
+        let availableQ;
+        let courseConfig = Configs.getCourseConfigs();
+        TotalExercisesPerCourseQ = database('exercises')
+        .select( 'exercises.courseId',
+        database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
+        .then((rows) => {
+            return Promise.resolve(rows);
+        });
+        
+        exerciseCompeletedPerCourseQ =
+        database('exercises')
+            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
+            'exercises.courseId')
+            .where('exercises.id', 'in', database('submissions')
+            .select('submissions.exerciseId').where({'submissions.completed':1})
+            .andWhere('submissions.userId', '=', studentId) 
+            ).groupBy('exercises.courseId')
+            .then((rows) => {
+                return Promise.resolve(rows);
+            });
+        
+            courseReliesOnQ =
+            database('course_relation')
+                .select(
+                'course_relation.courseId', 'course_relation.reliesOn'
+                )
+                .then((rows) => {
+                    return Promise.resolve(rows);
+                });
+
+                availableQ =
+                database('courses')
+                    .select('courses.id', 'courses.name', 'courses.type',
+                      'courses.logo', 'courses.shortDescription','courses.sequenceNum')
+                    .where('courses.id', 'not in', database('courses').distinct()
+                        .select('courses.id')
+                        .join('course_enrolments', function () {
+                            this.on('courses.id', '=', 'course_enrolments.courseId')
+                                .andOn('course_enrolments.studentId', '=', studentId);
+                        })
+                    )
+                    .then((rows) => {
+                        return Promise.resolve(rows);
+                    });
+
+                    let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
+                        courseReliesOnQ]).then((resolvedValues) => {
+                        let availableCourses = resolvedValues[0];
+                        let exerciseCompeletedPerCourse = resolvedValues[1];
+                        let totalExercisesPerCourse = resolvedValues[2];
+                        let courseReliesOn = resolvedValues[3];
+                        let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
+                        courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
+                        // console.log('coursesEligibleToEnrollIn');
+                        // console.log(coursesEligibleToEnrollIn);
+                        // console.log('coursesEligibleToEnrollIn');
+                         return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
+                    });
+                    
+                    let result = await a;
+                    // console.log('result');
+                    // console.log(result);
+                    // console.log('result');
+                    return result;
+    }

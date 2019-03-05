@@ -3,7 +3,7 @@ import * as Hapi from 'hapi';
 import * as knex from 'knex';
 
 import database from '../../';
-import { getIsSolutionAvailable,listToTree } from '../../helpers/courseHelper';
+import { getIsSolutionAvailable,listToTree,isStudentEligibleToEnroll } from '../../helpers/courseHelper';
 import {manipulateResultSet} from '../../helpers/courseHelper';
 import { IServerConfigurations } from '../../configurations/index';
 import * as Configs from "../../configurations";
@@ -179,8 +179,8 @@ export default class CourseController {
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
+                //console.log('outside promise allllllllllll');
                 Promise.all([enrolledQ, availableQ, completedQ,exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, courseReliesOnQ]).then(() => {
-                    
                     let availableCourses = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
                     resolve({
@@ -427,7 +427,6 @@ export default class CourseController {
 
     public enrollInCourse(request, h) {
         return new Promise((resolve, reject) => {
-
             database('course_enrolments').select('*')
                 .where({
                     'studentId': request.userId,
@@ -443,7 +442,7 @@ export default class CourseController {
                 })
                 .then((response) => {
                     if (response.alreadyEnrolled === false) {
-                        this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((isStudentEligible) => {
+                        isStudentEligibleToEnroll(request.userId, request.params.courseId).then((isStudentEligible) => {
                             if(isStudentEligible) {
                                 database('courses')
                                 .select('courses.id as courseId')
@@ -538,78 +537,8 @@ export default class CourseController {
     //                 }
     //             });
     //     });
-    // }
-
-
-    //performing a similar check in the enroll API as in courses API.
-    //to prevent a student from enrolling in a course by making a direct Api call through  
-    async isStudentEligibleToEnroll(studentId, courseId){
-        //let isEligibleToEnrollInCourse = false; 
-        let TotalExercisesPerCourseQ;
-        let exerciseCompeletedPerCourseQ;
-        let courseReliesOnQ;
-        let availableQ;
-        let courseConfig = Configs.getCourseConfigs();
-        TotalExercisesPerCourseQ = database('exercises')
-        .select( 'exercises.courseId',
-        database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
-        .then((rows) => {
-            return Promise.resolve(rows);
-        });
-        
-        exerciseCompeletedPerCourseQ =
-        database('exercises')
-            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
-            'exercises.courseId')
-            .where('exercises.id', 'in', database('submissions') //replace 9 with request.userId
-            .select('submissions.exerciseId').where({'submissions.completed':1})
-            .andWhere('submissions.userId', '=', 9) 
-            ).groupBy('exercises.courseId')
-            .then((rows) => {
-                return Promise.resolve(rows);
-            });
-        
-            courseReliesOnQ =
-            database('course_relation')
-                .select(
-                'course_relation.courseId', 'course_relation.reliesOn'
-                )
-                .then((rows) => {
-                    return Promise.resolve(rows);
-                });
-
-                availableQ =
-                database('courses')
-                    .select('courses.id', 'courses.name', 'courses.type',
-                      'courses.logo', 'courses.shortDescription','courses.sequenceNum')
-                    .where('courses.id', 'not in', database('courses').distinct()
-                        .select('courses.id')
-                        .join('course_enrolments', function () {
-                            this.on('courses.id', '=', 'course_enrolments.courseId')
-                                .andOn('course_enrolments.studentId', '=', studentId);
-                        })
-                    )
-                    .then((rows) => {
-                        return Promise.resolve(rows);
-                    });
-
-                    let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
-                        courseReliesOnQ]).then((resolvedValues) => {
-                        //console.log('inside .allllll');
-                        let availableCourses = resolvedValues[0];
-                        let exerciseCompeletedPerCourse = resolvedValues[1];
-                        let totalExercisesPerCourse = resolvedValues[2];
-                        let courseReliesOn = courseReliesOnQ[3];
-                        let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
-                        courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
-                        //console.log('coursesEligibleToEnrollIn');
-                        //console.log(coursesEligibleToEnrollIn);
-                         return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
-                    });
-                    
-                    let result = await a;
-                    return result;
-    }
+    // } 
+ 
     // Update all courses using default sequenceNum
     public updateCourseSequence(request, h) {
         return new Promise((resolve, reject) => {
@@ -1278,3 +1207,7 @@ export default class CourseController {
     }
 
 }
+
+
+
+
