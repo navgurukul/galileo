@@ -130,7 +130,7 @@ export const getUserRoles =function (userDetails) {
     for(let i = 0; i < userDetails.length; i++){
         if (userDetails[i].roles === "facilitator"){
             userRoles['isFacilitator']  = true;
-          
+        
         } else if (userDetails[i].roles === "admin") {
            
             userRoles['isAdmin']  = true;

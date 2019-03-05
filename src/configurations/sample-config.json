@@ -23,7 +23,7 @@
          "logger",
          "bell",
          "jwt-auth",
-         "swagger",
+         "swagger"
       ],
       "googleAuth":{
          "clientId":"googleAppClientId",
