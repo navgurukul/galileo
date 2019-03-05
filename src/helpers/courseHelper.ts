@@ -119,19 +119,21 @@ export const addingRootNode = function (rootArray, ChildArray) {
 }
 
 
-export const getUserRoles = function (userDetails) {
-    let userRoles = {
-            isAdmin: false,
-            isFacilitator: false,
-            isAlumni: false,
-            isTnp: false,
-            roles: null
-            
-        };
- 
-    for (let i = 0; i < userDetails.length; i++) {
-        if (userDetails[i].roles === "facilitator") {
-            userRoles['isFacilitator'] = true;
+export const getUserRoles =function (userDetails) {
+     let    userRoles={
+        isAdmin:false,
+        isFacilitator:false,
+        isAlumni:false,
+        isTnp:false,
+        roles:null
+
+
+     };
+    for(let i = 0; i < userDetails.length; i++){
+        if (userDetails[i].roles === "facilitator"){
+            userRoles['isFacilitator']  = true;
+          
+        } else if (userDetails[i].roles === "admin") {
            
         } else if (userDetails[i].roles === "admin") {
 

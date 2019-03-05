@@ -10,6 +10,9 @@ export const userSchema: Joi.ObjectSchema = Joi.object({
     isAdmin: Joi.bool(),
     isAlumni: Joi.bool().allow(null).default(false),
     center: Joi.string().allow(null),
+    githubLink: Joi.string().allow(null).uri(),
+    linkedinLink: Joi.string().allow(null).uri(),
+    mediumLink: Joi.string().allow(null).uri()
 });
 
 export const noteSchema: Joi.ObjectSchema = Joi.object({
@@ -17,6 +20,7 @@ export const noteSchema: Joi.ObjectSchema = Joi.object({
     text: Joi.string().required(),
     createdAt: Joi.date().required(),
     name: Joi.string().required(),
+  
 });
 
 

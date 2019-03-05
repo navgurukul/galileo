@@ -160,8 +160,13 @@ export default class CourseController {
                             'exercises.courseId')
                             .where('exercises.id', 'in', database('submissions')
                             .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
+<<<<<<< HEAD
                             .andWhere('submissions.userId', '=', request.userId)
                             .groupBy('exercises.courseId')
+=======
+                            .andWhere('submissions.userId', '=', 9) //******replace 9 with request.userId*****//
+                            ).groupBy('exercises.courseId')
+>>>>>>> issue-90
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
                                 return Promise.resolve();
