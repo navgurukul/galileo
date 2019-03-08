@@ -119,35 +119,49 @@ export const addingRootNode = function (rootArray, ChildArray) {
 }
 
 
-export const getUserRoles =function (userDetails) {
-     let    userRoles={
-        isAdmin:false,
-        isFacilitator:false,
-        isAlumni:false,
-        isTnp:false,
-        roles:null
+export const getUserRoles = function (userDetails) {
+    let userRoles = {
+        isAdmin: false,
+        isFacilitator: false,
+        isAlumni: false,
+        isTnp: false,
+        roles: [],
+        center: {
+            isFacilitator: [],
+            isAdmin: [],
+            isAlumni: [],
+            isTnp: [],
+            
+        }
 
+    };
 
-     };
-    for(let i = 0; i < userDetails.length; i++){
-        if (userDetails[i].roles === "facilitator"){
-            userRoles['isFacilitator']  = true;
-          
-        } else if (userDetails[i].roles === "admin") {
-           
+    for (let i = 0; i < userDetails.length; i++) {
+        if (userDetails[i].roles === "facilitator") {
+            userRoles['isFacilitator'] = true;
+            userRoles['center'].isFacilitator.push(userDetails[i].center);
         } else if (userDetails[i].roles === "admin") {
 
             userRoles['isAdmin'] = true;
+            userRoles.center.isAdmin.push(userDetails[i].center);
+
         } else if (userDetails[i].roles === "alumni") {
 
             userRoles['isAlumni'] = true;
+            userRoles['center'].isAlumni.push(userDetails[i].center)
         } else if (userDetails[i].roles === "tnp") {
 
             userRoles['isTnp'] = true;
+            userRoles['center'].isTnp.push(userDetails[i].center)
         } else {
-            userRoles['roles'][i] = userDetails[i].roles;
+            userRoles['roles'].push(userDetails[i].roles);
+            if((userDetails[i].roles in userRoles['center'])==false)
+            userRoles['center'][userDetails[i].roles]=[];
+            userRoles['center'][userDetails[i].roles].push(userDetails[i].center);
         }
     }
-    userRoles['roles']=JSON.stringify(userRoles['roles']);
+  
+   //  userRoles['roles']=JSON.stringify(userRoles['roles']);
+
     return userRoles;
 }

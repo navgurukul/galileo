@@ -4,6 +4,7 @@ import { IServerConfigurations } from "../../configurations";
 
 import UserController from "./user-controller";
 import { noteSchema, userSchema } from "./user-schemas";
+import * as Boom from 'boom';
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -92,18 +93,47 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     userId: Joi.number().required(),
                 },
                 payload: {
-                    githubLink: Joi.string().allow(null).uri(),
-                    linkedinLink: Joi.string().allow(null).uri(),
-                    mediumLink: Joi.string().allow(null).uri(),
+                    githubLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?github.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
+                    linkedinLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
+                    mediumLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?medium.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
                     uploadImage:Joi.string().allow(null)
-                }
+                },
+                failAction: async (request, h, err) => {
+                    if (process.env.NODE_ENV === 'production') {
+                      // In prod, log a limited error message and throw the default Bad Request error.
+                      console.error('ValidationError:', err.message);
+                      throw Boom.badRequest(`Invalid request payload input`);
+                    } else {
+                      // During development, log and respond with the full error.
+                      console.error(err.message);
+                     // throw err;
+                      throw Boom.badRequest(err.message);
+                    }
+                  }
 
             },
-            // response: {
-            //     user: userSchema
-            // },
+          
             response: {
-
+                schema: Joi.object({
+                    "user": userSchema
+                }),
+                failAction: async (request, h, err) => {
+                    if (process.env.NODE_ENV === 'production') {
+                      // In prod, log a limited error message and throw the default Bad Request error.
+                      console.error('ValidationError:', err.message);
+                      throw Boom.badRequest(`Invalid request payload input`);
+                    } else {
+                      // During development, log and respond with the full error.
+                      console.error(err);
+                     
+                     return h.response({
+                        "statusCode": 422,
+                        "error": err.name,
+                        "message": err.message
+                    }).code(422)
+                      
+                    }
+                  }
             },
             plugins: {
                 'hapi-swagger': {

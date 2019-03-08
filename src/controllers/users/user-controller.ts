@@ -6,10 +6,9 @@ import { NotesModel } from '../../models/notes-model';
 import { UserModel } from '../../models/user-model';
 
 import * as fs from 'fs';
+import * as Boom from 'boom';
 
-//var fs = require('fs');
-var path = require('path');
-var url = require('url');
+
 
 
 export default class UserController {
@@ -217,80 +216,72 @@ export default class UserController {
         let userDeatils = {
             'githubLink': request.payload.githubLink,
             'linkedinLink': request.payload.linkedinLink,
-            'mediumLink': request.payload.mediumLink
+            'mediumLink': request.payload.mediumLink,
+            'profilePicture': null
         };
 
+        let that = this;
 
-       
+
+
         return new Promise((resolve, reject) => {
-//console.log(request.payload.uploadImage);
-           let imageString= request.payload.uploadImage;
-           var base64Data = imageString.replace(/^data:image\/png;base64,/, "");
-        //    var userUploadedFeedMessagesLocation = '../../img/upload/feed/out.png';
-           var userUploadedFeedMessagesLocation = 'out.png';
-           var jsonPath = path.join(__dirname, '../../', 'img',  'out.png');
-          
-           //
-        //    var imageBuffer                      = decodeBase64Image(base64DimageStringata);
 
-        var relativePath = path.relative(process.cwd(), jsonPath);
-console.log(relativePath);
-var imagepath='/img/out.png';
-       
-fs.writeFile(jsonPath, base64Data, 'base64', function(err) {
-    console.log(err);
-    console.log(jsonPath);
+            //console.log(request.payload.uploadImage);
 
-  
-   
-   //var jsonPath = path.join(__dirname, '../../', 'img', 'upload','feed', 'out.png');
-    //var jsonString = fs.readFileSync(jsonPath, 'utf8');
-   // console.log(jsonString);
+            let imageString = request.payload.uploadImage;
+            let extension = undefined;
+            let lowerCase = imageString.toLowerCase();
+            if (lowerCase.indexOf("png") !== -1) extension = "png"
+            else if (lowerCase.indexOf("jpg") !== -1 || lowerCase.indexOf("jpeg") !== -1)
+                extension = "jpg"
+            else extension = "tiff";
 
-   var AWS = require('aws-sdk');
-   var s3 = new AWS.S3();
-   var myBucket = 'saralng';
-  
+            var base64Data = imageString.replace(/^data:image\/png;base64,/, "");
 
+            var imagepath = 'img/avatar/avatar_' + request.userId + '.' + extension;
 
-    fs.readFile(jsonPath, function (err,data) {
-        if (err) {
-            return console.log(err);
-        }
+            fs.writeFile(imagepath, base64Data, 'base64', function (err) {
+                if (err) {
+                    reject(Boom.expectationFailed(`There was a error at the time of image saving: ${err} `));
+                }
 
+                var AWS = require('aws-sdk');
+                var s3 = new AWS.S3();
+                var myBucket = 'saralng';
 
+                fs.readFile(imagepath, function (err, data) {
+                    if (err) {
+                        reject(Boom.expectationFailed(`There was a error at the time of image reading: ${err} `));
+                    }
 
-        let extn = 'png';
-        let contentType = 'application/octet-stream';
-         if (extn === 'png' || extn === 'jpg' || extn === 'gif') {
-            contentType = "image/" + extn;
-        }
+                    let contentType = 'application/octet-stream';
+                    if (extension === 'png' || extension === 'jpg' || extension === 'gif') {
+                        contentType = "image/" + extension;
+                    }
 
-        var params = {Bucket: myBucket, Key: imagepath, Body: data, ContentType: contentType};
-        s3.upload(params, function(err, data) {
-            if (err) {
-                console.log("error in s3 upload", err);
-            } else {
-                console.log('---------------------',data);
-                return resolve({
-                    relativePath: imagepath,
-                    gcsLink: "https://s3.ap-south-1.amazonaws.com/saralng/" + imagepath,
-                  
+                    var params = { Bucket: myBucket, Key: imagepath, Body: data, ContentType: contentType };
+                    s3.upload(params, function (err, data) {
+
+                        if (err) {
+
+                            reject(Boom.expectationFailed(`There was a error at the time of S3 upload: ${err} `));
+                        } else {
+                            //console.log('---------------------', data);
+
+                            userDeatils.profilePicture = "https://s3.ap-south-1.amazonaws.com/saralng/" + imagepath;
+                            //console.log(userDeatils);
+                            that.userModel.upsert(userDeatils, { id: request.params.userId }, true)
+                                .then((user) => {
+
+                                    resolve({ user: user });
+                                });
+                        }
+                    });
                 });
-            }
+
+            });
+
         });
-    });
-
-
-
-  });
-//   return false;
-//          this.userModel.upsert(userDeatils,{id:request.params.userId},true)
-//          .then((user) => {
-                  
-//                   resolve({user:user});
-//                 });
-         });
     }
 
     public postUserNotes(request, h) {
