@@ -426,6 +426,7 @@ export default class CourseController {
     }
 
     public enrollInCourse(request, h) {
+        //request.userId = 29;
         return new Promise((resolve, reject) => {
             database('course_enrolments').select('*')
                 .where({

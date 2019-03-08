@@ -61,9 +61,9 @@ export const manipulateResultSet=function (totalExercisesperCourse, exrcisesComp
         }
         return course;
     });
-     console.log('courseExerciseDetails');
-    console.log(courseExerciseDetails);
-    console.log('courseExerciseDetails');
+    // console.log('courseExerciseDetails');
+    // console.log(courseExerciseDetails);
+    // console.log('courseExerciseDetails');
    let id;
    let coursesWithDependecncy = _.uniq(_.pluck(courseReliesOn, 'courseId'));
    let groupListBycourseId =  _.groupBy(courseReliesOn, 'courseId');
