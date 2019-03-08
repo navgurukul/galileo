@@ -103,13 +103,19 @@ export const listToTree =function (list) {
         map[list[i].menteeId] = i; // initialize the map
         list[i].children = []; // initialize the children
     }
-    
-    for (i = 0; i < list.length; i += 1) {
+   // console.log(map)
+    // for (i = 0; i < list.length; i += 1) {
+    for (i = 0; i < list.length; i ++) {
         node = list[i];
+
+       // console.log(i,node.menteeId,node.mentorId,map[node.mentorId], list[map[node.mentorId]]);
         //if (node.parent !== "0") {
             // if you have dangling branches check that map[node.parentId] exists
-            if(map[node.mentorId]){
+            
+         //   if(map[node.mentorId]){
+            if(map[node.mentorId]==0||map[node.mentorId]>0){
             list[map[node.mentorId]].children.push(node);
+           // console.log('-------',list,'--------');
         } else {
             roots.push(node);
         }
@@ -187,3 +193,54 @@ export const  isStudentEligibleToEnroll= async function(studentId, courseId){
                     // console.log('result');
                     return result;
     }
+
+
+export const addingRootNode =function (rootArray,ChildArray) {
+    var  i,j;
+    //console.log(rootArray);
+    for (i = 0; i < rootArray.length; i += 1) {
+        
+        rootArray[i].children = []; 
+        for (j = 0; j < ChildArray.length; j += 1) {
+            if(rootArray[i].mentorId== ChildArray[j].mentorId){
+                rootArray[i].children.push(ChildArray[j]);
+            }
+        }
+    }
+   
+  
+
+
+    
+    return rootArray;
+}
+
+
+export const getUserRoles =function (userDetails) {
+    let userRoles = {
+        isAdmin: false,
+        isFacilitator: false,
+        isAlumni: false,
+        isTnp: false,
+        roles: null
+    };
+    for(let i = 0; i < userDetails.length; i++){
+        if (userDetails[i].roles === "facilitator"){
+            userRoles['isFacilitator']  = true;
+        
+        } else if (userDetails[i].roles === "admin") {
+           
+            userRoles['isAdmin']  = true;
+        } else if (userDetails[i].roles === "alumni") {
+           
+            userRoles['isAlumni']  = true;
+        } else if (userDetails[i].roles === "tnp") {
+           
+            userRoles['isTnp']  = true;
+        }else{
+            userRoles['roles']=userDetails[i].roles;
+        }
+    }
+
+    return userRoles;
+}

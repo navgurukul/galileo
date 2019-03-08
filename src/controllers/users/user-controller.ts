@@ -25,23 +25,32 @@ export default class UserController {
         //let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
 
         return new Promise((resolve, reject) => {
-            let auth = new GoogleAuth;
-            let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
-            client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
-                if (error) {
-                    return console.error(error);
-                }
-                let googleAuthPayload = login.getPayload();
+            // let auth = new GoogleAuth;
+            // let client = new auth.OAuth2(this.configs.googleAuth.clientId, '', '');
+            // client.verifyIdToken(request.payload.idToken, this.configs.googleAuth.clientId, (error, login) => {
+            //     if (error) {
+            //         return console.error(error);
+            //     }
+            //     let googleAuthPayload = login.getPayload();
 
-                let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+             //   let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                let isFacilitator = true;
                 let isAdmin = false,
                     isAlumni = false;
 
                 let userObj = {
-                    email: googleAuthPayload['email'],
-                    name: googleAuthPayload['name'],
-                    profilePicture: googleAuthPayload['picture'],
-                    googleUserId: googleAuthPayload['sub'],
+                    // email: googleAuthPayload['email'],
+                    email: 'a@navgurukul.org',
+                   // email: 'jcarrick4@tripadvisor.com',
+                    // name: googleAuthPayload['name'],
+                    name: 'Abhishek Gupta',
+                   // name: 'Jaymie Carrick',
+                    // profilePicture: googleAuthPayload['picture'],
+                    profilePicture: 'https://lh3.googleusercontent.com/-s0apA_h4PQU/AAAAAAAAAAI/AAAAAAAAAFI/fyXNZy021Y4/s96-c/photo.jpg',
+                  //  profilePicture: 'https://robohash.org/ametquiadolorem.png?size=50x50&set=set1',
+                    // googleUserId: googleAuthPayload['sub'],
+                     googleUserId: '104796884155684395169',
+                   // googleUserId: '76-2545818',
                 };
 
                 this.userModel.upsert(userObj, {'email': userObj['email']}, true)
@@ -63,8 +72,10 @@ export default class UserController {
                                 });
                     })
                     .then((response) => {
-                        const { shouldCreateRole, user } = response;
 
+                        
+                        const { shouldCreateRole, user } = response;
+                       
                         if(shouldCreateRole === true){
                             // when the user signup for the first time or
                             // didn't have any user_roles
@@ -150,10 +161,13 @@ export default class UserController {
                                         for(let i = 0; i < rows.length; i++){
                                             if (rows[i].roles === "facilitator"){
                                                 isFacilitator = true;
+                                                user.isFacilitator=isFacilitator;
                                             } else if (rows[i].roles === "admin") {
                                                 isAdmin = true;
+                                                user.isAdmin=isAdmin;
                                             } else if (rows[i].roles === "alumni") {
                                                 isAlumni = true;
+                                                user.isAlumni=isAlumni;
                                             }
                                         }
 
@@ -171,7 +185,7 @@ export default class UserController {
                             'user': user,
                             'jwt': this.userModel.getJWTToken(user)
                         });
-                    });
+                    //});
             });
          });
     }

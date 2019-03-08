@@ -493,15 +493,23 @@ export default class AssignmentController {
         let availableCoursesPostAssigmentApproval;
         let courseId;
         return new Promise((resolve, reject) => {
-            database('exercises')
-                .select('courseId').innerJoin('submissions', 'exercises.id', 'submissions.exerciseId')
-                .where({ 'submissions.id': request.params.submissionId })
-                .then((rows) => {
-                    if (rows.length > 0) {
-                        courseId = rows[0].courseId;
-                        return Promise.resolve(courseId);
-                    } else {
-                        reject(Boom.notFound("this submission does not belong to any course"));
+            // submitting the review of the submitted assignment
+            
+            database('submissions')
+                .select('submissions.id', 'submissions.userId', 'submissions.state', 'submissions.peerReviewerId', 'mentors.mentor', 'users.center')
+                .leftJoin('mentors', 'userId', 'mentee')
+                .innerJoin('users', 'submissions.userId', 'users.id')
+                .where({ 'submissions.id': request.params.submissionId }).then((rows) => {
+
+                    // validate the submissionId
+                    if (rows.length < 1) {
+                        reject(Boom.notFound("A submission with the given ID does not exist."));
+                        return Promise.reject("Rejected");
+                    }
+                    let submission = rows[0];
+                    // submissions once reviewed shouldn't be reviewed again.
+                    if (submission.state !== 'pending') {
+                        reject(Boom.expectationFailed("The given submission has already been reviewed."));
                         return Promise.reject("Rejected");
                     }
                 }).then((courseId) => {
@@ -542,32 +550,36 @@ export default class AssignmentController {
                                         let updateFields = {
                                             notesReviewer: request.payload.notes
                                         };
+                    return database('user_roles').select('*')
+                        .where({
+                            'roles': 'facilitator',
+                        })
+                        .whereIn(
+                            'center', [submission.center, 'all'] // or where the center is all
+                        )
+                        .then((rows) => {
 
-                                        return database('user_roles').select('*')
-                                            .where({
-                                                'roles': 'facilitator',
-                                                'center': submission.center
-                                            }).then((rows) => {
+                            let usersId = request.userId;
 
-                                                let usersId = request.userId;
+                            let usersFacilatorId = rows[0]? rows[0].userId: null;
+                            //console.log(usersFacilator.userId);
 
-                                                let usersFacilatorId = rows[0] ? rows[0].userId : null;
+                            if (
+                                usersId === submission.peerReviewerId
+                                || usersId === submission.mentor
+                                || usersId === usersFacilatorId
+                            ) {
+                                if (request.payload.approved) {
+                                    updateFields['completed'] = 1;
+                                    updateFields['state'] = 'completed';
+                                    updateFields['completedAt'] = new Date();
+                                    updateFields['markCompletedBy'] = usersId;
+                                } else {
+                                    updateFields['completed'] = 0;
+                                    updateFields['state'] = 'rejected';
+                                    updateFields['markCompletedBy'] = usersId;
+                                }
 
-                                                if (
-                                                    usersId === submission.peerReviewerId
-                                                    || usersId === submission.mentor
-                                                    || usersId === usersFacilatorId
-                                                ) {
-                                                    if (request.payload.approved) {
-                                                        isAssigmentApproved = true;
-                                                        updateFields['completed'] = 1;
-                                                        updateFields['state'] = 'completed';
-                                                        updateFields['completedAt'] = new Date();
-
-                                                    } else {
-                                                        updateFields['completed'] = 0;
-                                                        updateFields['state'] = 'rejected';
-                                                    }
 
                                                 } else {
 

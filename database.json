@@ -1,0 +1,11 @@
+{
+    "dev": {
+            "host": "localhost",
+            "user": "root",
+            "password": "root",
+            "database": "davinci",
+            "driver": "mysql",
+            "multipleStatements": true
+        },
+    "sql-file":true
+}
