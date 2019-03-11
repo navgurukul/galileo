@@ -35,7 +35,7 @@ const server = Server.init(serverConfigs, databaseConfig)
                 
                 
                 if (tags.error) {
-                    console.log(event.error);
+                    
 
                     // Sentry.captureMessage('Something went wrong');
                     // Sentry.captureMessage(`${event.error ? event.error.message : 'unknown'}`);

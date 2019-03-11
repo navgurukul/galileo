@@ -124,4 +124,12 @@ typings/
 # dotenv environment variables file
 .env
 
+<<<<<<< HEAD
+=======
+migrations
+database.json
+sqlScripts/
+# !migrations/migration_1.sql
+
+>>>>>>> e4549ce9f72a6cda5b3fbfd755236307b541b699
 curriculum

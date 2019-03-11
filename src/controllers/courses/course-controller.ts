@@ -3,8 +3,9 @@ import * as Hapi from 'hapi';
 import * as knex from 'knex';
 
 import database from '../../';
-import { getIsSolutionAvailable, listToTree, addingRootNode, getUserRoles } from '../../helpers/courseHelper';
+import { getIsSolutionAvailable,listToTree,isStudentEligibleToEnroll,addingRootNode, getUserRoles } from '../../helpers/courseHelper';
 import { manipulateResultSet } from '../../helpers/courseHelper';
+
 import { IServerConfigurations } from '../../configurations/index';
 import * as Configs from "../../configurations";
 var _ = require('underscore');
@@ -148,13 +149,14 @@ export default class CourseController {
                     .select('exercises.courseId',
                         database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
 
-                        .then((rows) => {
-                            totalExercisesPerCourse = rows;
-                            return Promise.resolve();
-                        });
-                    
-                  /* **get the exercises completed in each course by the given user ** */      
+                    .then((rows) => {
+                        totalExercisesPerCourse = rows;
+                        return Promise.resolve();
+                    });
+
+                /* **get the exercises completed in each course by the given user ** */
                 exerciseCompeletedPerCourseQ =
+<<<<<<< HEAD
                         database('exercises')
                             .select(
                                 database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
@@ -165,27 +167,40 @@ export default class CourseController {
                                         .where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
                                         .andWhere('submissions.userId', '=', 1))
 
+=======
+                    database('exercises')
+                        .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'),
+                            'exercises.courseId')
+                            .where('exercises.id', 'in', database('submissions')
+                            .select('submissions.exerciseId').where({ 'submissions.completed': 1 }))// ****change this with the enum value*****// 
+                            .andWhere('submissions.userId', '=', request.userId)
+>>>>>>> e4549ce9f72a6cda5b3fbfd755236307b541b699
                             .groupBy('exercises.courseId')
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
                                 return Promise.resolve();
                             });
+<<<<<<< HEAD
                     /* **get the course dependeny list ** */              
+=======
+
+                /* **get the course dependeny list ** */
+>>>>>>> e4549ce9f72a6cda5b3fbfd755236307b541b699
                 courseReliesOnQ =
-                            database('course_relation')
-                                .select(
-                                'course_relation.courseId', 'course_relation.reliesOn'
-                                )
-                                .then((rows) => {
-                                    courseReliesOn = rows;
-                                    return Promise.resolve();
-                                });
+                    database('course_relation')
+                        .select(
+                            'course_relation.courseId', 'course_relation.reliesOn'
+                        )
+                        .then((rows) => {
+                            courseReliesOn = rows;
+                            return Promise.resolve();
+                        });
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
-                Promise.all([enrolledQ, availableQ, completedQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, courseReliesOnQ]).then(() => {
-
-                    let availableCourses = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse, courseReliesOn,
+                //console.log('outside promise allllllllllll');
+                Promise.all([enrolledQ, availableQ, completedQ,exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, courseReliesOnQ]).then(() => {
+                    let availableCourses = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, courseReliesOn,
                         allAvailableCourses, courseConfig.courseCompleteionCriteria);
                     resolve({
                         enrolledCourses,
@@ -430,8 +445,8 @@ export default class CourseController {
     }
 
     public enrollInCourse(request, h) {
+        //request.userId = 29;
         return new Promise((resolve, reject) => {
-
             database('course_enrolments').select('*')
                 .where({
                     'studentId': request.userId,
@@ -447,8 +462,8 @@ export default class CourseController {
                 })
                 .then((response) => {
                     if (response.alreadyEnrolled === false) {
-                        this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((isStudentEligible) => {
-                            if (isStudentEligible) {
+                        isStudentEligibleToEnroll(request.userId, request.params.courseId).then((isStudentEligible) => {
+                            if(isStudentEligible) {
                                 database('courses')
                                     .select('courses.id as courseId')
                                     .where({
@@ -542,80 +557,8 @@ export default class CourseController {
     //                 }
     //             });
     //     });
-    // }
-
-
-    //performing a similar check in the enroll API as in courses API.
-    //to prevent a student from enrolling in a course by making a direct Api call through  
-    async isStudentEligibleToEnroll(studentId, courseId) {
-        //let isEligibleToEnrollInCourse = false; 
-        let TotalExercisesPerCourseQ;
-        let exerciseCompeletedPerCourseQ;
-        let courseReliesOnQ;
-        let availableQ;
-        let courseConfig = Configs.getCourseConfigs();
-        TotalExercisesPerCourseQ = database('exercises')
-            .select('exercises.courseId',
-                database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
-            .then((rows) => {
-                return Promise.resolve(rows);
-            });
-
-        exerciseCompeletedPerCourseQ =
-            database('exercises')
-                .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'),
-                    'exercises.courseId')
-                .where('exercises.id', 'in', database('submissions') //replace 9 with request.userId
-                    .select('submissions.exerciseId').where({ 'submissions.completed': 1 })
-                    .andWhere('submissions.userId', '=', 9)
-                ).groupBy('exercises.courseId')
-                .then((rows) => {
-                    return Promise.resolve(rows);
-                });
-
-        courseReliesOnQ =
-            database('course_relation')
-                .select(
-                    'course_relation.courseId', 'course_relation.reliesOn'
-                )
-                .then((rows) => {
-                    return Promise.resolve(rows);
-                });
-
-        availableQ =
-            database('courses')
-                .select('courses.id', 'courses.name', 'courses.type',
-                    'courses.logo', 'courses.shortDescription', 'courses.sequenceNum')
-                .where('courses.id', 'not in', database('courses').distinct()
-                    .select('courses.id')
-                    .join('course_enrolments', function () {
-                        this.on('courses.id', '=', 'course_enrolments.courseId')
-                            .andOn('course_enrolments.studentId', '=', studentId);
-                    })
-                )
-                .then((rows) => {
-                    return Promise.resolve(rows);
-                });
-
-
-                    let a = Promise.all([availableQ, exerciseCompeletedPerCourseQ, TotalExercisesPerCourseQ, 
-                        courseReliesOnQ]).then((resolvedValues) => {
-                        //console.log('inside .allllll');
-                        let availableCourses = resolvedValues[0];
-                        let exerciseCompeletedPerCourse = resolvedValues[1];
-                        let totalExercisesPerCourse = resolvedValues[2];
-                        let courseReliesOn = courseReliesOnQ[3];
-                        let coursesEligibleToEnrollIn = manipulateResultSet(totalExercisesPerCourse,exerciseCompeletedPerCourse, 
-                        courseReliesOn, availableCourses, courseConfig.courseCompleteionCriteria);
-                        //console.log('coursesEligibleToEnrollIn');
-                        //console.log(coursesEligibleToEnrollIn);
-                        return _.where(coursesEligibleToEnrollIn, {id: courseId}).length > 0 ? true : false;
-                    });
-                    
-                    let result = await a;
-                    return result;
-
-    }
+    // } 
+ 
     // Update all courses using default sequenceNum
     public updateCourseSequence(request, h) {
         return new Promise((resolve, reject) => {
@@ -896,7 +839,7 @@ export default class CourseController {
                     resolve({ data: rows });
                 } else {
                     resolve({
-                        data : [] ,
+                        data: [],
                         message: 'Not added any course dependencies for the courses...'
                     });
                 }
@@ -907,42 +850,42 @@ export default class CourseController {
     public deleteCourseRelation(request, h) {
         return new Promise((resolve, reject) => {
             database('user_roles').select('roles')
-            .where({
-                'userId': request.userId
-            })
-            .then((rows) => {
-                const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                return Promise.resolve(isAdmin);
-            })
-            .then((isAdmin) => {
-                // only admin are allowed to add the courses
-                if (isAdmin) {
-                    database('course_relation').select('*')
-                    .where({
-                        'courseId': request.params.courseId,
-                        'reliesOn': request.params.reliesOn
-                    })
-                    .then((rows) => {
-                        if (rows.length > 0) {
-                            database('course_relation')
-                                .where({
-                                    'courseId': request.params.courseId,
-                                    'reliesOn': request.params.reliesOn
-                                }).delete()
-                                .then(() => {
-                                    resolve({
-                                        deleted: true
-                                    });
-                                });
-                        } else {
-                            reject(Boom.expectationFailed('Course Dependency to the corresponding course id does not exists.'));
-                        }
-                    });
-                } else {
-                    reject(Boom.expectationFailed('Only Admins are allowed to add the course dependencies.'));
-                    return Promise.reject("Rejected");
-                }
-            });
+                .where({
+                    'userId': request.userId
+                })
+                .then((rows) => {
+                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
+                    return Promise.resolve(isAdmin);
+                })
+                .then((isAdmin) => {
+                    // only admin are allowed to add the courses
+                    if (isAdmin) {
+                        database('course_relation').select('*')
+                            .where({
+                                'courseId': request.params.courseId,
+                                'reliesOn': request.params.reliesOn
+                            })
+                            .then((rows) => {
+                                if (rows.length > 0) {
+                                    database('course_relation')
+                                        .where({
+                                            'courseId': request.params.courseId,
+                                            'reliesOn': request.params.reliesOn
+                                        }).delete()
+                                        .then(() => {
+                                            resolve({
+                                                deleted: true
+                                            });
+                                        });
+                                } else {
+                                    reject(Boom.expectationFailed('Course Dependency to the corresponding course id does not exists.'));
+                                }
+                            });
+                    } else {
+                        reject(Boom.expectationFailed('Only Admins are allowed to add the course dependencies.'));
+                        return Promise.reject("Rejected");
+                    }
+                });
 
         });
     }
@@ -1010,16 +953,16 @@ export default class CourseController {
                     'userId': request.userId
                 })
                 .whereIn(
-                    'center',[request.query.centerId,'all']
+                    'center', [request.query.centerId, 'all']
                 )
-                
+
                 .then((rows) => {
 
-
-                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                    const isFacilitator = (rows.length > 0 && getUserRoles(rows).isFacilitator === true) ? true : false;
-                    const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
-                    const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
+                    const access=getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
 
@@ -1079,14 +1022,14 @@ export default class CourseController {
                     'userId': request.userId
                 })
                 .whereIn(
-                    'center',[request.query.centerId,'all']
+                    'center', [request.query.centerId, 'all']
                 )
                 .then((rows) => {
-
-                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                    const isFacilitator = (rows.length > 0 && getUserRoles(rows).isFacilitator === true) ? true : false;
-                    const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
-                    const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
+                    const access=getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
 
@@ -1128,9 +1071,6 @@ export default class CourseController {
                     }
                 });
 
-
-
-
         });
     }
 
@@ -1143,19 +1083,25 @@ export default class CourseController {
 
 
         return new Promise((resolve, reject) => {
+<<<<<<< HEAD
+=======
+            // resolve(request);
+            //  return false;
+
+>>>>>>> e4549ce9f72a6cda5b3fbfd755236307b541b699
             database('user_roles').select('roles')
                 .where({
                     'userId': request.userId
                 })
                 .whereIn(
-                    'center',[request.query.centerId,'all']
+                    'center', [request.query.centerId, 'all']
                 ).then((rows) => {
 
-
-                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                    const isFacilitator = (rows.length > 0 && getUserRoles(rows).isFacilitator === true) ? true : false;
-                    const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
-                    const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
+                    const access=getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
 
@@ -1283,14 +1229,14 @@ export default class CourseController {
                 .where({
                     'userId': request.userId
                 })
-                
-                
-                .then((rows) => {
 
-                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                    const isFacilitator = (rows.length > 0 && getUserRoles(rows).isFacilitator === true) ? true : false;
-                    const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
-                    const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
+
+                .then((rows) => {
+                    const access=getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
 
@@ -1412,32 +1358,42 @@ export default class CourseController {
 
         return new Promise((resolve, reject) => {
 
-            database('user_roles').select('roles')
+           let p= database('user_roles').select('roles', 'center')
                 .where({
                     'userId': request.userId
-                }).then((rows) => {
+                });
+               // console.log(p.toString());
+                
+                
+               p .then((rows) => {
+                    let access=getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
 
-                    const isAdmin = (rows.length > 0 && getUserRoles(rows).isAdmin === true) ? true : false;
-                    const isFacilitator = (rows.length > 0 && getUserRoles(rows).isFacilitator === true) ? true : false;
-                    const isTnp = (rows.length > 0 && getUserRoles(rows).isTnp === true) ? true : false;
-                    const userRole = (rows.length > 0 && getUserRoles(rows).roles !== undefined) ? getUserRoles(rows).roles : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
 
-                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
+
+                    const center = access.center;
+                    console.log(access);
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
 
 
-                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole, center }) => {
 
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
-
+                       
                         const mentorId = request.payload.mentorId;
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
+                        let allCenter = [];
 
-
-
-
-                        return database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
+                        let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
+                        allCenter = Array.from(locationSet);
+                        console.log("---------------",allCenter); 
+                        return false;
+                    return    database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
                             .innerJoin('users', 'users.id', 'mentors.mentor')
                             .where({
 
@@ -1450,10 +1406,14 @@ export default class CourseController {
 
                                 if (mentorEmail !== undefined)
                                     this.where({ 'users.email': mentorEmail })
+                            }).andWhere(function () {
+
+                                if (allCenter.indexOf("all")==-1)
+                                    this.whereIn('users.center',allCenter)
                             }).then((rows) => {
                                 // if the course for given id doesn't exist
                                 if (rows.length < 1) {
-                                    reject(Boom.expectationFailed(`This record doesn't exists.`));
+                                    reject(Boom.expectationFailed(`You are not allowed to delete `));
                                     return Promise.reject("Rejected");
                                 } else {
 
@@ -1480,3 +1440,7 @@ export default class CourseController {
     }
 
 }
+
+
+
+

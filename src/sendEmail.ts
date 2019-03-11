@@ -128,3 +128,24 @@ export const sendAssignmentReviewCompleteEmail = (student:User, reviewer:User, e
         return Promise.resolve();
     });
 };
+
+export const sendCoursesUnlockedForUserEmail = (student:User, courses) => {
+  console.log('insid sendCoursesUnlockedForUserEmail');
+  let emailTemplate = `
+    <div>
+      <h5>
+        Hi ${student.name}, ab aap ${courses} mein enroll kar sakte hain <br />
+        Aap apna assignment ka feedback
+      </h5>
+    </div>
+  `;
+  let subject = `Congratulation new courses unlocked for ${student.name}.`;
+  let emailText = ("\r\n");
+
+  // send email to reviewer
+  let emailPromise = sendEmail([student.email], emailTemplate, subject, emailText, []);
+
+  return emailPromise.then(() => {
+      return Promise.resolve();
+  });
+};

@@ -5,6 +5,11 @@ import { IServerConfigurations } from '../../configurations';
 import { NotesModel } from '../../models/notes-model';
 import { UserModel } from '../../models/user-model';
 
+import * as fs from 'fs';
+import * as Boom from 'boom';
+
+
+
 
 export default class UserController {
 
@@ -33,179 +38,258 @@ export default class UserController {
             //     }
             //     let googleAuthPayload = login.getPayload();
 
-             //   let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
-                let isFacilitator = true;
-                let isAdmin = false,
-                    isAlumni = false;
+            //   let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+            let isFacilitator = true;
+            let isAdmin = false,
+                isAlumni = false;
 
-                let userObj = {
-                    // email: googleAuthPayload['email'],
-                    email: 'a@navgurukul.org',
-                   // email: 'jcarrick4@tripadvisor.com',
-                    // name: googleAuthPayload['name'],
-                    name: 'Abhishek Gupta',
-                   // name: 'Jaymie Carrick',
-                    // profilePicture: googleAuthPayload['picture'],
-                    profilePicture: 'https://lh3.googleusercontent.com/-s0apA_h4PQU/AAAAAAAAAAI/AAAAAAAAAFI/fyXNZy021Y4/s96-c/photo.jpg',
-                  //  profilePicture: 'https://robohash.org/ametquiadolorem.png?size=50x50&set=set1',
-                    // googleUserId: googleAuthPayload['sub'],
-                     googleUserId: '104796884155684395169',
-                   // googleUserId: '76-2545818',
-                };
+            let userObj = {
+                // email: googleAuthPayload['email'],
+                email: 'a@navgurukul.org',
+                // email: 'jcarrick4@tripadvisor.com',
+                // name: googleAuthPayload['name'],
+                name: 'Abhishek Gupta',
+                // name: 'Jaymie Carrick',
+                // profilePicture: googleAuthPayload['picture'],
+                profilePicture: 'https://lh3.googleusercontent.com/-s0apA_h4PQU/AAAAAAAAAAI/AAAAAAAAAFI/fyXNZy021Y4/s96-c/photo.jpg',
+                //  profilePicture: 'https://robohash.org/ametquiadolorem.png?size=50x50&set=set1',
+                // googleUserId: googleAuthPayload['sub'],
+                googleUserId: '104796884155684395169',
+                // googleUserId: '76-2545818',
+            };
 
-                this.userModel.upsert(userObj, {'email': userObj['email']}, true)
-                    .then((user) => {
-                        return database('user_roles').select('*')
-                                .where({'user_roles.userId':user.id})
+            this.userModel.upsert(userObj, { 'email': userObj['email'] }, true)
+                .then((user) => {
+                    return database('user_roles').select('*')
+                        .where({ 'user_roles.userId': user.id })
+                        .then((rows) => {
+                            if (rows.length < 1) {
+                                return Promise.resolve({
+                                    shouldCreateRole: true,
+                                    user
+                                });
+                            } else {
+                                return Promise.resolve({
+                                    shouldCreateRole: false,
+                                    user
+                                });
+                            }
+                        });
+                })
+                .then((response) => {
+
+
+                    const { shouldCreateRole, user } = response;
+
+                    if (shouldCreateRole === true) {
+                        // when the user signup for the first time or
+                        // didn't have any user_roles
+                        let userRoles = {
+                            userId: user.id
+                        };
+
+                        // if he/she is a facilitator
+                        if (isFacilitator) {
+                            userRoles['roles'] = 'facilitator';
+                            userRoles['center'] = 'all';
+                        };
+
+                        return database('user_roles').insert(userRoles)
+                            .then(() => {
+                                return Promise.resolve({
+                                    ...user,
+                                    isAdmin,
+                                    isFacilitator,
+                                    isAlumni,
+                                });
+                            });
+
+                    } else {
+                        // update the facilitator from config files
+                        let shouldCreateFacilitatorRole =
+                            database('user_roles').select('*')
+                                .where({
+                                    'user_roles.userId': user.id,
+                                    'user_roles.roles': 'facilitator',
+                                    'user_roles.center': 'all'
+                                })
                                 .then((rows) => {
-                                    if(rows.length < 1){
-                                        return Promise.resolve({
-                                            shouldCreateRole: true,
-                                            user
-                                        });
-                                    } else {
-                                        return Promise.resolve({
-                                            shouldCreateRole: false,
-                                            user
-                                        });
+                                    // if user had been added as facilitator after joining SARAL
+                                    if (rows.length < 1 && isFacilitator) {
+                                        return Promise.resolve({ createFacilitatorRole: true });
+                                    }
+                                    // else if (rows.length > 1 && !isFacilitator){
+                                    //     // if he/she has been removed as facilitator from
+                                    //     // config file but is still a facilitator in the DB
+                                    //     return database('user_roles').where({
+                                    //         'user_roles.roles':'facilitator',
+                                    //         'user_roles.userId': user.id, 
+                                    //         'user_roles.center': 'all'
+                                    //     })
+                                    //     .delete()
+                                    //     .then(() => Promise.resolve({createFacilitatorRole: false}));
+
+                                    // } 
+                                    else {
+                                        return Promise.resolve({ createFacilitatorRole: false });
                                     }
                                 });
-                    })
-                    .then((response) => {
+                        // NOTE: Need to create a route which grants roles to users
 
-                        
-                        const { shouldCreateRole, user } = response;
-                       
-                        if(shouldCreateRole === true){
-                            // when the user signup for the first time or
-                            // didn't have any user_roles
-                            let userRoles = {
-                                userId: user.id
-                            };
-                            // if he/she is a facilitator
-                            if(isFacilitator){
-                                userRoles['roles'] = 'facilitator';
-                                userRoles['center'] = 'all';
-                            };
-
-                            return database('user_roles').insert(userRoles)
-                                    .then(() => {
-                                        return Promise.resolve({
-                                            ...user,
-                                            isAdmin,
-                                            isFacilitator,
-                                            isAlumni,
-                                        });
-                                    });
-
-                        } else {
-                            // update the facilitator from config files
-                            let shouldCreateFacilitatorRole =
-                                    database('user_roles').select('*')
-                                        .where({
+                        return shouldCreateFacilitatorRole
+                            .then(({ createFacilitatorRole }) => {
+                                if (createFacilitatorRole === true) {
+                                    // create the facilitator role for the user who is already
+                                    // in the platform but have been added as facilitator in config file.
+                                    return database('user_roles')
+                                        .insert({
                                             'user_roles.userId': user.id,
                                             'user_roles.roles': 'facilitator',
-                                            'user_roles.center': 'all'
+                                            'user_roles.center': 'all',
                                         })
-                                        .then((rows) => {
-                                            // if user had been added as facilitator after joining SARAL
-                                            if(rows.length < 1 && isFacilitator){
-                                                return Promise.resolve({createFacilitatorRole: true});
-                                            } 
-                                            // else if (rows.length > 1 && !isFacilitator){
-                                            //     // if he/she has been removed as facilitator from
-                                            //     // config file but is still a facilitator in the DB
-                                            //     return database('user_roles').where({
-                                            //         'user_roles.roles':'facilitator',
-                                            //         'user_roles.userId': user.id,
-                                            //         'user_roles.center': 'all'
-                                            //     })
-                                            //     .delete()
-                                            //     .then(() => Promise.resolve({createFacilitatorRole: false}));
+                                        .then((rows) => Promise.resolve());
 
-                                            // } 
-                                            else {
-                                                return Promise.resolve({createFacilitatorRole: false});
-                                            }
-                                        });
-                            // NOTE: Need to create a route which grants roles to users
-
-                            return shouldCreateFacilitatorRole
-                                    .then(({createFacilitatorRole}) => {
-                                        if(createFacilitatorRole === true){
-                                        // create the facilitator role for the user who is already
-                                        // in the platform but have been added as facilitator in config file.
-                                            return database('user_roles')
-                                                    .insert({
-                                                        'user_roles.userId': user.id,
-                                                        'user_roles.roles': 'facilitator',
-                                                        'user_roles.center': 'all',
-                                                    })
-                                                    .then((rows) => Promise.resolve());
-
-                                        } else {
-                                            // TODO: just update the user_roles values.
-                                            return Promise.resolve();
-                                        }
-                                    })
-                                    .then(() => {
-                                        // get all the roles the user have
-                                        return database('user_roles')
-                                                .select('*')
-                                                .where({
-                                                    'user_roles.userId': user.id,
-                                                });
-                                    })
-                                    .then((rows) => {
-                                        // get the roles of the users
-                                        for(let i = 0; i < rows.length; i++){
-                                            if (rows[i].roles === "facilitator"){
-                                                isFacilitator = true;
-                                                user.isFacilitator=isFacilitator;
-                                            } else if (rows[i].roles === "admin") {
-                                                isAdmin = true;
-                                                user.isAdmin=isAdmin;
-                                            } else if (rows[i].roles === "alumni") {
-                                                isAlumni = true;
-                                                user.isAlumni=isAlumni;
-                                            }
-                                        }
-
-                                        return Promise.resolve({
-                                            ...user,
-                                            isFacilitator,
-                                            isAdmin,
-                                            isAlumni,
-                                        });
+                                } else {
+                                    // TODO: just update the user_roles values.
+                                    return Promise.resolve();
+                                }
+                            })
+                            .then(() => {
+                                // get all the roles the user have
+                                return database('user_roles')
+                                    .select('*')
+                                    .where({
+                                        'user_roles.userId': user.id,
                                     });
-                        }
-                    })
-                    .then((user) => {
-                        resolve({
-                            'user': user,
-                            'jwt': this.userModel.getJWTToken(user)
-                        });
+                            })
+                            .then((rows) => {
+                                // get the roles of the users
+                                for (let i = 0; i < rows.length; i++) {
+                                    if (rows[i].roles === "facilitator") {
+                                        isFacilitator = true;
+                                        user.isFacilitator = isFacilitator;
+                                    } else if (rows[i].roles === "admin") {
+                                        isAdmin = true;
+                                        user.isAdmin = isAdmin;
+                                    } else if (rows[i].roles === "alumni") {
+                                        isAlumni = true;
+                                        user.isAlumni = isAlumni;
+                                    }
+                                }
+
+                                return Promise.resolve({
+                                    ...user,
+                                    isFacilitator,
+                                    isAdmin,
+                                    isAlumni,
+                                });
+                            });
+                    }
+                })
+                .then((user) => {
+                    resolve({
+                        'user': user,
+                        'jwt': this.userModel.getJWTToken(user)
+                    });
                     //});
-            });
-         });
+                });
+        });
     }
+
 
     public getUserInfo(request, h) {
         let id = request.params.userId;
         return new Promise((resolve, reject) => {
-            this.userModel.findOne({id: id})
+            this.userModel.findOne({ id: id })
                 .then((obj) => {
                     resolve(obj);
                 });
         });
     }
 
+    /**
+     * Update User details 
+     * @param request 
+     * @param h 
+     */
+    public updateUserInfo(request, h) {
+        let userDeatils = {
+            'githubLink': request.payload.githubLink,
+            'linkedinLink': request.payload.linkedinLink,
+            'mediumLink': request.payload.mediumLink,
+            'profilePicture': null
+        };
+
+        let that = this;
+
+
+
+        return new Promise((resolve, reject) => {
+
+            //console.log(request.payload.uploadImage);
+
+            let imageString = request.payload.uploadImage;
+            let extension = undefined;
+            let lowerCase = imageString.toLowerCase();
+            if (lowerCase.indexOf("png") !== -1) extension = "png"
+            else if (lowerCase.indexOf("jpg") !== -1 || lowerCase.indexOf("jpeg") !== -1)
+                extension = "jpg"
+            else extension = "tiff";
+
+            var base64Data = imageString.replace(/^data:image\/png;base64,/, "");
+
+            var imagepath = 'img/avatar/avatar_' + request.userId + '.' + extension;
+
+            fs.writeFile(imagepath, base64Data, 'base64', function (err) {
+                if (err) {
+                    reject(Boom.expectationFailed(`There was a error at the time of image saving: ${err} `));
+                }
+
+                var AWS = require('aws-sdk');
+                var s3 = new AWS.S3();
+                var myBucket = 'saralng';
+
+                fs.readFile(imagepath, function (err, data) {
+                    if (err) {
+                        reject(Boom.expectationFailed(`There was a error at the time of image reading: ${err} `));
+                    }
+
+                    let contentType = 'application/octet-stream';
+                    if (extension === 'png' || extension === 'jpg' || extension === 'gif') {
+                        contentType = "image/" + extension;
+                    }
+
+                    var params = { Bucket: myBucket, Key: imagepath, Body: data, ContentType: contentType };
+                    s3.upload(params, function (err, data) {
+
+                        if (err) {
+
+                            reject(Boom.expectationFailed(`There was a error at the time of S3 upload: ${err} `));
+                        } else {
+                            //console.log('---------------------', data);
+
+                            userDeatils.profilePicture = "https://s3.ap-south-1.amazonaws.com/saralng/" + imagepath;
+                            //console.log(userDeatils);
+                            that.userModel.upsert(userDeatils, { id: request.params.userId }, true)
+                                .then((user) => {
+
+                                    resolve({ user: user });
+                                });
+                        }
+                    });
+                });
+
+            });
+
+        });
+    }
+
     public postUserNotes(request, h) {
-        let note = {'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId};
+        let note = { 'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId };
         return new Promise((resolve, reject) => {
             this.notesModel.insert(note)
                 .then((status) => {
-                    resolve({status: status});
+                    resolve({ status: status });
                 });
         });
     }
@@ -214,7 +298,7 @@ export default class UserController {
         return new Promise((resolve, reject) => {
             this.notesModel.getUserNotes(request.params.userId)
                 .then((rows) => {
-                    resolve({data: rows});
+                    resolve({ data: rows });
                 });
         });
     }
@@ -223,7 +307,7 @@ export default class UserController {
         return new Promise((resolve, reject) => {
             this.notesModel.del(request.params.noteId)
                 .then((status) => {
-                    resolve({status: status});
+                    resolve({ status: status });
                 });
         });
 

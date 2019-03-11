@@ -1,11 +1,13 @@
 import * as Hapi from 'hapi';
 import * as Boom from "boom";
+import { manipulateResultSet, isStudentEligibleToEnroll } from '../../helpers/courseHelper';
 // import * as GoogleCloudStorage from "@google-cloud/storage";
-
+import * as Configs from "../../configurations";
 import database from "../../";
 import { IServerConfigurations } from "../../configurations/index";
 
-import { sendAssignmentReviewPendingEmail, sendAssignmentReviewCompleteEmail } from "../../sendEmail";
+import { sendAssignmentReviewPendingEmail, sendAssignmentReviewCompleteEmail, sendCoursesUnlockedForUserEmail} from "../../sendEmail";
+var _ = require('underscore');
 
 // Helper function to generate UIDs
 function generateUID() {
@@ -418,6 +420,7 @@ export default class AssignmentController {
     public getPeerReviewRequests(request, h) {
         return new Promise((resolve, reject) => {
             // Hackish Solution to show all the review to the Developer.
+            //request.userId = 29;
             let developerEmails = [
                 'amar17@navgurukul.org',
                 'diwakar17@navgurukul.org',
@@ -483,7 +486,12 @@ export default class AssignmentController {
 
 
     public editPeerReviewRequest(request, h) {
-
+        //const usersId = 29;
+        //request.userId = 29;
+        let isAssigmentApproved = false;
+        let initialAvailableCourses;
+        let availableCoursesPostAssigmentApproval;
+        let courseId;
         return new Promise((resolve, reject) => {
             // submitting the review of the submitted assignment
             
@@ -504,13 +512,44 @@ export default class AssignmentController {
                         reject(Boom.expectationFailed("The given submission has already been reviewed."));
                         return Promise.reject("Rejected");
                     }
-                    return Promise.resolve(submission);
-                }).then((submission) => {
+                }).then((courseId) => {
+                    database('course_enrolments').select('*')
+                        .where({
+                            'studentId': request.userId,
+                            'courseId': courseId
+                        })
+                        .then((rows) => {
+                            if (rows.length > 0) {
+                                return Promise.resolve({ isAlreadyEnrolled: true, 'courseId': courseId });
+                            } else {
+                                reject(Boom.expectationFailed('the user is not enrolled in this course'));
+                                return Promise.resolve({ isAlreadyEnrolled: false, 'courseId': courseId });
 
-                    let updateFields = {
-                        notesReviewer: request.payload.notes
-                    };
+                            }
+                        }).then((response) => {
+                            if (response.isAlreadyEnrolled) {
+                                database('submissions')
+                                    .select('*')
+                                    .leftJoin('mentors', 'userId', 'mentee')
+                                    .innerJoin('users', 'submissions.userId', 'users.id')
+                                    .where({ 'submissions.id': request.params.submissionId })
+                                    .then((rows) => {
+                                        if (rows.length < 1) {
+                                            reject(Boom.notFound("A submission with the given ID does not exist."));
+                                            return Promise.reject("Rejected");
+                                        }
+                                        let submission = rows[0];
+                                        // submissions once reviewed shouldn't be reviewed again.
+                                        if (submission.state !== 'pending') {
+                                            reject(Boom.expectationFailed("The given submission has already been reviewed."));
+                                            return Promise.reject("Rejected");
+                                        }
+                                        return Promise.resolve(submission);
+                                    }).then((submission) => {
 
+                                        let updateFields = {
+                                            notesReviewer: request.payload.notes
+                                        };
                     return database('user_roles').select('*')
                         .where({
                             'roles': 'facilitator',
@@ -541,73 +580,276 @@ export default class AssignmentController {
                                     updateFields['markCompletedBy'] = usersId;
                                 }
 
-                            } else {
+
+                                                } else {
 
 
-                                reject(Boom.notFound("User is not authorize to do so."));
-                                return Promise.reject("Rejected");
-                            }
+                                                    reject(Boom.notFound("User is not authorize to do so."));
+                                                    return Promise.reject("Rejected");
+                                                }
 
 
-                            return Promise.resolve({ updateFields, submission });
+                                                return Promise.resolve({ updateFields, submission });
 
-                        });
-
+<<<<<<< HEAD
                 })
                 .then(({ updateFields, submission }) => {
+=======
+                                            });
 
 
-                    //console.log("i am end here in the right position : ", updateFields, submission);
+>>>>>>> e4549ce9f72a6cda5b3fbfd755236307b541b699
 
-                    // Updating the submission with the reviewers review.
-                    database('submissions')
-                        .update(updateFields)
-                        .where({ id: request.params.submissionId })
-                        .then((rows) => {
-                            /**
-                             *  Finding the student and the reviewer details to send email
-                             * to them about the assignment review.
-                            */
-                            let student, reviewer;
-                            let studentQ = database('users').select('*')
-                                .where({
-                                    'users.id': submission.userId
-                                })
-                                .then((rows) => {
-                                    student = rows[0];
-                                    return Promise.resolve();
-                                });
+                                    })
+                                    .then(({ updateFields, submission }) => {
+                                        if (isAssigmentApproved) {
+                                            console.log('isAssigmentApproved');
+                                            this.checkDependencyCourses(request.userId).then((courses) => {
+                                                initialAvailableCourses = courses;
+                                                database('submissions')
+                                                    .update(updateFields)
+                                                    .where({ id: request.params.submissionId })
+                                                    .then((rows) => {
+                                                        this.checkDependencyCourses(request.userId).then((courses)=>{
+                                                            availableCoursesPostAssigmentApproval = courses;
+                                                            this.checkIfDependencyCourseUnlocked(initialAvailableCourses, availableCoursesPostAssigmentApproval, request.userId);
+                                                     /*  Finding the student and the reviewer details to send email
+                                                     * to them about the assignment review.
+                                                    */
+                                                    let student, reviewer;
+                                                    let studentQ = database('users').select('*')
+                                                        .where({
+                                                            'users.id': submission.userId
+                                                        })
+                                                        .then((rows) => {
+                                                            student = rows[0];
+                                                            return Promise.resolve();
+                                                        });
 
-                            let reviewerQ = database('users').select('*')
-                                .where({
-                                    'users.id': submission.userId
-                                })
-                                .then((rows) => {
-                                    reviewer = rows[0];
-                                    return Promise.resolve();
-                                });
+                                                    let reviewerQ = database('users').select('*')
+                                                        .where({
+                                                            'users.id': submission.userId
+                                                        })
+                                                        .then((rows) => {
+                                                            reviewer = rows[0];
+                                                            return Promise.resolve();
+                                                        });
 
-                            return Promise.all([studentQ, reviewerQ])
-                                .then(() => {
+                                                    return Promise.all([studentQ, reviewerQ])
+                                                        .then(() => {
+                                                            // send email for submission review completion
+                                                            return database('submissions')
+                                                                .select('exercises.courseId', 'exercises.slug',
+                                                                    'exercises.name')
+                                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                                .where({
+                                                                    'submissions.id': submission.id
+                                                                })
+                                                                .then((rows) => {
+                                                                    return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
+                                                                });
+                                                        });
+                                                        })
+                                                    }).then(() => {
+                                                        resolve({ 'success': true });
+                                                    });
 
-                                    // send email for submission review completion
-                                    return database('submissions')
-                                        .select('exercises.courseId', 'exercises.slug',
-                                            'exercises.name')
-                                        .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
-                                        .where({
-                                            'submissions.id': submission.id
-                                        })
-                                        .then((rows) => {
+                                            })
+                                        } else {
+                                            //console.log("i am end here in the right position : ", updateFields, submission);
 
-                                            return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
-                                        });
-                                });
+                                            // Updating the submission with the reviewers review.
+                                            database('submissions')
+                                                .update(updateFields)
+                                                .where({ id: request.params.submissionId })
+                                                .then((rows) => {
+                                                    /**
+                                                     *  Finding the student and the reviewer details to send email
+                                                     * to them about the assignment review.
+                                                    */
+                                                    let student, reviewer;
+                                                    let studentQ = database('users').select('*')
+                                                        .where({
+                                                            'users.id': submission.userId
+                                                        })
+                                                        .then((rows) => {
+                                                            student = rows[0];
+                                                            return Promise.resolve();
+                                                        });
+
+                                                    let reviewerQ = database('users').select('*')
+                                                        .where({
+                                                            'users.id': submission.userId
+                                                        })
+                                                        .then((rows) => {
+                                                            reviewer = rows[0];
+                                                            return Promise.resolve();
+                                                        });
+
+                                                    return Promise.all([studentQ, reviewerQ])
+                                                        .then(() => {
+                                                            // send email for submission review completion
+                                                            return database('submissions')
+                                                                .select('exercises.courseId', 'exercises.slug',
+                                                                    'exercises.name')
+                                                                .innerJoin('exercises', 'exercises.id', 'submissions.exerciseId')
+                                                                .where({
+                                                                    'submissions.id': submission.id
+                                                                })
+                                                                .then((rows) => {
+                                                                    return sendAssignmentReviewCompleteEmail(student, reviewer, rows[0]);
+                                                                });
+                                                        });
+                                                })
+                                                .then(() => {
+                                                    resolve({ 'success': true });
+                                                });
+
+                                        }
+
+                                    });
+                            }
+
                         })
-                        .then(() => {
-                            resolve({ 'success': true });
-                        });
-                });
+                })
+            // submitting the review of the submitted assiugnment
+
         });
     }
+
+    public checkDependencyCourses(userId) {
+        //let TotalExercisesPerCourseQ, exerciseCompeletedPerCourseQ, courseReliesOnQ, availableQ;
+        var availableCourses = [];
+        let mergedResult = {};
+        let totalExercisesPerCourse = [];
+        let exerciseCompeletedPerCourse = [];
+        let allAvailableCourses = [];
+        let courseReliesOn = [];
+        let courseConfig = Configs.getCourseConfigs();
+    
+    
+        return new Promise((resolve, reject) => {
+            database('courses')
+                .select('courses.id', 'courses.name', 'courses.type',
+                    'courses.logo', 'courses.shortDescription', 'courses.sequenceNum')
+                .where('courses.id', 'not in', database('courses').distinct()
+                    .select('courses.id')
+                    .join('course_enrolments', function () {
+                        this.on('courses.id', '=', 'course_enrolments.courseId')
+                            .andOn('course_enrolments.studentId', '=', userId);
+                    })
+                )
+                .then((rows) => {
+                    //allAvailableCourses = rows;
+                    mergedResult['allAvailableCourses'] = rows;
+                    return Promise.resolve(mergedResult);
+                }).then((mergedResult) => {
+                    database('exercises')
+                        .select('exercises.courseId',
+                            database.raw('COUNT(exercises.id) as totalExercises')).groupBy('exercises.courseId')
+                        .then((rows) => {
+                            //totalExercisesPerCourse = rows;
+                            mergedResult['totalExercisesPerCourse'] = rows;
+                            return Promise.resolve(mergedResult);
+                        }).then((mergedResult) => {
+                            database('exercises')
+                                .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'),
+                                    'exercises.courseId')
+                                .where('exercises.id', 'in', database('submissions')
+                                    .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
+                                    .andWhere('submissions.userId', '=', userId) //******replace 9 with request.userId*****//
+                                ).groupBy('exercises.courseId')
+                                .then((rows) => {
+    
+                                    mergedResult['exerciseCompeletedPerCourse'] = rows;
+                                    //exerciseCompeletedPerCourse = rows;
+                                    return Promise.resolve(mergedResult);
+                                }).then((mergedResult) => {
+                                    database('course_relation')
+                                        .select(
+                                            'course_relation.courseId', 'course_relation.reliesOn'
+                                        )
+                                        .then((rows) => {
+                                            //courseReliesOn = rows;
+                                            mergedResult['courseReliesOn'] = rows;
+                                            return Promise.resolve(mergedResult);
+                                        }).then((mergedResult) => {
+                                            //console.log('@@@@@@@@@@@@@@@@@@@ mergedResult @@@@@@@@');
+                                            //console.log(mergedResult);
+                                            //console.log('%%%%%%%%%%%%%%%%%%%%%%%mergedResult%%%%%%%%%%%%%%%%%%%5');
+                                            allAvailableCourses = mergedResult['allAvailableCourses'];
+                                            exerciseCompeletedPerCourse = mergedResult['exerciseCompeletedPerCourse'];
+                                            totalExercisesPerCourse = mergedResult['totalExercisesPerCourse'];
+                                            courseReliesOn = mergedResult['courseReliesOn'];
+                                            //console.log('availableCourses');
+                                            //console.log(availableCourses);
+                                            //console.log('availableCourses');
+                                            availableCourses = manipulateResultSet(totalExercisesPerCourse, exerciseCompeletedPerCourse, courseReliesOn,
+                                                allAvailableCourses, courseConfig.courseCompleteionCriteria);
+    
+                                            resolve(availableCourses);
+                                            //console.log('availableCourses');
+                                            //console.log(availableCourses);
+                                            //console.log('availableCourses');
+                                            //return Promise.resolve('abc');
+    
+                                        })
+                                })
+                        });
+                })
+        })
+    }
+
+    public checkIfDependencyCourseUnlocked(initialAvailableCourses, availableCoursesPostAssigmentApproval, userId){
+        let initialAvaiblecourseIDs = _.pluck(initialAvailableCourses, 'id');
+        // console.log('initial available courses');
+        // console.log(initialAvaiblecourseIDs);
+        // console.log('initial available courses');
+        let availableCoursesPostAssigmentApprovalIDs = _.pluck(availableCoursesPostAssigmentApproval, 'id');
+        // console.log('availableCoursesPostAssigmentApprovalIDs');
+        // console.log(availableCoursesPostAssigmentApprovalIDs);
+        // console.log('availableCoursesPostAssigmensstApprovalIDs');
+        let unlockedCourses = _.difference(availableCoursesPostAssigmentApprovalIDs,initialAvaiblecourseIDs);
+        unlockedCourses.length>0 ? this.ProcessEmailNotification(unlockedCourses, userId):null;
+        console.log('unlockedCourse');
+        console.log(unlockedCourses);
+        console.log('unlockedCourse');
+    
+
+    }
+
+    public ProcessEmailNotification(unlockedCourses, userId){
+        let student, courses;
+        let cousresQ = database('courses').select('name')
+        .whereIn(
+            'id', unlockedCourses
+        ).then((rows)=>{
+            courses = rows;
+            return Promise.resolve();
+        })
+
+        
+        let studentQ = database('users').select('*')
+            .where({
+                'users.id': userId
+            })
+            .then((rows) => {
+                student = rows[0];
+                return Promise.resolve();
+            });
+
+            Promise.all([cousresQ,studentQ]).then(()=>{
+                let coursesName = (_.pluck(courses, 'name')).toString();
+                sendCoursesUnlockedForUserEmail(student, coursesName) ;
+                console.log('coursesName');
+                console.log(coursesName);
+                console.log('coursesName');
+                
+            });
+
+    }
 }
+
+
+
+
