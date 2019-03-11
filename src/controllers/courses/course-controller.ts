@@ -1392,7 +1392,7 @@ export default class CourseController {
                         let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
                         allCenter = Array.from(locationSet);
                         console.log("---------------",allCenter); 
-                        return false;
+                       
                     return    database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
                             .innerJoin('users', 'users.id', 'mentors.mentor')
                             .where({
