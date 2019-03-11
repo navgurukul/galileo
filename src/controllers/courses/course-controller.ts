@@ -1426,7 +1426,7 @@ export default class CourseController {
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     const center = access.center;
-                    console.log(access);
+                    console.log("all accesss:",access);
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
 
 
@@ -1442,41 +1442,88 @@ export default class CourseController {
 
                         let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
                         allCenter = Array.from(locationSet);
+                        console.log("all center:",allCenter);
+                    let getMentorMenteeQuery=    database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
+                        .innerJoin('users', 'users.id', 'mentors.mentor')
+                        .where({
+
+                            'mentors.mentee': menteeId
+                        }).andWhere(function () {
+
+                            if (mentorId !== undefined)
+                                this.where({ 'mentors.mentor': mentorId })
+                        }).andWhere(function () {
+
+                            if (mentorEmail !== undefined)
+                                this.where({ 'users.email': mentorEmail })
+                        })
                         
-                    return    database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
-                            .innerJoin('users', 'users.id', 'mentors.mentor')
-                            .where({
+                        
+                        getMentorMenteeQuery .then((rows) => {
+                            // if the course for given id doesn't exist
+                            if (rows.length < 1) {
+                                reject(Boom.expectationFailed(`You are not allowed to delete `));
+                                return Promise.reject("Rejected");
+                            } else {
 
-                                'mentors.mentee': menteeId
-                            }).andWhere(function () {
+                              return  getMentorMenteeQuery.andWhere(function () {
 
-                                if (mentorId !== undefined)
-                                    this.where({ 'mentors.mentor': mentorId })
-                            }).andWhere(function () {
+                                    if (allCenter.indexOf("all")==-1)
+                                        this.whereIn('users.center',allCenter)
+                                })
+                              . then((centerWiseRows) => {
 
-                                if (mentorEmail !== undefined)
-                                    this.where({ 'users.email': mentorEmail })
-                            }).andWhere(function () {
+                                  //  console.log("data i received:", centerWiseRows);
+                                    // if the course for given id doesn't exist
+                                    if (centerWiseRows.length < 1) {
+                                        reject(Boom.expectationFailed(`You are not allowed to delete because of location `));
+                                        return Promise.reject("Rejected");
+                                    } else {
+    
+                                        return centerWiseRows;
+                                        return Promise.resolve(centerWiseRows[0]);
+                                    }
+                                });
+                               
+                            }
+                        });
 
-                                if (allCenter.indexOf("all")==-1)
-                                    this.whereIn('users.center',allCenter)
-                            }).then((rows) => {
-                                // if the course for given id doesn't exist
-                                if (rows.length < 1) {
-                                    reject(Boom.expectationFailed(`You are not allowed to delete `));
-                                    return Promise.reject("Rejected");
-                                } else {
+
+                    // return   database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
+                    //         .innerJoin('users', 'users.id', 'mentors.mentor')
+                    //         .where({
+
+                    //             'mentors.mentee': menteeId
+                    //         }).andWhere(function () {
+
+                    //             if (mentorId !== undefined)
+                    //                 this.where({ 'mentors.mentor': mentorId })
+                    //         }).andWhere(function () {
+
+                    //             if (mentorEmail !== undefined)
+                    //                 this.where({ 'users.email': mentorEmail })
+                    //         }).andWhere(function () {
+
+                    //             if (allCenter.indexOf("all")==-1)
+                    //                 this.whereIn('users.center',allCenter)
+                    //         }).then((rows) => {
+                    //             // if the course for given id doesn't exist
+                    //             if (rows.length < 1) {
+                    //                 reject(Boom.expectationFailed(`You are not allowed to delete `));
+                    //                 return Promise.reject("Rejected");
+                    //             } else {
 
 
-                                    return Promise.resolve(rows[0]);
-                                }
-                            });
+                    //                 return Promise.resolve(rows[0]);
+                    //             }
+                    //         });
                     } else {
                         reject(Boom.expectationFailed(` ${userRole} are not allowed to delete the mentors and mentee.`));
                         return Promise.reject("Rejected");
                     }
                 }).then((mentors) => {
-
+                    console.log("i am getting right data",mentors);
+                    return false;
                     // after all that deleting delete the course
                     database('mentors')
                         .where({ id: mentors.mentorsId }).delete()

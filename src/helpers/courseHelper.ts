@@ -111,10 +111,6 @@ export const addingRootNode = function (rootArray, ChildArray) {
         }
     }
 
-
-
-
-
     return rootArray;
 }
 
