@@ -99,16 +99,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     uploadImage:Joi.string().allow(null)
                 },
                 failAction: async (request, h, err) => {
-                    if (process.env.NODE_ENV === 'production') {
-                      // In prod, log a limited error message and throw the default Bad Request error.
-                      console.error('ValidationError:', err.message);
-                      throw Boom.badRequest(`Invalid request payload input`);
-                    } else {
-                      // During development, log and respond with the full error.
-                      console.error(err.message);
-                     // throw err;
+                  
                       throw Boom.badRequest(err.message);
-                    }
+                    
                   }
 
             },
@@ -118,13 +111,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "user": userSchema
                 }),
                 failAction: async (request, h, err) => {
-                    if (process.env.NODE_ENV === 'production') {
-                      // In prod, log a limited error message and throw the default Bad Request error.
-                      console.error('ValidationError:', err.message);
-                      throw Boom.badRequest(`Invalid request payload input`);
-                    } else {
-                      // During development, log and respond with the full error.
-                      console.error(err);
+                  
                      
                      return h.response({
                         "statusCode": 422,
@@ -132,7 +119,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                         "message": err.message
                     }).code(422)
                       
-                    }
+                   
                   }
             },
             plugins: {
