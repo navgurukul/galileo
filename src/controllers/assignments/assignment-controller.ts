@@ -553,8 +553,6 @@ export default class AssignmentController {
 
                         });
 
-
-
                 })
                 .then(({ updateFields, submission }) => {
 

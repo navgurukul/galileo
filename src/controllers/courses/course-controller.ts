@@ -156,17 +156,20 @@ export default class CourseController {
                   /* **get the exercises completed in each course by the given user ** */      
                 exerciseCompeletedPerCourseQ =
                         database('exercises')
-                            .select(database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
-                            'exercises.courseId')
+                            .select(
+                                database.raw('COUNT(exercises.id) as totalExercisesCompleted'), 
+                                'exercises.courseId'
+                            )
                             .where('exercises.id', 'in', database('submissions')
-                            .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
-                            .andWhere('submissions.userId', '=', request.userId)
+                                        .select('submissions.exerciseId')
+                                        .where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
+                                        .andWhere('submissions.userId', '=', 1))
+
                             .groupBy('exercises.courseId')
                             .then((rows) => {
                                 exerciseCompeletedPerCourse = rows;
                                 return Promise.resolve();
                             });
-                            
                     /* **get the course dependeny list ** */              
                 courseReliesOnQ =
                             database('course_relation')
@@ -1140,10 +1143,7 @@ export default class CourseController {
 
 
         return new Promise((resolve, reject) => {
-            // resolve(request);
-            //  return false;
-
-          database('user_roles').select('roles')
+            database('user_roles').select('roles')
                 .where({
                     'userId': request.userId
                 })

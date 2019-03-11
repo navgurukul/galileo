@@ -406,7 +406,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "deleted": Joi.bool()
                 }
             },
-             auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteMentorMentee
         }
@@ -424,7 +424,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     mentorEmail: Joi.string().email().allow(null),
                     menteeId: Joi.number()
                 }
-               
 
             },
             response: {
@@ -432,7 +431,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "deleted": Joi.bool()
                 }
             },
-             auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteMentorMenteeByidOrEmail
         }
