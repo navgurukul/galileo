@@ -16,6 +16,9 @@ import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
 
+
+
+
 export default class CourseController {
     private configs: IServerConfigurations;
     private database: any;
@@ -87,7 +90,7 @@ export default class CourseController {
                         "=",
                         "courses.id"
                     )
-                    .innerJoin("exercises", function() {
+                    .innerJoin("exercises", function () {
                         // count only those exercises which have submissionType != null
                         this.on(
                             "course_enrolments.courseId",
@@ -95,7 +98,7 @@ export default class CourseController {
                             "exercises.courseId"
                         );
                     })
-                    .leftJoin("submissions", function() {
+                    .leftJoin("submissions", function () {
                         this.on("submissions.userId", "=", request.userId)
                             .andOn(
                                 "submissions.exerciseId",
@@ -197,7 +200,7 @@ export default class CourseController {
                         database("courses")
                             .distinct()
                             .select("courses.id")
-                            .join("course_enrolments", function() {
+                            .join("course_enrolments", function () {
                                 this.on(
                                     "courses.id",
                                     "=",
@@ -388,7 +391,7 @@ export default class CourseController {
                         "submissions.completedAt as submissionCompleteAt",
                         "submissions.userId"
                     )
-                    .leftJoin("submissions", function() {
+                    .leftJoin("submissions", function () {
                         this.on("submissions.id", "=", knex.raw(xyz)).on(
                             "submissions.userId",
                             "=",
@@ -519,7 +522,7 @@ export default class CourseController {
                         "submissions.id as submissionId",
                         "submissions.completedAt as submissionCompleteAt"
                     )
-                    .leftJoin("submissions", function() {
+                    .leftJoin("submissions", function () {
                         this.on("submissions.id", "=", database.raw(xyz));
                     })
                     .where({ "exercises.slug": request.query.slug });
@@ -536,7 +539,7 @@ export default class CourseController {
                                 "=",
                                 "users.id"
                             )
-                            .innerJoin("exercises", function() {
+                            .innerJoin("exercises", function () {
                                 this.on(
                                     "exercises.id",
                                     "=",
@@ -584,7 +587,7 @@ export default class CourseController {
             database("courses")
                 .select("notes")
                 .where("id", request.params.courseId)
-                .then(function(rows) {
+                .then(function (rows) {
                     let notes = rows[0].notes;
                     resolve({ notes: notes });
                 });
@@ -769,7 +772,7 @@ export default class CourseController {
                                             reject(
                                                 Boom.expectationFailed(
                                                     `No courses found for the given Id: ${
-                                                        coursesData[i].id
+                                                    coursesData[i].id
                                                     }.`
                                                 )
                                             );
@@ -800,7 +803,7 @@ export default class CourseController {
                             reject(
                                 Boom.expectationFailed(
                                     "Minimum 2 courses are required " +
-                                        "to change their sequence number."
+                                    "to change their sequence number."
                                 )
                             );
                         }
@@ -927,7 +930,7 @@ export default class CourseController {
                         reject(
                             Boom.expectationFailed(
                                 "The menteeId is " +
-                                    "invalid no student exist with the given menteeId."
+                                "invalid no student exist with the given menteeId."
                             )
                         );
                         return Promise.reject("Rejected");
@@ -1029,7 +1032,7 @@ export default class CourseController {
                                 reject(
                                     Boom.expectationFailed(
                                         "The student have already " +
-                                            "completed the course."
+                                        "completed the course."
                                     )
                                 );
                                 return Promise.reject("Rejected");
@@ -1214,33 +1217,23 @@ export default class CourseController {
                 .where({
                     userId: request.userId
                 })
-                .whereIn("center", [request.query.centerId, "all"])
+                .whereIn(
+                    'center', [request.query.centerId, 'all']
+                )
 
-                .then(rows => {
+                .then((rows) => {
+
                     const access = getUserRoles(rows);
-                    const isAdmin =
-                        rows.length > 0 && access.isAdmin === true
-                            ? true
-                            : false;
-                    const isFacilitator =
-                        rows.length > 0 && access.isFacilitator === true
-                            ? true
-                            : false;
-                    const isTnp =
-                        rows.length > 0 && access.isTnp === true ? true : false;
-                    const userRole =
-                        rows.length > 0 && access.roles !== undefined
-                            ? access.roles
-                            : false;
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
-                    return Promise.resolve({
-                        isAdmin,
-                        isFacilitator,
-                        isTnp,
-                        userRole
-                    });
-                })
-                .then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
                         database("users")
@@ -1265,7 +1258,7 @@ export default class CourseController {
                             .where({
                                 "user_roles.roles": 3
                             })
-                            .andWhere(function() {
+                            .andWhere(function () {
                                 if (
                                     request.query.centerId &&
                                     request.query.centerId.length > 0
@@ -1311,32 +1304,21 @@ export default class CourseController {
                 .where({
                     userId: request.userId
                 })
-                .whereIn("center", [request.query.centerId, "all"])
-                .then(rows => {
+                .whereIn(
+                    'center', [request.query.centerId, 'all']
+                )
+                .then((rows) => {
                     const access = getUserRoles(rows);
-                    const isAdmin =
-                        rows.length > 0 && access.isAdmin === true
-                            ? true
-                            : false;
-                    const isFacilitator =
-                        rows.length > 0 && access.isFacilitator === true
-                            ? true
-                            : false;
-                    const isTnp =
-                        rows.length > 0 && access.isTnp === true ? true : false;
-                    const userRole =
-                        rows.length > 0 && access.roles !== undefined
-                            ? access.roles
-                            : false;
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
-                    return Promise.resolve({
-                        isAdmin,
-                        isFacilitator,
-                        isTnp,
-                        userRole
-                    });
-                })
-                .then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
                         database("users")
@@ -1364,7 +1346,7 @@ export default class CourseController {
                                 "mentors.mentor": request.params.mentorId
                             })
 
-                            .andWhere(function() {
+                            .andWhere(function () {
                                 if (
                                     request.query.centerId &&
                                     request.query.centerId.length > 0
@@ -1408,32 +1390,20 @@ export default class CourseController {
                 .where({
                     userId: request.userId
                 })
-                .whereIn("center", [request.query.centerId, "all"])
-                .then(rows => {
-                    const access = getUserRoles(rows);
-                    const isAdmin =
-                        rows.length > 0 && access.isAdmin === true
-                            ? true
-                            : false;
-                    const isFacilitator =
-                        rows.length > 0 && access.isFacilitator === true
-                            ? true
-                            : false;
-                    const isTnp =
-                        rows.length > 0 && access.isTnp === true ? true : false;
-                    const userRole =
-                        rows.length > 0 && access.roles !== undefined
-                            ? access.roles
-                            : false;
+                .whereIn(
+                    'center', [request.query.centerId, 'all']
+                ).then((rows) => {
 
-                    return Promise.resolve({
-                        isAdmin,
-                        isFacilitator,
-                        isTnp,
-                        userRole
-                    });
-                })
-                .then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                    const access = getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
+
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
                     console.log(isAdmin, isFacilitator, isTnp, userRole);
                     // only admin facilitator or tnp  are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
@@ -1444,7 +1414,7 @@ export default class CourseController {
                         let subquery = database("users")
                             .select("mentors.mentee")
                             .innerJoin("mentors", "users.id", "mentors.mentor")
-                            .andWhere(function() {
+                            .andWhere(function () {
                                 if (
                                     request.query.centerId &&
                                     request.query.centerId.length > 0
@@ -1468,7 +1438,7 @@ export default class CourseController {
 
                             // })
 
-                            .andWhere(function() {
+                            .andWhere(function () {
                                 if (
                                     request.query.centerId &&
                                     request.query.centerId.length > 0
@@ -1526,7 +1496,7 @@ export default class CourseController {
 
                             // })
 
-                            .andWhere(function() {
+                            .andWhere(function () {
                                 if (
                                     request.query.centerId &&
                                     request.query.centerId.length > 0
@@ -1588,31 +1558,19 @@ export default class CourseController {
                     userId: request.userId
                 })
 
-                .then(rows => {
-                    const access = getUserRoles(rows);
-                    const isAdmin =
-                        rows.length > 0 && access.isAdmin === true
-                            ? true
-                            : false;
-                    const isFacilitator =
-                        rows.length > 0 && access.isFacilitator === true
-                            ? true
-                            : false;
-                    const isTnp =
-                        rows.length > 0 && access.isTnp === true ? true : false;
-                    const userRole =
-                        rows.length > 0 && access.roles !== undefined
-                            ? access.roles
-                            : false;
 
-                    return Promise.resolve({
-                        isAdmin,
-                        isFacilitator,
-                        isTnp,
-                        userRole
-                    });
-                })
-                .then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+                .then((rows) => {
+                    const access = getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
+
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
                         const mentorId = request.params.mentorId;
@@ -1709,10 +1667,16 @@ export default class CourseController {
                                 database("mentors")
                                     .where({ id: mentors.id })
                                     .delete()
-                                    .then(() => {
-                                        resolve({
-                                            deleted: true
-                                        });
+                                    .then((data) => {
+
+                                        if (data) {
+                                            resolve({
+                                                deleted: true
+                                            });
+                                        } else {
+                                            reject(Boom.expectationFailed(`There was an error during delete operation `));
+                                            return Promise.reject("Rejected");
+                                        }
                                     });
                             });
                     } else {
@@ -1734,92 +1698,156 @@ export default class CourseController {
      */
     public deleteMentorMenteeByidOrEmail(request, h) {
         return new Promise((resolve, reject) => {
-            database("user_roles")
-                .select("roles", "center")
+
+            database('user_roles').select('roles', 'center')
                 .where({
-                    userId: request.userId
-                })
-                .then(rows => {
+                    'userId': request.userId
+                }).then((rows) => {
                     let access = getUserRoles(rows);
-                    const isAdmin =
-                        rows.length > 0 && access.isAdmin === true
-                            ? true
-                            : false;
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
 
-                    const isFacilitator =
-                        rows.length > 0 && access.isFacilitator === true
-                            ? true
-                            : false;
-                    const isTnp =
-                        rows.length > 0 && access.isTnp === true ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
 
-                    const userRole =
-                        rows.length > 0 && access.roles !== undefined
-                            ? access.roles
-                            : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     const center = access.center;
-                    console.log(access);
-                    return Promise.resolve({
-                        isAdmin,
-                        isFacilitator,
-                        isTnp,
-                        userRole,
-                        center
-                    });
-                })
-                .then(({ isAdmin, isFacilitator, isTnp, userRole, center }) => {
+                    console.log("all accesss:", access);
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole, center }) => {
+
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
+
                         const mentorId = request.payload.mentorId;
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
-                        let allCenter = [];
+                        let mentorExist = false, menteeExist = false;
 
-                        let locationSet = new Set(
-                            allCenter.concat(
-                                center.isAdmin,
-                                center.isFacilitator,
-                                center.isTnp
-                            )
-                        );
-                        allCenter = Array.from(locationSet);
-                        console.log("---------------", allCenter);
-                      
-                        return database("mentors")
-                            .select(
-                                "mentors.id as mentorsId",
-                                "users.id as userID"
-                            )
-                            .innerJoin("users", "users.id", "mentors.mentor")
+                        let mentor = database('mentors').select('*')
                             .where({
-                                "mentors.mentee": menteeId
-                            })
-                            .andWhere(function() {
-                                if (mentorId !== undefined)
-                                    this.where({ "mentors.mentor": mentorId });
-                            })
-                            .andWhere(function() {
-                                if (mentorEmail !== undefined)
-                                    this.where({ "users.email": mentorEmail });
-                            })
-                            .andWhere(function() {
-                                if (allCenter.indexOf("all") == -1)
-                                    this.whereIn("users.center", allCenter);
-                            })
-                            .then(rows => {
-                                // if the course for given id doesn't exist
+                                'mentor': mentorId,
+
+                            }).then((rows) => {
                                 if (rows.length < 1) {
-                                    reject(
-                                        Boom.expectationFailed(
-                                            `You are not allowed to delete `
-                                        )
-                                    );
-                                    return Promise.reject("Rejected");
+                                    // reject(Boom.expectationFailed(` This mentor doesn't exists.`));
+                                    //return Promise.reject("Rejected");
+
+                                    return Promise.resolve(mentorExist);
                                 } else {
-                                    return Promise.resolve(rows[0]);
+
+                                    mentorExist = true;
+                                    return Promise.resolve(mentorExist);
                                 }
                             });
+
+                        let mentee = database('mentors').select('*')
+                            .where({
+                                'mentee': menteeId
+
+                            }).then((rows) => {
+                                if (rows.length < 1) {
+                                    //  reject(Boom.expectationFailed(` This mentee doesn't exists.`));
+                                    //return Promise.reject("Rejected");
+
+                                    return Promise.resolve(menteeExist);
+                                } else {
+
+                                    menteeExist = true;
+                                    return Promise.resolve(menteeExist);
+
+                                }
+                            });
+
+                        Promise.all([mentor, mentee]).then(() => {
+
+                            if (mentorExist && menteeExist) {
+
+                                let allCenter = [];
+
+                                let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
+                                allCenter = Array.from(locationSet);
+                                console.log("all center:", allCenter);
+                                let getMentorMenteeQuery = database('mentors').select('mentors.id as mentorsTableId', 'users.id as userID')
+                                    .innerJoin('users', 'users.id', 'mentors.mentor')
+                                    .where({
+
+                                        'mentors.mentee': menteeId
+                                    }).andWhere(function () {
+
+                                        if (mentorId !== undefined)
+                                            this.where({ 'mentors.mentor': mentorId })
+                                    }).andWhere(function () {
+
+                                        if (mentorEmail !== undefined)
+                                            this.where({ 'users.email': mentorEmail })
+                                    })
+
+
+                                getMentorMenteeQuery.then((rows) => {
+                                    // if the course for given id doesn't exist
+                                    if (rows.length < 1) {
+                                        reject(Boom.expectationFailed(` The mentorId  is not the mentor of the menteeId.`));
+                                        return Promise.reject("Rejected");
+                                    } else {
+
+                                        getMentorMenteeQuery.andWhere(function () {
+
+                                            if (allCenter.indexOf("all") == -1)
+                                                this.whereIn('users.center', allCenter)
+                                        }).then((mentors) => {
+
+                                            //  console.log("data i received:", centerWiseRows);
+                                            // if the course for given id doesn't exist
+                                            if (mentors.length < 1) {
+                                                reject(Boom.expectationFailed(`You are not allowed to delete record for this location `));
+                                                return Promise.reject("Rejected");
+                                            } else {
+
+
+                                                // after all that deleting delete the course
+                                                database('mentors')
+                                                    .where({ id: mentors[0].mentorsTableId }).delete()
+                                                    .then((data) => {
+
+                                                        if (data) {
+                                                            resolve({
+                                                                deleted: true
+                                                            });
+                                                        } else {
+                                                            reject(Boom.expectationFailed(`There was an error during delete operation `));
+                                                            return Promise.reject("Rejected");
+                                                        }
+
+                                                    });
+                                            }
+                                        });
+
+                                    }
+                                });
+
+
+
+
+
+                            } else if (mentorExist && !menteeExist) {
+                                reject(Boom.expectationFailed(` The menteeId doesn't have any mentor.`));
+                                return Promise.reject("Rejected");
+
+
+                            } else if (!mentorExist && menteeExist) {
+                                reject(Boom.expectationFailed(` The mentorId is not a mentor.`));
+                                return Promise.reject("Rejected");
+
+
+                            } else {
+                                reject(Boom.expectationFailed(` MentorId and menteeId both doesn't exist in the platform.`));
+                                return Promise.reject("Rejected");
+                            }
+                        });
+
                     } else {
                         reject(
                             Boom.expectationFailed(
@@ -1829,17 +1857,6 @@ export default class CourseController {
                         return Promise.reject("Rejected");
                     }
                 })
-                .then(mentors => {
-                    // after all that deleting delete the course
-                    database("mentors")
-                        .where({ id: mentors.mentorsId })
-                        .delete()
-                        .then(() => {
-                            resolve({
-                                deleted: true
-                            });
-                        });
-                });
         });
     }
 }
