@@ -650,7 +650,7 @@ export default class AssignmentController {
                         return Promise.reject("Rejected");
                     }
                     let submission = rows[0];
-                    console.log('submission', submission, 'submission' );
+                    //console.log('submission', submission, 'submission' );
                     // submissions once reviewed shouldn't be reviewed again.
                     return Promise.resolve(submission);
                 })
@@ -658,7 +658,7 @@ export default class AssignmentController {
                     database('exercises').select('courseId').where({'exercises.id': submission.exerciseId}).then((rows)=>{
 
                         courseId = rows[0].courseId;
-                        console.log('courseId1', courseId, 'courseId1' );
+                        //console.log('courseId1', courseId, 'courseId1' );
                         return Promise.resolve(courseId);
                     }).then(courseId => {
                         console.log('arguments', request.userId, courseId), 'arguments';
@@ -690,7 +690,13 @@ export default class AssignmentController {
                             .then(response => {
                                 if (response.isAlreadyEnrolled) {
                                     database("submissions")
-                                        .select("*")
+                                        .select("submissions.id",
+                                        "submissions.userId",
+                                        "submissions.state",
+                                        "submissions.peerReviewerId",
+                                        "submissions.Id",
+                                        "mentors.mentor",
+                                        "users.center")
                                         .leftJoin("mentors", "userId", "mentee")
                                         .innerJoin(
                                             "users",
@@ -705,7 +711,9 @@ export default class AssignmentController {
                                             //moved the check for validaity of submission Id to top section
 
                                              let submission = rows[0];
-
+                                            console.log('submission sss');
+                                            console.log(submission);
+                                            console.log('submission sss');
                                             // submissions once reviewed shouldn't be reviewed again.
                                             if (submission.state !== "pending") {
                                                 reject(
@@ -718,6 +726,9 @@ export default class AssignmentController {
                                             return Promise.resolve(submission);
                                         })
                                         .then(submission => {
+                                            console.log('submission aaaaaaaaaaaaaaaaa');
+                                            console.log(submission);
+                                            console.log('submission aaaaaaaaaaaaaaaaaaaaaaa');
                                             let updateFields = {
                                                 notesReviewer: request.payload.notes
                                             };
@@ -789,7 +800,7 @@ export default class AssignmentController {
                                         })
                                         .then(({ updateFields, submission }) => {
                                             if (isAssigmentApproved) {
-                                                console.log("isAssigmentApproved");
+                                                //console.log("isAssigmentApproved");
                                                 this.checkDependencyCourses(
                                                     request.userId
                                                 ).then(courses => {
@@ -1132,9 +1143,9 @@ export default class AssignmentController {
         unlockedCourses.length > 0
             ? this.ProcessEmailNotification(unlockedCourses, userId)
             : null;
-        console.log("unlockedCourse");
-        console.log(unlockedCourses);
-        console.log("unlockedCourse");
+        //console.log("unlockedCourse");
+        //console.log(unlockedCourses);
+        //console.log("unlockedCourse");
     }
 
     public ProcessEmailNotification(unlockedCourses, userId) {
