@@ -7,6 +7,8 @@ import { getIsSolutionAvailable, listToTree, addingRootNode, getUserRoles } from
 import { manipulateResultSet } from '../../helpers/courseHelper';
 import { IServerConfigurations } from '../../configurations/index';
 import * as Configs from "../../configurations";
+import { promises } from 'fs';
+import { resolve } from 'url';
 var _ = require('underscore');
 
 
@@ -161,11 +163,11 @@ export default class CourseController {
                         .where('exercises.id', 'in', database('submissions')
                             .select('submissions.exerciseId').where({ 'submissions.completed': 1 })// ****change this with the enum value*****// 
                             .andWhere('submissions.userId', '=', request.userId))
-                            .groupBy('exercises.courseId')
-                            .then((rows) => {
-                                exerciseCompeletedPerCourse = rows;
-                                return Promise.resolve();
-                            });
+                        .groupBy('exercises.courseId')
+                        .then((rows) => {
+                            exerciseCompeletedPerCourse = rows;
+                            return Promise.resolve();
+                        });
 
                 /* **get the course dependeny list ** */
                 courseReliesOnQ =
@@ -1012,7 +1014,7 @@ export default class CourseController {
 
                 .then((rows) => {
 
-                    const access=getUserRoles(rows);
+                    const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
@@ -1079,7 +1081,7 @@ export default class CourseController {
                     'center', [request.query.centerId, 'all']
                 )
                 .then((rows) => {
-                    const access=getUserRoles(rows);
+                    const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
@@ -1148,7 +1150,7 @@ export default class CourseController {
                     'center', [request.query.centerId, 'all']
                 ).then((rows) => {
 
-                    const access=getUserRoles(rows);
+                    const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
@@ -1283,7 +1285,7 @@ export default class CourseController {
 
 
                 .then((rows) => {
-                    const access=getUserRoles(rows);
+                    const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
@@ -1381,10 +1383,16 @@ export default class CourseController {
                             // after all that deleting delete the course
                             database('mentors')
                                 .where({ id: mentors.id }).delete()
-                                .then(() => {
-                                    resolve({
-                                        deleted: true
-                                    });
+                                .then((data) => {
+
+                                    if (data) {
+                                        resolve({
+                                            deleted: true
+                                        });
+                                    } else {
+                                        reject(Boom.expectationFailed(`There was an error during delete operation `));
+                                        return Promise.reject("Rejected");
+                                    }
                                 });
                         });
 
@@ -1409,15 +1417,11 @@ export default class CourseController {
 
         return new Promise((resolve, reject) => {
 
-           let p= database('user_roles').select('roles', 'center')
+            database('user_roles').select('roles', 'center')
                 .where({
                     'userId': request.userId
-                });
-               // console.log(p.toString());
-                
-                
-               p .then((rows) => {
-                    let access=getUserRoles(rows);
+                }).then((rows) => {
+                    let access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
 
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
@@ -1426,7 +1430,7 @@ export default class CourseController {
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     const center = access.center;
-                    console.log("all accesss:",access);
+                    console.log("all accesss:", access);
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
 
 
@@ -1434,105 +1438,139 @@ export default class CourseController {
 
                     // only admin are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
-                       
+
                         const mentorId = request.payload.mentorId;
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
-                        let allCenter = [];
+                        let mentorExist = false, menteeExist = false;
 
-                        let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
-                        allCenter = Array.from(locationSet);
-                        console.log("all center:",allCenter);
-                    let getMentorMenteeQuery=    database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
-                        .innerJoin('users', 'users.id', 'mentors.mentor')
-                        .where({
+                        let mentor = database('mentors').select('*')
+                            .where({
+                                'mentor': mentorId,
 
-                            'mentors.mentee': menteeId
-                        }).andWhere(function () {
+                            }).then((rows) => {
+                                if (rows.length < 1) {
+                                    // reject(Boom.expectationFailed(` This mentor doesn't exists.`));
+                                    //return Promise.reject("Rejected");
 
-                            if (mentorId !== undefined)
-                                this.where({ 'mentors.mentor': mentorId })
-                        }).andWhere(function () {
+                                    return Promise.resolve(mentorExist);
+                                } else {
 
-                            if (mentorEmail !== undefined)
-                                this.where({ 'users.email': mentorEmail })
-                        })
-                        
-                        
-                        getMentorMenteeQuery .then((rows) => {
-                            // if the course for given id doesn't exist
-                            if (rows.length < 1) {
-                                reject(Boom.expectationFailed(`You are not allowed to delete `));
-                                return Promise.reject("Rejected");
-                            } else {
+                                    mentorExist = true;
+                                    return Promise.resolve(mentorExist);
+                                }
+                            });
 
-                              return  getMentorMenteeQuery.andWhere(function () {
+                        let mentee = database('mentors').select('*')
+                            .where({
+                                'mentee': menteeId
 
-                                    if (allCenter.indexOf("all")==-1)
-                                        this.whereIn('users.center',allCenter)
-                                })
-                              . then((centerWiseRows) => {
+                            }).then((rows) => {
+                                if (rows.length < 1) {
+                                    //  reject(Boom.expectationFailed(` This mentee doesn't exists.`));
+                                    //return Promise.reject("Rejected");
 
-                                  //  console.log("data i received:", centerWiseRows);
+                                    return Promise.resolve(menteeExist);
+                                } else {
+
+                                    menteeExist = true;
+                                    return Promise.resolve(menteeExist);
+
+                                }
+                            });
+
+                        Promise.all([mentor, mentee]).then(() => {
+
+                            if (mentorExist && menteeExist) {
+
+                                let allCenter = [];
+
+                                let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
+                                allCenter = Array.from(locationSet);
+                                console.log("all center:", allCenter);
+                                let getMentorMenteeQuery = database('mentors').select('mentors.id as mentorsTableId', 'users.id as userID')
+                                    .innerJoin('users', 'users.id', 'mentors.mentor')
+                                    .where({
+
+                                        'mentors.mentee': menteeId
+                                    }).andWhere(function () {
+
+                                        if (mentorId !== undefined)
+                                            this.where({ 'mentors.mentor': mentorId })
+                                    }).andWhere(function () {
+
+                                        if (mentorEmail !== undefined)
+                                            this.where({ 'users.email': mentorEmail })
+                                    })
+
+
+                                getMentorMenteeQuery.then((rows) => {
                                     // if the course for given id doesn't exist
-                                    if (centerWiseRows.length < 1) {
-                                        reject(Boom.expectationFailed(`You are not allowed to delete because of location `));
+                                    if (rows.length < 1) {
+                                        reject(Boom.expectationFailed(` The mentorId  is not the mentor of the menteeId.`));
                                         return Promise.reject("Rejected");
                                     } else {
-    
-                                        return centerWiseRows;
-                                        return Promise.resolve(centerWiseRows[0]);
+
+                                        getMentorMenteeQuery.andWhere(function () {
+
+                                            if (allCenter.indexOf("all") == -1)
+                                                this.whereIn('users.center', allCenter)
+                                        }).then((mentors) => {
+
+                                            //  console.log("data i received:", centerWiseRows);
+                                            // if the course for given id doesn't exist
+                                            if (mentors.length < 1) {
+                                                reject(Boom.expectationFailed(`You are not allowed to delete record for this location `));
+                                                return Promise.reject("Rejected");
+                                            } else {
+
+
+                                                // after all that deleting delete the course
+                                                database('mentors')
+                                                    .where({ id: mentors[0].mentorsTableId }).delete()
+                                                    .then((data) => {
+
+                                                        if (data) {
+                                                            resolve({
+                                                                deleted: true
+                                                            });
+                                                        } else {
+                                                            reject(Boom.expectationFailed(`There was an error during delete operation `));
+                                                            return Promise.reject("Rejected");
+                                                        }
+
+                                                    });
+                                            }
+                                        });
+
                                     }
                                 });
-                               
+
+
+
+
+
+                            } else if (mentorExist && !menteeExist) {
+                                reject(Boom.expectationFailed(` The menteeId doesn't have any mentor.`));
+                                return Promise.reject("Rejected");
+
+
+                            } else if (!mentorExist && menteeExist) {
+                                reject(Boom.expectationFailed(` The mentorId is not a mentor.`));
+                                return Promise.reject("Rejected");
+
+
+                            } else {
+                                reject(Boom.expectationFailed(` MentorId and menteeId both doesn't exist in the platform.`));
+                                return Promise.reject("Rejected");
                             }
                         });
 
-
-                    // return   database('mentors').select('mentors.id as mentorsId', 'users.id as userID')
-                    //         .innerJoin('users', 'users.id', 'mentors.mentor')
-                    //         .where({
-
-                    //             'mentors.mentee': menteeId
-                    //         }).andWhere(function () {
-
-                    //             if (mentorId !== undefined)
-                    //                 this.where({ 'mentors.mentor': mentorId })
-                    //         }).andWhere(function () {
-
-                    //             if (mentorEmail !== undefined)
-                    //                 this.where({ 'users.email': mentorEmail })
-                    //         }).andWhere(function () {
-
-                    //             if (allCenter.indexOf("all")==-1)
-                    //                 this.whereIn('users.center',allCenter)
-                    //         }).then((rows) => {
-                    //             // if the course for given id doesn't exist
-                    //             if (rows.length < 1) {
-                    //                 reject(Boom.expectationFailed(`You are not allowed to delete `));
-                    //                 return Promise.reject("Rejected");
-                    //             } else {
-
-
-                    //                 return Promise.resolve(rows[0]);
-                    //             }
-                    //         });
                     } else {
                         reject(Boom.expectationFailed(` ${userRole} are not allowed to delete the mentors and mentee.`));
                         return Promise.reject("Rejected");
                     }
-                }).then((mentors) => {
-                    console.log("i am getting right data",mentors);
-                    return false;
-                    // after all that deleting delete the course
-                    database('mentors')
-                        .where({ id: mentors.mentorsId }).delete()
-                        .then(() => {
-                            resolve({
-                                deleted: true
-                            });
-                        });
-                });
+                })
         });
     }
 
