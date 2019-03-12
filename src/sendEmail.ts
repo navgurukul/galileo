@@ -106,6 +106,7 @@ export const sendAssignmentReviewPendingEmail = (student:User, reviewer:User, su
 
 
 export const sendAssignmentReviewCompleteEmail = (student:User, reviewer:User, exerciseDetail: ExerciseDetail) => {
+  console.log('sendAssignmentReviewCompleteEmail', student, exerciseDetail, 'sendAssignmentReviewCompleteEmail');
     let emailTemplate = `
       <div>
         <h5>
@@ -130,12 +131,11 @@ export const sendAssignmentReviewCompleteEmail = (student:User, reviewer:User, e
 };
 
 export const sendCoursesUnlockedForUserEmail = (student:User, courses) => {
-  console.log('insid sendCoursesUnlockedForUserEmail');
+  //console.log('insid sendCoursesUnlockedForUserEmail', courses);
   let emailTemplate = `
     <div>
       <h5>
         Hi ${student.name}, ab aap ${courses} mein enroll kar sakte hain <br />
-        Aap apna assignment ka feedback
       </h5>
     </div>
   `;

@@ -631,6 +631,8 @@ export default class AssignmentController {
                     "submissions.userId",
                     "submissions.state",
                     "submissions.peerReviewerId",
+                    "submissions.exerciseId",
+                    "submissions.Id",
                     "mentors.mentor",
                     "users.center"
                 )
@@ -648,152 +650,244 @@ export default class AssignmentController {
                         return Promise.reject("Rejected");
                     }
                     let submission = rows[0];
+                    console.log('submission', submission, 'submission' );
                     // submissions once reviewed shouldn't be reviewed again.
-                    if (submission.state !== "pending") {
-                        reject(
-                            Boom.expectationFailed(
-                                "The given submission has already been reviewed."
-                            )
-                        );
-                        return Promise.reject("Rejected");
-                    }
+                    return Promise.resolve(submission);
                 })
-                .then(courseId => {
-                    database("course_enrolments")
-                        .select("*")
-                        .where({
-                            studentId: request.userId,
-                            courseId: courseId
-                        })
-                        .then(rows => {
-                            if (rows.length > 0) {
-                                return Promise.resolve({
-                                    isAlreadyEnrolled: true,
-                                    courseId: courseId
-                                });
-                            } else {
-                                reject(
-                                    Boom.expectationFailed(
-                                        "the user is not enrolled in this course"
-                                    )
-                                );
-                                return Promise.resolve({
-                                    isAlreadyEnrolled: false,
-                                    courseId: courseId
-                                });
-                            }
-                        })
-                        .then(response => {
-                            if (response.isAlreadyEnrolled) {
-                                database("submissions")
-                                    .select("*")
-                                    .leftJoin("mentors", "userId", "mentee")
-                                    .innerJoin(
-                                        "users",
-                                        "submissions.userId",
-                                        "users.id"
-                                    )
-                                    .where({
-                                        "submissions.id":
-                                            request.params.submissionId
-                                    })
-                                    .then(rows => {
-                                        if (rows.length < 1) {
-                                            reject(
-                                                Boom.notFound(
-                                                    "A submission with the given ID does not exist."
-                                                )
-                                            );
-                                            return Promise.reject("Rejected");
-                                        }
-                                        let submission = rows[0];
-                                        // submissions once reviewed shouldn't be reviewed again.
-                                        if (submission.state !== "pending") {
-                                            reject(
-                                                Boom.expectationFailed(
-                                                    "The given submission has already been reviewed."
-                                                )
-                                            );
-                                            return Promise.reject("Rejected");
-                                        }
-                                        return Promise.resolve(submission);
-                                    })
-                                    .then(submission => {
-                                        let updateFields = {
-                                            notesReviewer: request.payload.notes
-                                        };
-                                        return database("user_roles")
-                                            .select("*")
-                                            .where({
-                                                roles: "facilitator"
-                                            })
-                                            .whereIn(
-                                                "center",
-                                                [submission.center, "all"] // or where the center is all
-                                            )
-                                            .then(rows => {
-                                                let usersId = request.userId;
+                .then((submission)=>{
+                    database('exercises').select('courseId').where({'exercises.id': submission.exerciseId}).then((rows)=>{
 
-                                                let usersFacilatorId = rows[0]
-                                                    ? rows[0].userId
-                                                    : null;
-                                                //console.log(usersFacilator.userId);
+                        courseId = rows[0].courseId;
+                        console.log('courseId1', courseId, 'courseId1' );
+                        return Promise.resolve(courseId);
+                    }).then(courseId => {
+                        console.log('arguments', request.userId, courseId), 'arguments';
+                        //console.log(courseId);
+                        database("course_enrolments")
+                            .select("*")
+                            .where({
+                                studentId: request.userId,
+                                courseId: courseId
+                            })
+                            .then(rows => {
+                                if (rows.length > 0) {
+                                    return Promise.resolve({
+                                        isAlreadyEnrolled: true,
+                                        courseId: courseId
+                                    });
+                                } else {
+                                    reject(
+                                        Boom.expectationFailed(
+                                            "the user is not enrolled in this course"
+                                        )
+                                    );
+                                    return Promise.resolve({
+                                        isAlreadyEnrolled: false,
+                                        courseId: courseId
+                                    });
+                                }
+                            })
+                            .then(response => {
+                                if (response.isAlreadyEnrolled) {
+                                    database("submissions")
+                                        .select("*")
+                                        .leftJoin("mentors", "userId", "mentee")
+                                        .innerJoin(
+                                            "users",
+                                            "submissions.userId",
+                                            "users.id"
+                                        )
+                                        .where({
+                                            "submissions.id":
+                                                request.params.submissionId
+                                        })
+                                        .then(rows => {
+                                            //moved the check for validaity of submission Id to top section
 
-                                                if (
-                                                    usersId ===
-                                                        submission.peerReviewerId ||
-                                                    usersId ===
-                                                        submission.mentor ||
-                                                    usersId === usersFacilatorId
-                                                ) {
+                                             let submission = rows[0];
+
+                                            // submissions once reviewed shouldn't be reviewed again.
+                                            if (submission.state !== "pending") {
+                                                reject(
+                                                    Boom.expectationFailed(
+                                                        "The given submission has already been reviewed."
+                                                    )
+                                                );
+                                                return Promise.reject("Rejected");
+                                            }
+                                            return Promise.resolve(submission);
+                                        })
+                                        .then(submission => {
+                                            let updateFields = {
+                                                notesReviewer: request.payload.notes
+                                            };
+                                            return database("user_roles")
+                                                .select("*")
+                                                .where({
+                                                    roles: "facilitator"
+                                                })
+                                                .whereIn(
+                                                    "center",
+                                                    [submission.center, "all"] // or where the center is all
+                                                )
+                                                .then(rows => {
+                                                    let usersId = request.userId;
+    
+                                                    let usersFacilatorId = rows[0]
+                                                        ? rows[0].userId
+                                                        : null;
+                                                    //console.log(usersFacilator.userId);
+    
                                                     if (
-                                                        request.payload.approved
+                                                        usersId ===
+                                                            submission.peerReviewerId ||
+                                                        usersId ===
+                                                            submission.mentor ||
+                                                        usersId === usersFacilatorId
                                                     ) {
-                                                        updateFields[
-                                                            "completed"
-                                                        ] = 1;
-                                                        updateFields["state"] =
-                                                            "completed";
-                                                        updateFields[
-                                                            "completedAt"
-                                                        ] = new Date();
-                                                        updateFields[
-                                                            "markCompletedBy"
-                                                        ] = usersId;
+                                                        if (
+                                                            request.payload.approved
+                                                        ) {
+                                                            isAssigmentApproved = true;
+                                                            updateFields[
+                                                                "completed"
+                                                            ] = 1;
+                                                            updateFields["state"] =
+                                                                "completed";
+                                                            updateFields[
+                                                                "completedAt"
+                                                            ] = new Date();
+                                                            updateFields[
+                                                                "markCompletedBy"
+                                                            ] = usersId;
+                                                        } else {
+                                                            updateFields[
+                                                                "completed"
+                                                            ] = 0;
+                                                            updateFields["state"] =
+                                                                "rejected";
+                                                            updateFields[
+                                                                "markCompletedBy"
+                                                            ] = usersId;
+                                                        }
                                                     } else {
-                                                        updateFields[
-                                                            "completed"
-                                                        ] = 0;
-                                                        updateFields["state"] =
-                                                            "rejected";
-                                                        updateFields[
-                                                            "markCompletedBy"
-                                                        ] = usersId;
+                                                        reject(
+                                                            Boom.notFound(
+                                                                "User is not authorize to do so."
+                                                            )
+                                                        );
+                                                        return Promise.reject(
+                                                            "Rejected"
+                                                        );
                                                     }
-                                                } else {
-                                                    reject(
-                                                        Boom.notFound(
-                                                            "User is not authorize to do so."
-                                                        )
-                                                    );
-                                                    return Promise.reject(
-                                                        "Rejected"
-                                                    );
-                                                }
-
-                                                return Promise.resolve({
-                                                    updateFields,
-                                                    submission
+    
+                                                    return Promise.resolve({
+                                                        updateFields,
+                                                        submission
+                                                    });
                                                 });
-                                            });
-                                    })
-                                    .then(({ updateFields, submission }) => {
-                                        if (isAssigmentApproved) {
-                                            console.log("isAssigmentApproved");
-                                            this.checkDependencyCourses(
-                                                request.userId
-                                            ).then(courses => {
-                                                initialAvailableCourses = courses;
+                                        })
+                                        .then(({ updateFields, submission }) => {
+                                            if (isAssigmentApproved) {
+                                                console.log("isAssigmentApproved");
+                                                this.checkDependencyCourses(
+                                                    request.userId
+                                                ).then(courses => {
+                                                    initialAvailableCourses = courses;
+                                                    database("submissions")
+                                                        .update(updateFields)
+                                                        .where({
+                                                            id:
+                                                                request.params
+                                                                    .submissionId
+                                                        })
+                                                        .then(rows => {
+                                                            this.checkDependencyCourses(
+                                                                request.userId
+                                                            ).then(courses => {
+                                                                availableCoursesPostAssigmentApproval = courses;
+                                                                this.checkIfDependencyCourseUnlocked(
+                                                                    initialAvailableCourses,
+                                                                    availableCoursesPostAssigmentApproval,
+                                                                    request.userId
+                                                                );
+                                                                /*  Finding the student and the reviewer details to send email
+                                                                 * to them about the assignment review.
+                                                                 */
+                                                                let student,
+                                                                    reviewer;
+                                                                let studentQ = database(
+                                                                    "users"
+                                                                )
+                                                                    .select("*")
+                                                                    .where({
+                                                                        "users.id":
+                                                                            submission.userId
+                                                                    })
+                                                                    .then(rows => {
+                                                                        student =
+                                                                            rows[0];
+                                                                        return Promise.resolve();
+                                                                    });
+    
+                                                                let reviewerQ = database(
+                                                                    "users"
+                                                                )
+                                                                    .select("*")
+                                                                    .where({
+                                                                        "users.id":
+                                                                            submission.userId
+                                                                    })
+                                                                    .then(rows => {
+                                                                        reviewer =
+                                                                            rows[0];
+                                                                        return Promise.resolve();
+                                                                    });
+    
+                                                                return Promise.all([
+                                                                    studentQ,
+                                                                    reviewerQ
+                                                                ]).then(() => {
+                                                                    // send email for submission review completion
+                                                                    return database(
+                                                                        "submissions"
+                                                                    )
+                                                                        .select(
+                                                                            "exercises.courseId",
+                                                                            "exercises.slug",
+                                                                            "exercises.name"
+                                                                        )
+                                                                        .innerJoin(
+                                                                            "exercises",
+                                                                            "exercises.id",
+                                                                            "submissions.exerciseId"
+                                                                        )
+                                                                        .where({
+                                                                            "submissions.id":
+                                                                                submission.id
+                                                                        })
+                                                                        .then(
+                                                                            rows => {
+                                                                                return sendAssignmentReviewCompleteEmail(
+                                                                                    student,
+                                                                                    reviewer,
+                                                                                    rows[0]
+                                                                                );
+                                                                            }
+                                                                        );
+                                                                });
+                                                            });
+                                                        })
+                                                        .then(() => {
+                                                            resolve({
+                                                                success: true
+                                                            });
+                                                        });
+                                                });
+                                            } else {
+                                                //console.log("i am end here in the right position : ", updateFields, submission);
+    
+                                                // Updating the submission with the reviewers review.
                                                 database("submissions")
                                                     .update(updateFields)
                                                     .where({
@@ -802,170 +896,78 @@ export default class AssignmentController {
                                                                 .submissionId
                                                     })
                                                     .then(rows => {
-                                                        this.checkDependencyCourses(
-                                                            request.userId
-                                                        ).then(courses => {
-                                                            availableCoursesPostAssigmentApproval = courses;
-                                                            this.checkIfDependencyCourseUnlocked(
-                                                                initialAvailableCourses,
-                                                                availableCoursesPostAssigmentApproval,
-                                                                request.userId
-                                                            );
-                                                            /*  Finding the student and the reviewer details to send email
-                                                             * to them about the assignment review.
-                                                             */
-                                                            let student,
-                                                                reviewer;
-                                                            let studentQ = database(
-                                                                "users"
-                                                            )
-                                                                .select("*")
-                                                                .where({
-                                                                    "users.id":
-                                                                        submission.userId
-                                                                })
-                                                                .then(rows => {
-                                                                    student =
-                                                                        rows[0];
-                                                                    return Promise.resolve();
-                                                                });
-
-                                                            let reviewerQ = database(
-                                                                "users"
-                                                            )
-                                                                .select("*")
-                                                                .where({
-                                                                    "users.id":
-                                                                        submission.userId
-                                                                })
-                                                                .then(rows => {
-                                                                    reviewer =
-                                                                        rows[0];
-                                                                    return Promise.resolve();
-                                                                });
-
-                                                            return Promise.all([
-                                                                studentQ,
-                                                                reviewerQ
-                                                            ]).then(() => {
-                                                                // send email for submission review completion
-                                                                return database(
-                                                                    "submissions"
-                                                                )
-                                                                    .select(
-                                                                        "exercises.courseId",
-                                                                        "exercises.slug",
-                                                                        "exercises.name"
-                                                                    )
-                                                                    .innerJoin(
-                                                                        "exercises",
-                                                                        "exercises.id",
-                                                                        "submissions.exerciseId"
-                                                                    )
-                                                                    .where({
-                                                                        "submissions.id":
-                                                                            submission.id
-                                                                    })
-                                                                    .then(
-                                                                        rows => {
-                                                                            return sendAssignmentReviewCompleteEmail(
-                                                                                student,
-                                                                                reviewer,
-                                                                                rows[0]
-                                                                            );
-                                                                        }
-                                                                    );
+                                                        /**
+                                                         *  Finding the student and the reviewer details to send email
+                                                         * to them about the assignment review.
+                                                         */
+                                                        let student, reviewer;
+                                                        let studentQ = database(
+                                                            "users"
+                                                        )
+                                                            .select("*")
+                                                            .where({
+                                                                "users.id":
+                                                                    submission.userId
+                                                            })
+                                                            .then(rows => {
+                                                                student = rows[0];
+                                                                return Promise.resolve();
                                                             });
+    
+                                                        let reviewerQ = database(
+                                                            "users"
+                                                        )
+                                                            .select("*")
+                                                            .where({
+                                                                "users.id":
+                                                                    submission.userId
+                                                            })
+                                                            .then(rows => {
+                                                                reviewer = rows[0];
+                                                                return Promise.resolve();
+                                                            });
+    
+                                                        return Promise.all([
+                                                            studentQ,
+                                                            reviewerQ
+                                                        ]).then(() => {
+                                                            // send email for submission review completion
+                                                            return database(
+                                                                "submissions"
+                                                            )
+                                                                .select(
+                                                                    "exercises.courseId",
+                                                                    "exercises.slug",
+                                                                    "exercises.name"
+                                                                )
+                                                                .innerJoin(
+                                                                    "exercises",
+                                                                    "exercises.id",
+                                                                    "submissions.exerciseId"
+                                                                )
+                                                                .where({
+                                                                    "submissions.id":
+                                                                        submission.id
+                                                                })
+                                                                .then(rows => {
+                                                                    return sendAssignmentReviewCompleteEmail(
+                                                                        student,
+                                                                        reviewer,
+                                                                        rows[0]
+                                                                    );
+                                                                });
                                                         });
                                                     })
                                                     .then(() => {
-                                                        resolve({
-                                                            success: true
-                                                        });
+                                                        resolve({ success: true });
                                                     });
-                                            });
-                                        } else {
-                                            //console.log("i am end here in the right position : ", updateFields, submission);
-
-                                            // Updating the submission with the reviewers review.
-                                            database("submissions")
-                                                .update(updateFields)
-                                                .where({
-                                                    id:
-                                                        request.params
-                                                            .submissionId
-                                                })
-                                                .then(rows => {
-                                                    /**
-                                                     *  Finding the student and the reviewer details to send email
-                                                     * to them about the assignment review.
-                                                     */
-                                                    let student, reviewer;
-                                                    let studentQ = database(
-                                                        "users"
-                                                    )
-                                                        .select("*")
-                                                        .where({
-                                                            "users.id":
-                                                                submission.userId
-                                                        })
-                                                        .then(rows => {
-                                                            student = rows[0];
-                                                            return Promise.resolve();
-                                                        });
-
-                                                    let reviewerQ = database(
-                                                        "users"
-                                                    )
-                                                        .select("*")
-                                                        .where({
-                                                            "users.id":
-                                                                submission.userId
-                                                        })
-                                                        .then(rows => {
-                                                            reviewer = rows[0];
-                                                            return Promise.resolve();
-                                                        });
-
-                                                    return Promise.all([
-                                                        studentQ,
-                                                        reviewerQ
-                                                    ]).then(() => {
-                                                        // send email for submission review completion
-                                                        return database(
-                                                            "submissions"
-                                                        )
-                                                            .select(
-                                                                "exercises.courseId",
-                                                                "exercises.slug",
-                                                                "exercises.name"
-                                                            )
-                                                            .innerJoin(
-                                                                "exercises",
-                                                                "exercises.id",
-                                                                "submissions.exerciseId"
-                                                            )
-                                                            .where({
-                                                                "submissions.id":
-                                                                    submission.id
-                                                            })
-                                                            .then(rows => {
-                                                                return sendAssignmentReviewCompleteEmail(
-                                                                    student,
-                                                                    reviewer,
-                                                                    rows[0]
-                                                                );
-                                                            });
-                                                    });
-                                                })
-                                                .then(() => {
-                                                    resolve({ success: true });
-                                                });
-                                        }
-                                    });
-                            }
-                        });
-                });
+                                            }
+                                        });
+                                }
+                            });
+                    });
+                })
+                
             // submitting the review of the submitted assiugnment
         });
     }
