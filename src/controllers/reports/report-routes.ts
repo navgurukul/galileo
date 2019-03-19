@@ -92,19 +92,72 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-                schema: Joi.object({
-                    courseId: Joi.number(),
-                    courseName: Joi.string(),
-                    courseType: Joi.string(),
-                    courseLogo: Joi.string(),
-                    courseShortDescription: Joi.string(),
-                    menteesExercisesReport: Joi.array().items(exerciseReportSchema),
-                    mentees: Joi.array().items(menteeSchema),
-                })
+                // schema: Joi.object({
+                //     courseId: Joi.number(),
+                //     courseName: Joi.string(),
+                //     courseType: Joi.string(),
+                //     courseLogo: Joi.string(),
+                //     courseShortDescription: Joi.string(),
+                //     menteesExercisesReport: Joi.array().items(exerciseReportSchema),
+                //     mentees: Joi.array().items(menteeSchema),
+                // })
             },
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesExercisesReport,
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/reports/assignmentSubmissionPending',
+        config: {
+            description: 'count the no of submission done by student center wise who has a center ',
+            validate: {
+                query: {
+                    centerId: Joi.string().required(),
+                    timePeriod: Joi.string().default('today'),
+                }
+            },
+            response: {
+                schema: Joi.object({
+                    numberOfPendingRequests: Joi.number(),
+                    numberOfRequestCreated:Joi.object({
+                        requestTodays:Joi.number(),
+                        requestYesterday:Joi.number(),
+                        requestLastWeek:Joi.number(),
+                        requestLastMonth:Joi.number(),
+                    })
+                    
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.numberOfAssignmentSubmitted,
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/reports/assignmentSubmissionPendingPerUser',
+        config: {
+            description: 'count the no of submission done by student center wise who has a center ',
+            validate: {
+                query: {
+                    centerId: Joi.string().required(),
+                    
+                }
+            },
+            response: {
+                schema:Joi.array().items( Joi.object({
+                    name: Joi.string(),
+                    numberOfAssignmentSubmitted: Joi.number(),
+                    
+                }))
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.numberOfAssignmentSubmittedPerUser,
         }
     });
 }

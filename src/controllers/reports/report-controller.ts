@@ -7,6 +7,10 @@ import database from "../../";
 import { IServerConfigurations } from "../../configurations";
 import { resolve } from "path";
 
+import {
+    getforIndivisualTimePeriod
+} from "../../helpers/reportHelper";
+
 export default class ReportController {
     private configs: IServerConfigurations;
     private database: any;
@@ -200,7 +204,7 @@ export default class ReportController {
                             );
                             let attempts =
                                 submissionsObj[submission.exerciseId][
-                                    "attempts"
+                                "attempts"
                                 ] + 1;
                             // Replace the stored submission with the current submission if
                             // the stored one is of a lesser level
@@ -268,7 +272,7 @@ export default class ReportController {
                                     reject(
                                         Boom.expectationFailed(
                                             "User is niether mentor for any student " +
-                                                "nor facilitator for any center"
+                                            "nor facilitator for any center"
                                         )
                                     );
                                     return Promise.reject("Rejected");
@@ -347,7 +351,7 @@ export default class ReportController {
                                 "course_enrolments.courseId",
                                 "exercises.courseId"
                             )
-                            .leftJoin("submissions", function() {
+                            .leftJoin("submissions", function () {
                                 this.on("submissions.userId", "=", "users.id")
                                     .andOn(
                                         "submissions.exerciseId",
@@ -411,7 +415,7 @@ export default class ReportController {
                                 "course_enrolments.courseId",
                                 "exercises.courseId"
                             )
-                            .leftJoin("submissions", function() {
+                            .leftJoin("submissions", function () {
                                 this.on(
                                     "submissions.userId",
                                     "=",
@@ -525,7 +529,7 @@ export default class ReportController {
                                     reject(
                                         Boom.expectationFailed(
                                             "User is niether mentor for any student " +
-                                                "nor facilitator for any center"
+                                            "nor facilitator for any center"
                                         )
                                     );
                                     return Promise.reject("Rejected");
@@ -713,7 +717,7 @@ export default class ReportController {
                             menteeSubmissions.push(exercises[exerciseId]);
                         }
                         // sorting them sequence wise
-                        menteeSubmissions.sort(function(a, b) {
+                        menteeSubmissions.sort(function (a, b) {
                             return (
                                 a.exerciseSequenceNum - b.exerciseSequenceNum
                             );
@@ -727,6 +731,102 @@ export default class ReportController {
                         });
                     });
                 });
+        });
+    }
+
+
+    public numberOfAssignmentSubmitted(request, h) {
+        return new Promise((resolve, reject) => {
+            console.log(request.query.timePeriod);
+            let numberOfPendingRequests, requestTodays, requestYesterday, requestLastWeek, requestLastMonth;
+
+            let totalRecord = getforIndivisualTimePeriod(request.query.centerId, null).then((results) => {
+
+                numberOfPendingRequests = results;
+                return Promise.resolve(numberOfPendingRequests);
+            });
+
+            let todaysRecord = getforIndivisualTimePeriod(request.query.centerId, 'today').then((results) => {
+
+                requestTodays = results;
+                return Promise.resolve(requestTodays);
+            });
+            let yesterdayRecord = getforIndivisualTimePeriod(request.query.centerId, 'yesterday').then((results) => {
+
+                requestYesterday = results;
+                return Promise.resolve(requestYesterday);
+            });
+            let lastWeekRecord = getforIndivisualTimePeriod(request.query.centerId, 'lastWeek').then((results) => {
+
+                requestLastWeek = results;
+                return Promise.resolve(requestLastWeek);
+            });
+            let lastMonthRecord = getforIndivisualTimePeriod(request.query.centerId, 'lastMonth').then((results) => {
+
+                requestLastMonth = results;
+                return Promise.resolve(requestLastMonth);
+            });
+
+
+            Promise.all([totalRecord, todaysRecord, yesterdayRecord, lastWeekRecord, lastMonthRecord]).then((pp) => {
+             
+                let finalResult = {
+                    "numberOfPendingRequests": numberOfPendingRequests.itemcounts,
+                    "numberOfRequestCreated": {
+                        "requestTodays": requestTodays.itemcounts,
+                        "requestYesterday": requestYesterday.itemcounts,
+                        "requestLastWeek": requestLastWeek.itemcounts,
+                        "requestLastMonth": requestLastMonth.itemcounts,
+                    }
+
+                }
+               // console.log(finalResult);
+                resolve(finalResult);
+
+            })
+
+
+        });
+    }
+
+
+
+    public numberOfAssignmentSubmittedPerUser(request, h) {
+        return new Promise((resolve, reject) => {
+            console.log(request.query.timePeriod);
+            let timePeriod = request.query.timePeriod;
+            let p = database("submissions")
+                .select("users.name")
+                .count('submissions.id as numberOfAssignmentSubmitted')
+                .innerJoin('users', 'users.id', 'submissions.userId')
+                .where({
+                    "users.center": request.query.centerId,
+                    "submissions.state": 'pending'
+                })
+
+                .whereNotNull("users.center")
+                .groupBy('users.id');
+            console.log(p.toString());
+            p.then(rows => {
+
+                // check if he is a facilitator?
+                if (rows.length < 1) {
+                    reject(
+                        Boom.expectationFailed(
+                            "no submission is pending for this center"
+                        )
+                    );
+                } else {
+
+
+                    // resolve({
+                    //     name:rows[0].name,
+                    //     numberOfAssignmentSubmitted: rows[0].itemcount
+                    // });
+                    resolve(rows);
+
+                }
+            })
         });
     }
 }

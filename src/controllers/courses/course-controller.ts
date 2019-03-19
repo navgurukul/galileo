@@ -1691,6 +1691,10 @@ export default class CourseController {
         });
     }
 
+   
+
+
+
     /**
      * Delete the mentee by id and mentor by id or email.
      * @param request
@@ -1698,7 +1702,7 @@ export default class CourseController {
      */
     public deleteMentorMenteeByidOrEmail(request, h) {
         return new Promise((resolve, reject) => {
-
+           
             database('user_roles').select('roles', 'center')
                 .where({
                     'userId': request.userId
@@ -1725,8 +1729,12 @@ export default class CourseController {
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
                         let mentorExist = false, menteeExist = false;
+                        let mentorByEmail={} ,mentor ={};
 
-                        let mentor = database('mentors').select('*')
+                      
+
+                        if (mentorId !== undefined) {
+                         mentor = database('mentors').select('*')
                             .where({
                                 'mentor': mentorId,
 
@@ -1742,7 +1750,7 @@ export default class CourseController {
                                     return Promise.resolve(mentorExist);
                                 }
                             });
-
+                        }
                         let mentee = database('mentors').select('*')
                             .where({
                                 'mentee': menteeId
@@ -1760,9 +1768,33 @@ export default class CourseController {
 
                                 }
                             });
+                        if (mentorEmail !== undefined) {
+                             mentorByEmail = database('mentors').select('*').
+                                innerJoin('users', 'users.id', 'mentors.mentor')
+                                .where({
+                                    'users.email': mentorEmail
 
-                        Promise.all([mentor, mentee]).then(() => {
+                                }).then((rows) => {
 
+                                    
+                                    if (rows.length < 1) {
+                                        //  reject(Boom.expectationFailed(` This mentee doesn't exists.`));
+                                        //return Promise.reject("Rejected");
+                                        
+                                        return Promise.resolve(mentorExist);
+                                    } else {
+                                       
+                                        mentorExist = true;
+
+                                     
+                                        return Promise.resolve(mentorExist);
+
+                                    }
+                                });
+                        }
+                       
+                        Promise.all([mentor, mentee,mentorByEmail]).then(() => {
+                           
                             if (mentorExist && menteeExist) {
 
                                 let allCenter = [];
@@ -1789,7 +1821,7 @@ export default class CourseController {
                                 getMentorMenteeQuery.then((rows) => {
                                     // if the course for given id doesn't exist
                                     if (rows.length < 1) {
-                                        reject(Boom.expectationFailed(` The mentorId  is not the mentor of the menteeId.`));
+                                        reject(Boom.expectationFailed(` The mentorId is not the mentor of the menteeId.`));
                                         return Promise.reject("Rejected");
                                     } else {
 
@@ -1833,12 +1865,12 @@ export default class CourseController {
 
 
                             } else if (mentorExist && !menteeExist) {
-                                reject(Boom.expectationFailed(` The menteeId doesn't have any mentor.`));
+                                reject(Boom.expectationFailed(` The menteeId does not exist on the system .`));
                                 return Promise.reject("Rejected");
 
 
                             } else if (!mentorExist && menteeExist) {
-                                reject(Boom.expectationFailed(` The mentorId is not a mentor.`));
+                                reject(Boom.expectationFailed(` The mentorId or email does not exist on the system.`));
                                 return Promise.reject("Rejected");
 
 
