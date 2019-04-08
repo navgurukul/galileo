@@ -60,7 +60,7 @@
     "mkdirp": "0.5.1",
     "mongoose": "4.8.6",
     "mysql": "2.13.0",
-    "natives": "1.1.0",
+    "natives": "1.1.6",
     "nconf": "0.8.4",
     "node-uuid": "1.4.8",
     "path": "0.12.7",
@@ -72,7 +72,7 @@
     "typings": "^2.1.1",
     "underscore": "^1.9.1",
     "vision": "^5.4.3",
-    "yarn": "^1.12.3"
+    "yarn": "^1.15.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",

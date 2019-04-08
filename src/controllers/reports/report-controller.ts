@@ -232,7 +232,7 @@ export default class ReportController {
 
     public getMenteesCoursesReport(request, h) {
         return new Promise((resolve, reject) => {
-            // request.userId = 2;
+            request.userId = 1;
             let mentees = [],
                 menteesCoursesReport = [];
 
