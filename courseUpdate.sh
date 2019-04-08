@@ -5,7 +5,7 @@ echo "(Unless Error Message is attached here.)"
 
 #cd /home/galileo
 
-export GALILEO_ENV='dev'
+export GALILEO_ENV='prod'
 cd curriculum
 git pull > /dev/null
 cd ..
