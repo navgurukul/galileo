@@ -25,6 +25,7 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
     let inside = false;
     let insideInnerList = false;
     let isSolutionToken;
+    console.log(globals)
     for (let i=1; i<tokens.length-1; i++) {
         tokens[i]["text"] = tokens[i]["text"] ? tokens[i]["text"].trim() : undefined;
         if (tokens[i]["type"]==="list_start" && inside===true) {
@@ -57,20 +58,21 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
             }
             if (!inside) {
                 if (isSolutionToken) {
-                l1++;
-                seqNumbers[tokens[i]["text"]] = l1*1000;
-                globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': true};
+                    l1++;
+                    seqNumbers[tokens[i]["text"]] = l1*1000;
+                    globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': true};
                 } else {
-                l1++;
-                seqNumbers[tokens[i]["text"]] = l1*1000;
-                globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': false};
+                    l1++;
+                    seqNumbers[tokens[i]["text"]] = l1*1000;
+                    globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': false};
                 }
                 
             }
         } else if (tokens[i]["type"]==="list_end") {
-                inside=false;
+            inside=false;
         }
     }
+    // console.log(seqNumbers)
     return seqNumbers;
 };
 

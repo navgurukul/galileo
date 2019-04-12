@@ -599,12 +599,10 @@ export default class AssignmentController {
                             "submissions.submittedAt",
                             "submissions.submitterNotes",
                             "submissions.files",
-                            "submissions.files",
                             "submissions.notesReviewer",
                             "submissions.state",
                             "submissions.completed",
                             "submissions.completedAt",
-                            "submissions.submittedAt",
                             "submissions.submittedAt",
                             // Exercises Table
                             "exercises.id as exerciseId",
@@ -629,7 +627,9 @@ export default class AssignmentController {
                         .innerJoin("users", "submissions.userId", "users.id")
                         .where(response.whereClause)
                         .orderBy("submittedAt", "desc")
+                        // console.log(p.toSQL())
                         .then(rows => {
+                            console.log(rows)
                             let submissions = [];
                             for (let i = 0; i < rows.length; i++) {
                                 let submission = rows[i];
@@ -640,6 +640,7 @@ export default class AssignmentController {
                                 }
                                 submissions.push(submission);
                             }
+                            // console.log(submissions)
                             resolve({ data: submissions });
                         });
                 });

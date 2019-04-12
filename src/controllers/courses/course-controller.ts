@@ -46,7 +46,7 @@ export default class CourseController {
                 completedCourses = [];
 
             let enrolledQ, availableQ, completedQ;
-
+            ///request.headers.authorization = 'aklooo';
             if (request.headers.authorization === undefined) {
                 availableQ = database("courses")
                     .select(
@@ -68,6 +68,7 @@ export default class CourseController {
                     });
                 });
             } else if (request.headers.authorization !== "") {
+                console.log('inside else');
                 enrolledQ = database("course_enrolments")
                     .select(
                         "courses.id",
@@ -235,10 +236,7 @@ export default class CourseController {
 
                 /* **get the exercises completed in each course by the given user ** */
                 exerciseCompeletedPerCourseQ = database("exercises")
-                    .select(
-                        database.raw(
-                            "COUNT(exercises.id) as totalExercisesCompleted"
-                        ),
+                    .select(database.raw("COUNT(exercises.id) as totalExercisesCompleted"),
                         "exercises.courseId"
                     )
                     .where(
@@ -247,8 +245,8 @@ export default class CourseController {
                         database("submissions")
                             .select("submissions.exerciseId")
                             .where({ "submissions.completed": 1 })
-                    ) // ****change this with the enum value*****//
-                   // .andWhere("submissions.userId", "=", request.userId)
+                            .andWhere("submissions.userId", "=", request.userId)
+                    )
                     .groupBy("exercises.courseId")
                     .then(rows => {
                         exerciseCompeletedPerCourse = rows;
@@ -268,7 +266,6 @@ export default class CourseController {
 
                 /* ** Perform operations on the data received above to filter the courses that the user 
                 is not eligible to watch in the code block below  ** */
-                //console.log('outside promise allllllllllll');
                 Promise.all([
                     enrolledQ,
                     availableQ,
