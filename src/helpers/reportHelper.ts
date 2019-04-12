@@ -2,13 +2,18 @@ var _ = require("underscore");
 import * as Configs from "../configurations";
 import database from "../";
 
-export const getforIndivisualTimePeriod =   function (centerId: string, date: string) {
+export const getforIndivisualTimePeriod = function (centerId: string, date: string) {
     return database("submissions")
         .count('submissions.id as itemcounts')
         .innerJoin('users', 'users.id', 'submissions.userId')
         .where({
-            "users.center": centerId,
+
             "submissions.state": 'pending'
+        })
+        .andWhere(function () {
+            if (centerId.toLowerCase() !== 'all') {
+                this.where({ "users.center": centerId, })
+            }
         })
         .andWhere(function () {
             switch (date) {
@@ -67,7 +72,7 @@ export const getforIndivisualTimePeriod =   function (centerId: string, date: st
             if (rows.length < 1) {
 
             } else {
-                console.log("total record", rows);
+                //console.log("total record", rows);
                 // return rows[0].itemcount
                 // return  totalRecord = rows[0].itemcount
 
@@ -77,3 +82,40 @@ export const getforIndivisualTimePeriod =   function (centerId: string, date: st
         });
 
 };
+
+export const getNumberOfAssignmentSubmittedPerUser = function (centerId: string) {
+    return database("submissions")
+        .select("users.name")
+        .count('submissions.id as numberOfAssignmentSubmitted')
+        .innerJoin('users', 'users.id', 'submissions.userId')
+        .where({
+
+            "submissions.state": 'pending'
+        })
+        .andWhere(function () {
+            if (centerId.toLowerCase() !== 'all') {
+                this.where({ "users.center": centerId, })
+            }
+        })
+        .whereNotNull("users.center")
+        .groupBy('users.id')
+
+
+        .then(rows => {
+
+            // check if he is a facilitator?
+            if (rows.length < 1) {
+
+            } else {
+              //  console.log(`total record for ${centerId} =`, rows);
+                // return rows[0].itemcount
+                // return  totalRecord = rows[0].itemcount
+
+                return Promise.resolve(rows);
+
+            }
+        });
+
+};
+
+

@@ -15,6 +15,9 @@ import { manipulateResultSet } from "../../helpers/courseHelper";
 import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
+import {
+    sendCliqIntimation
+} from "../../cliq";
 
 
 
@@ -245,7 +248,7 @@ export default class CourseController {
                             .select("submissions.exerciseId")
                             .where({ "submissions.completed": 1 })
                     ) // ****change this with the enum value*****//
-                    .andWhere("submissions.userId", "=", request.userId)
+                   // .andWhere("submissions.userId", "=", request.userId)
                     .groupBy("exercises.courseId")
                     .then(rows => {
                         exerciseCompeletedPerCourse = rows;
@@ -1055,6 +1058,19 @@ export default class CourseController {
                                 request.params.courseId
                         })
                         .then(rows => {
+
+                            // let studentObject = {
+                            //     "receiverId": student.email,
+                            //     "message": ` Your course has been marked as completed `
+                            // }
+                
+                
+                            // sendCliqIntimation(studentObject).then(result => {
+                            //     console.log("What i am getting ", result)
+                            // })
+
+
+
                             resolve({
                                 success: true
                             });

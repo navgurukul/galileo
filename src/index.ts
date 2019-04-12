@@ -1,6 +1,8 @@
 import * as Server from "./server";
 import * as Database from "./database";
 import * as Configs from "./configurations";
+const cron = require("node-cron");
+const request = require("request");
 
 //Init Database
 const dbConfigs = Configs.getDatabaseConfig();
@@ -19,41 +21,49 @@ const serverConfigs = Configs.getServerConfigs();
 
 const Sentry = Configs.getSentryConfig();
 
+const scheduleConfigs=Configs.getScheduleConfigs();
+
 //Starting Application Server
 const server = Server.init(serverConfigs, databaseConfig)
     .then((server) => {
-        
 
+       
         if (!module.parent) {
             // console.log("yahan"); 
             server.start(() => {
                 console.log('Server running at:', server.info.uri);
             });
 
-            
+
             server.events.on('request', (request, event, tags) => {
-                
-                
+
+
                 if (tags.error) {
-                    
+
 
                     // Sentry.captureMessage('Something went wrong');
                     // Sentry.captureMessage(`${event.error ? event.error.message : 'unknown'}`);
                     // console.log(`koushik Request ${event.request} error: ${event.error ? event.error.message : 'unknown'}`);
-                    // console.log( event );
-                    if(event.error.stack!=undefined){
-                    let stack = event.error.stack;
-                    var subStr = stack.match("\n(.*)\n");
-                    }else{
-                        subStr[0]='unknown';
+                    //console.log(event.error);
+                    var subStr = [];
+                    if (event.error != undefined) {
+                        if (event.error.stack != undefined) {
+                            let stack = event.error.stack;
+                            subStr = stack.match("\n(.*)\n");
+                        } else {
+                            subStr[0] = 'unknown';
+                        }
+                    } else {
+
+                        subStr[0] = 'unknown';
                     }
                     let additionalData = {
                         url: request.url.path,
-                        logedinId:request.userId,
-                        requestType:request.method,
-                        requestParam:request.params,
-                        requestQuery:request.query,
-                        requestPayload:request.payload,
+                        logedinId: request.userId,
+                        requestType: request.method,
+                        requestParam: request.params,
+                        requestQuery: request.query,
+                        requestPayload: request.payload,
                         time: new Date(event.timestamp),
                         line: subStr[0],
                         errorPayload: event.error.output.payload,
@@ -71,9 +81,21 @@ const server = Server.init(serverConfigs, databaseConfig)
                         // scope.setLevel(level);
                         Sentry.captureMessage(event.error ? event.error.message : 'unknown');
                     });
-                    
+
                 }
             });
+
+            // cron.schedule(`${scheduleConfigs.timeInSecond} * * * * *`, function () {
+               
+            //     console.log("Running Cron Job");
+                
+            //     request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
+            //         if (!error && response.statusCode == 200) {
+            //             console.log('im ok')
+            //              //console.log(body) // Show the HTML for the Google homepage.
+            //         }
+            //     })
+            // });
 
 
 

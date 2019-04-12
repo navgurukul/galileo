@@ -102,7 +102,11 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                         .description("List of submissions.")
                 })
             },
-            auth: 'jwt',
+            // auth: 'jwt',
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
             tags: ['api'],
             handler: assignmentController.getExerciseSubmissions,
         }

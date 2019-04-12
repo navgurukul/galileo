@@ -1,12 +1,12 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import {IServerConfigurations} from "../../configurations";
+import { IServerConfigurations } from "../../configurations";
 // import * as Boom from "boom";
 
 import ReportController from "./report-controller";
-import { 
-    courseReportSchema, 
-    menteeSchema, 
+import {
+    courseReportSchema,
+    menteeSchema,
     exerciseReportSchema,
 } from "./report-schemas";
 
@@ -85,7 +85,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/reports/course/{courseId}',
         config: {
             description: 'Progress report of exercises of a course for all the mentee assgin to a Mentor' +
-                        ' or a center to a facilitator.',
+                ' or a center to a facilitator.',
             validate: {
                 params: {
                     courseId: Joi.number(),
@@ -108,6 +108,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    
     server.route({
         method: 'GET',
         path: '/reports/assignmentSubmissionPending',
@@ -122,13 +123,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: Joi.object({
                     numberOfPendingRequests: Joi.number(),
-                    numberOfRequestCreated:Joi.object({
-                        requestTodays:Joi.number(),
-                        requestYesterday:Joi.number(),
-                        requestLastWeek:Joi.number(),
-                        requestLastMonth:Joi.number(),
+                    numberOfRequestCreated: Joi.object({
+                        requestTodays: Joi.number(),
+                        requestYesterday: Joi.number(),
+                        requestLastWeek: Joi.number(),
+                        requestLastMonth: Joi.number(),
                     })
-                    
+
                 })
             },
             auth: 'jwt',
@@ -141,23 +142,47 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         method: 'GET',
         path: '/reports/assignmentSubmissionPendingPerUser',
         config: {
-            description: 'count the no of submission done by student center wise who has a center ',
+            description: 'Get the submission report center wise per user ',
             validate: {
                 query: {
                     centerId: Joi.string().required(),
-                    
+
                 }
             },
             response: {
-                schema:Joi.array().items( Joi.object({
+                schema: Joi.array().items(Joi.object({
                     name: Joi.string(),
                     numberOfAssignmentSubmitted: Joi.number(),
-                    
+
                 }))
             },
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.numberOfAssignmentSubmittedPerUser,
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/reports/getSubmissionReport',
+        config: {
+            description: 'This route is to send admin the total submission report in email center wise and all ',
+            validate: {
+                // query: {
+                //     centerId: Joi.string().required(),
+
+                // }
+            },
+            response: {
+                // schema:Joi.array().items( Joi.object({
+                //     name: Joi.string(),
+                //     numberOfAssignmentSubmitted: Joi.number(),
+
+                // }))
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.sendSubmissionReport,
         }
     });
 }

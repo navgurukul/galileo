@@ -39,5 +39,13 @@
    },
    "courseConfig":{
       "courseCompleteionCriteria": 70
+    },
+    "scheduleConfig":{
+      "timeInSecond": 30,
+     
+      "receiverEmail":"amar17@navgurukul.org"
+    },
+    "cliqConfig":{
+      "authtoken": "f9a1f1ae5ab636824e062b6ccdb381cf"
     }
 }
