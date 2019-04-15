@@ -165,7 +165,6 @@ export default class UserController {
                         }
                     })
                     .then((user) => {
-                        console.log(user)
                         resolve({
                             'user': user,
                             'jwt': this.userModel.getJWTToken(user)
