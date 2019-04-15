@@ -43,6 +43,14 @@ export interface CouseConfigurations {
     courseCompleteionCriteria: number;
 }
 
+export interface ScheduleConfigurations {
+    timeInSecond: number;
+    receiverEmail: string;
+}
+
+export interface CliqConfigurations {
+    authtoken:  string;
+}
 
 export function checkConfigEnvironment(): void {
     if (!!configs.get("database") === false) {
@@ -67,9 +75,19 @@ export function getCourseConfigs(): CouseConfigurations {
     return configs.get("courseConfig");
 }
 
+export function getScheduleConfigs(): ScheduleConfigurations {
+    checkConfigEnvironment();
+    return  configs.get("scheduleConfig");  
+}
+
 export function getSentryConfig(){
     checkConfigEnvironment();
     let sentryConfig = configs.get("sentryConfig");
     Sentry.init({ dsn: sentryConfig.sentryDsn });
     return Sentry;
+}
+
+export function getCliqConfig():CliqConfigurations{
+    checkConfigEnvironment()
+    return configs.get("cliqConfig");
 }

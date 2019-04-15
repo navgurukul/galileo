@@ -14,6 +14,10 @@ import {
     sendAssignmentReviewCompleteEmail,
     sendCoursesUnlockedForUserEmail
 } from "../../sendEmail";
+import {
+    sendCliqIntimation
+} from "../../cliq";
+
 var _ = require("underscore");
 
 // Helper function to generate UIDs
@@ -135,7 +139,7 @@ export default class AssignmentController {
                                                 reject(
                                                     Boom.expectationFailed(
                                                         "Student have no center assigned can't" +
-                                                            "submit assignment."
+                                                        "submit assignment."
                                                     )
                                                 );
                                                 return Promise.reject(
@@ -209,7 +213,7 @@ export default class AssignmentController {
                                                 reject(
                                                     Boom.expectationFailed(
                                                         "There is no facilitator " +
-                                                            "added on the platform."
+                                                        "added on the platform."
                                                     )
                                                 );
                                                 return Promise.reject(
@@ -384,12 +388,30 @@ export default class AssignmentController {
                                         });
                                     })
                                     .then(rows => {
-                                        // send email using aws to the student and the reviewer
-                                        sendAssignmentReviewPendingEmail(
-                                            student,
-                                            reviewer,
-                                            rows[0]
-                                        );
+                                        // send email using aws to the student and the reviewer--
+                                        // sendAssignmentReviewPendingEmail(
+                                        //     student,
+                                        //     reviewer,
+                                        //     rows[0]
+                                        // );
+
+                                        let reviewerObject = {
+                                            "receiverId": reviewer.email,
+                                            "message": `${student.name} as submitted his assignment. Please review it http://saral.navgurukul.org/assignment-review?submissionId=${rows[0].submissionId}`
+                                        }
+                                        let studentObject = {
+                                            "receiverId": student.email,
+                                            "message": `${reviewer.name} has been intimated for your assignment review`
+                                        }
+
+
+                                        sendCliqIntimation(reviewerObject).then(result => {
+                                            console.log("What i am getting ", result)
+                                        })
+                                        sendCliqIntimation(studentObject).then(result => {
+                                            console.log("What i am getting ", result)
+                                        })
+
                                         resolve(rows[0]);
                                     });
                             });
@@ -431,6 +453,8 @@ export default class AssignmentController {
     }
 
     public getExerciseSubmissions(request, h) {
+
+
         return new Promise((resolve, reject) => {
             // query to find all the submission of particular exerciseId
             let submissionQuery = database("submissions")
@@ -533,7 +557,8 @@ export default class AssignmentController {
             //request.userId = 29;
             let developerEmails = [
                 "amar17@navgurukul.org",
-                "diwakar17@navgurukul.org"
+                "diwakar17@navgurukul.org",
+                "a@navgurukul.org"
                 // 'lalita17@navgurukul.org',
                 // 'kanika17@navgurukul.org',
                 // 'rani17@navgurukul.org',
@@ -655,8 +680,8 @@ export default class AssignmentController {
                     // submissions once reviewed shouldn't be reviewed again.
                     return Promise.resolve(submission);
                 })
-                .then((submission)=>{
-                    database('exercises').select('courseId').where({'exercises.id': submission.exerciseId}).then((rows)=>{
+                .then((submission) => {
+                    database('exercises').select('courseId').where({ 'exercises.id': submission.exerciseId }).then((rows) => {
 
                         courseId = rows[0].courseId;
                         //console.log('courseId1', courseId, 'courseId1' );
@@ -692,12 +717,12 @@ export default class AssignmentController {
                                 if (response.isAlreadyEnrolled) {
                                     database("submissions")
                                         .select("submissions.id",
-                                        "submissions.userId",
-                                        "submissions.state",
-                                        "submissions.peerReviewerId",
-                                        "submissions.Id",
-                                        "mentors.mentor",
-                                        "users.center")
+                                            "submissions.userId",
+                                            "submissions.state",
+                                            "submissions.peerReviewerId",
+                                            "submissions.Id",
+                                            "mentors.mentor",
+                                            "users.center")
                                         .leftJoin("mentors", "userId", "mentee")
                                         .innerJoin(
                                             "users",
@@ -712,9 +737,6 @@ export default class AssignmentController {
                                             //moved the check for validaity of submission Id to top section
 
                                             let submission = rows[0];
-                                            console.log('submission sss');
-                                            console.log(submission);
-                                            console.log('submission sss');
                                             // submissions once reviewed shouldn't be reviewed again.
                                             if (submission.state !== "pending") {
                                                 reject(
@@ -727,9 +749,8 @@ export default class AssignmentController {
                                             return Promise.resolve(submission);
                                         })
                                         .then(submission => {
-                                            console.log('submission aaaaaaaaaaaaaaaaa');
-                                            console.log(submission);
-                                            console.log('submission aaaaaaaaaaaaaaaaaaaaaaa');
+
+
                                             let updateFields = {
                                                 notesReviewer: request.payload.notes
                                             };
@@ -744,17 +765,17 @@ export default class AssignmentController {
                                                 )
                                                 .then(rows => {
                                                     let usersId = request.userId;
-    
+
                                                     let usersFacilatorId = rows[0]
                                                         ? rows[0].userId
                                                         : null;
                                                     //console.log(usersFacilator.userId);
-    
+
                                                     if (
                                                         usersId ===
-                                                            submission.peerReviewerId ||
+                                                        submission.peerReviewerId ||
                                                         usersId ===
-                                                            submission.mentor ||
+                                                        submission.mentor ||
                                                         usersId === usersFacilatorId
                                                     ) {
                                                         if (
@@ -792,7 +813,7 @@ export default class AssignmentController {
                                                             "Rejected"
                                                         );
                                                     }
-    
+
                                                     return Promise.resolve({
                                                         updateFields,
                                                         submission
@@ -841,7 +862,7 @@ export default class AssignmentController {
                                                                             rows[0];
                                                                         return Promise.resolve();
                                                                     });
-    
+
                                                                 let reviewerQ = database(
                                                                     "users"
                                                                 )
@@ -855,7 +876,7 @@ export default class AssignmentController {
                                                                             rows[0];
                                                                         return Promise.resolve();
                                                                     });
-    
+
                                                                 return Promise.all([
                                                                     studentQ,
                                                                     reviewerQ
@@ -880,11 +901,22 @@ export default class AssignmentController {
                                                                         })
                                                                         .then(
                                                                             rows => {
-                                                                                return sendAssignmentReviewCompleteEmail(
-                                                                                    student,
-                                                                                    reviewer,
-                                                                                    rows[0]
-                                                                                );
+                                                                                let studentObject = {
+                                                                                    "receiverId": student.name,
+                                                                                    "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
+                                                                                                `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                }
+
+
+                                                                                // sendAssignmentReviewCompleteEmail(
+                                                                                //     student,
+                                                                                //     reviewer,
+                                                                                //     rows[0]
+                                                                                // );
+                                                                                return sendCliqIntimation(studentObject).then(result => {
+                                                                                    console.log("What i am getting ", result)
+                                                                                })
+
                                                                             }
                                                                         );
                                                                 });
@@ -898,7 +930,7 @@ export default class AssignmentController {
                                                 });
                                             } else {
                                                 //console.log("i am end here in the right position : ", updateFields, submission);
-    
+
                                                 // Updating the submission with the reviewers review.
                                                 database("submissions")
                                                     .update(updateFields)
@@ -925,7 +957,7 @@ export default class AssignmentController {
                                                                 student = rows[0];
                                                                 return Promise.resolve();
                                                             });
-    
+
                                                         let reviewerQ = database(
                                                             "users"
                                                         )
@@ -938,7 +970,7 @@ export default class AssignmentController {
                                                                 reviewer = rows[0];
                                                                 return Promise.resolve();
                                                             });
-    
+
                                                         return Promise.all([
                                                             studentQ,
                                                             reviewerQ
@@ -962,11 +994,20 @@ export default class AssignmentController {
                                                                         submission.id
                                                                 })
                                                                 .then(rows => {
-                                                                    return sendAssignmentReviewCompleteEmail(
-                                                                        student,
-                                                                        reviewer,
-                                                                        rows[0]
-                                                                    );
+                                                                    let studentObject = {
+                                                                        "receiverId": student.name,
+                                                                        "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
+                                                                                    `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                    }
+
+                                                                    return sendCliqIntimation(studentObject).then(result => {
+                                                                        console.log("What i am getting ", result)
+                                                                    })
+                                                                //     return sendAssignmentReviewCompleteEmail(
+                                                                //         student,
+                                                                //         reviewer,
+                                                                //         rows[0]
+                                                                //     );
                                                                 });
                                                         });
                                                     })
@@ -979,7 +1020,7 @@ export default class AssignmentController {
                             });
                     });
                 })
-                
+
             // submitting the review of the submitted assiugnment
         });
     }
@@ -1010,7 +1051,7 @@ export default class AssignmentController {
                     database("courses")
                         .distinct()
                         .select("courses.id")
-                        .join("course_enrolments", function() {
+                        .join("course_enrolments", function () {
                             this.on(
                                 "courses.id",
                                 "=",
@@ -1086,15 +1127,15 @@ export default class AssignmentController {
                                             //console.log('%%%%%%%%%%%%%%%%%%%%%%%mergedResult%%%%%%%%%%%%%%%%%%%5');
                                             allAvailableCourses =
                                                 mergedResult[
-                                                    "allAvailableCourses"
+                                                "allAvailableCourses"
                                                 ];
                                             exerciseCompeletedPerCourse =
                                                 mergedResult[
-                                                    "exerciseCompeletedPerCourse"
+                                                "exerciseCompeletedPerCourse"
                                                 ];
                                             totalExercisesPerCourse =
                                                 mergedResult[
-                                                    "totalExercisesPerCourse"
+                                                "totalExercisesPerCourse"
                                                 ];
                                             courseReliesOn =
                                                 mergedResult["courseReliesOn"];
@@ -1171,10 +1212,16 @@ export default class AssignmentController {
 
         Promise.all([cousresQ, studentQ]).then(() => {
             let coursesName = _.pluck(courses, "name").toString();
-            sendCoursesUnlockedForUserEmail(student, coursesName);
-            console.log("coursesName");
-            console.log(coursesName);
-            console.log("coursesName");
+            let studentObject = {
+                "receiverId": student.email,
+                "message": `Hi ${student.name}, Apka yeh ${coursesName} unlockced hogya ha.`
+            }
+
+
+            sendCliqIntimation(studentObject).then(result => {
+                console.log("What i am getting ", result)
+            })
+            // sendCoursesUnlockedForUserEmail(student, coursesName);
         });
     }
 }

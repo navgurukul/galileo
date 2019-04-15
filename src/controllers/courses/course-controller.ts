@@ -1,6 +1,6 @@
 import * as Boom from "boom";
 import * as Hapi from "hapi";
-import * as knex from "knex";
+// import * as knex from "knex";
 
 import database from "../../";
 import {
@@ -15,6 +15,9 @@ import { manipulateResultSet } from "../../helpers/courseHelper";
 import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
+import {
+    sendCliqIntimation
+} from "../../cliq";
 
 
 
@@ -389,7 +392,7 @@ export default class CourseController {
                         "submissions.userId"
                     )
                     .leftJoin("submissions", function () {
-                        this.on("submissions.id", "=", knex.raw(xyz)).on(
+                        this.on("submissions.id", "=", database.raw(xyz)).on(
                             "submissions.userId",
                             "=",
                             request.userId
@@ -1052,6 +1055,19 @@ export default class CourseController {
                                 request.params.courseId
                         })
                         .then(rows => {
+
+                            // let studentObject = {
+                            //     "receiverId": student.email,
+                            //     "message": ` Your course has been marked as completed `
+                            // }
+                
+                
+                            // sendCliqIntimation(studentObject).then(result => {
+                            //     console.log("What i am getting ", result)
+                            // })
+
+
+
                             resolve({
                                 success: true
                             });

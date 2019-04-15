@@ -4,18 +4,25 @@ import * as Jwt from "jsonwebtoken";
 import * as GoogleAuth from "google-auth-library";
 
 import database from "../../";
-import { IServerConfigurations } from "../../configurations";
+import { IServerConfigurations, getScheduleConfigs } from "../../configurations";
 import { resolve } from "path";
 
 import {
-    getforIndivisualTimePeriod
+    getforIndivisualTimePeriod,
+    getNumberOfAssignmentSubmittedPerUser
 } from "../../helpers/reportHelper";
+
+import {
+    sendSubmissionReport
+} from "../../sendEmail";
+
+
 
 export default class ReportController {
     private configs: IServerConfigurations;
     private database: any;
     private user: any;
-
+   
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
@@ -734,10 +741,14 @@ export default class ReportController {
         });
     }
 
-
+    /**
+     * Total submission report center wise and date wise
+     * @param request 
+     * @param h 
+     */
     public numberOfAssignmentSubmitted(request, h) {
         return new Promise((resolve, reject) => {
-            console.log(request.query.timePeriod);
+
             let numberOfPendingRequests, requestTodays, requestYesterday, requestLastWeek, requestLastMonth;
 
             let totalRecord = getforIndivisualTimePeriod(request.query.centerId, null).then((results) => {
@@ -768,19 +779,18 @@ export default class ReportController {
             });
 
 
-            Promise.all([totalRecord, todaysRecord, yesterdayRecord, lastWeekRecord, lastMonthRecord]).then((pp) => {
-             
-                let finalResult = {
-                    "numberOfPendingRequests": numberOfPendingRequests.itemcounts,
-                    "numberOfRequestCreated": {
-                        "requestTodays": requestTodays.itemcounts,
-                        "requestYesterday": requestYesterday.itemcounts,
-                        "requestLastWeek": requestLastWeek.itemcounts,
-                        "requestLastMonth": requestLastMonth.itemcounts,
-                    }
+            Promise.all([totalRecord, todaysRecord, yesterdayRecord, lastWeekRecord, lastMonthRecord]).then(() => {
 
+                let finalResult = {
+                    "numberOfPendingRequests": numberOfPendingRequests.itemCounts,
+                    "numberOfRequestCreated": {
+                        "requestTodays": requestTodays.itemCounts,
+                        "requestYesterday": requestYesterday.itemCounts,
+                        "requestLastWeek": requestLastWeek.itemCounts,
+                        "requestLastMonth": requestLastMonth.itemCounts,
+                    }
                 }
-               // console.log(finalResult);
+                // console.log(finalResult);
                 resolve(finalResult);
 
             })
@@ -790,43 +800,135 @@ export default class ReportController {
     }
 
 
-
+    /**
+     *  generate submission report student wise and center wise
+     * @param request 
+     * @param h 
+     */
     public numberOfAssignmentSubmittedPerUser(request, h) {
         return new Promise((resolve, reject) => {
-            console.log(request.query.timePeriod);
-            let timePeriod = request.query.timePeriod;
-            let p = database("submissions")
-                .select("users.name")
-                .count('submissions.id as numberOfAssignmentSubmitted')
-                .innerJoin('users', 'users.id', 'submissions.userId')
-                .where({
-                    "users.center": request.query.centerId,
-                    "submissions.state": 'pending'
-                })
-
-                .whereNotNull("users.center")
-                .groupBy('users.id');
-            console.log(p.toString());
-            p.then(rows => {
-
+            getNumberOfAssignmentSubmittedPerUser(request.query.centerId).then(rows => {
                 // check if he is a facilitator?
                 if (rows.length < 1) {
-                    reject(
-                        Boom.expectationFailed(
-                            "no submission is pending for this center"
-                        )
-                    );
+                    resolve([{
+                        name: "No Students",
+                        numberOfAssignmentSubmitted:"No assignment have been submitted"
+                    }])
                 } else {
-
-
-                    // resolve({
-                    //     name:rows[0].name,
-                    //     numberOfAssignmentSubmitted: rows[0].itemcount
-                    // });
                     resolve(rows);
-
                 }
             })
         });
+    }
+
+    /**
+     * This function is to send admin the total submission report in email cemter wise and all
+     * @param request 
+     * @param h 
+     */
+    public sendSubmissionReport(request, h) {
+
+
+        return new Promise((resolve, reject) => {
+            //  console.log("==============i am here in the new Funcion==========");
+            let userWiseDharmshalaCount,
+                userWiseBangaloreCount,
+                userWiseAllCount,
+                totalDharmshalaCount,
+                totalBangaloreCount,
+                totalAllCount
+                ;
+
+            request.query.centerId = 'dharamshala';
+            // console.log(request.query.centerId);
+            let userWsieforDharamshala = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
+                //  console.log("in side then Result:>>>>>>>>:", result);
+                userWiseDharmshalaCount = result;
+                return Promise.resolve(userWiseDharmshalaCount)
+            });
+
+
+            request.query.centerId = 'bangalore';
+            // console.log(request.query.centerId);
+            let userWsieforBangalore = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
+                // console.log("in side then Result:>>>>>>>>:", result);
+                userWiseBangaloreCount = result;
+                return Promise.resolve(userWiseBangaloreCount)
+            });
+
+            request.query.centerId = 'All';
+            //console.log(request.query.centerId);
+            let userWsieforAll = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
+                // console.log("in side then Result:>>>>>>>>:", result);
+                userWiseAllCount = result;
+                return Promise.resolve(userWiseAllCount)
+            });
+
+
+
+
+            request.query.centerId = 'dharamshala';
+            // console.log(request.query.centerId);
+            let forDharamshala = this.numberOfAssignmentSubmitted(request, h).then(result => {
+                //  console.log("in side then Result:>>>>>>>>:", result);
+                totalDharmshalaCount = result;
+                return Promise.resolve(totalDharmshalaCount)
+            });
+
+
+            request.query.centerId = 'bangalore';
+            // console.log(request.query.centerId);
+            let forBangalore = this.numberOfAssignmentSubmitted(request, h).then(result => {
+                // console.log("in side then Result:>>>>>>>>:", result);
+                totalBangaloreCount = result;
+                return Promise.resolve(totalBangaloreCount)
+            });
+
+            request.query.centerId = 'All';
+            // console.log(request.query.centerId);
+            let forAll = this.numberOfAssignmentSubmitted(request, h).then(result => {
+                // console.log("in side then Result:>>>>>>>>:", result);
+                totalAllCount = result;
+                return Promise.resolve(totalAllCount)
+            });
+
+            Promise.all([
+                userWsieforDharamshala,
+                userWsieforBangalore,
+                userWsieforAll,
+                forDharamshala,
+                forBangalore,
+                forAll
+            ]).then(() => {
+                let student = { "email": '', "name": 'Admin' };
+                
+                let scheduleConf = getScheduleConfigs();
+                
+                student.email = scheduleConf.receiverEmail;
+
+                let result = {
+                    "userWise": {
+                        "dharamshala": userWiseDharmshalaCount,
+                        "bangalore": userWiseBangaloreCount,
+                        "all": userWiseAllCount,
+                    },
+                    "totalCount": {
+                        "dharamshala": totalDharmshalaCount,
+                        "bangalore": totalBangaloreCount,
+                        "all": totalAllCount,
+                    }
+                }
+                let response = sendSubmissionReport(student, result);
+                response.then(res => {
+                    if (res == 'sent') {
+                        resolve("Email Send Successfully")
+                    }
+                })
+            });
+        });
+
+
+
+
     }
 }
