@@ -4,7 +4,7 @@ import * as CustomRequest from "request";
 import * as Configs from "./configurations";
 
 interface Details {
-    receiverId: string;
+    receiverEmail: string;
     message: string;
 
 }
@@ -16,7 +16,7 @@ export const sendCliqIntimation = (details: Details) => {
 
     return new Promise(function (resolve, reject) {
     
-        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverId}/message?authtoken=${cliqConfigs.authtoken}`, {
+        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverEmail}/message?authtoken=${cliqConfigs.authtoken}`, {
             json: {
                 text: `${details.message}`
             }

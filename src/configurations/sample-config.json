@@ -47,6 +47,6 @@
       "authtoken": "f9a1f1ae5ab636824e062b6ccdb381cf"
    },
    "sentryConfig": {
-      "sentryDsn": "sentry-dsn-key"
+      "sentryDsn": "cd4de37634ca11e9878a4201c0a8d032"
    }
 }

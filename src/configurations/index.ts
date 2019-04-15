@@ -47,6 +47,10 @@ export interface ScheduleConfigurations {
     timeInSecond: number;
 }
 
+export interface CliqConfigurations {
+    authtoken:  string;
+}
+
 export function checkConfigEnvironment(): void {
     if (!!configs.get("database") === false) {
         console.error('Check GALILEO_ENV variable');
@@ -82,7 +86,7 @@ export function getSentryConfig(){
     return Sentry;
 }
 
-export function getCliqConfig(){
+export function getCliqConfig():CliqConfigurations{
     checkConfigEnvironment()
    
     return configs.get("cliqConfig");
