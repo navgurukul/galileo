@@ -115,4 +115,4 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 }
 ```
 - `npx db-migrate create <migrtaion_file_name>`
-  to create migrations in migrations folder there would be two files created one would contain the sql command to upgrade and one to downgrade
+  To create migrations in migrations folder there would be two files created one would contain the sql command to upgrade and one to downgrade
