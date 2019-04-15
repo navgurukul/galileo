@@ -98,7 +98,21 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 *We will make sure to have frequent merges from `dev` into `master` and release stuff into production*
 
 ### Migrations
-- npx db-migrate up
-- npx db-migrate down
-- database.json has the configurations
-- npx db-migrate create <migrtaion_file_name>
+- `npx db-migrate up` to upgrade migrations
+- `npx db-migrate down` to downgrade migrations
+- create database.json in the root folder with following the configurations
+```js
+{
+    "dev": {
+            "host": "host",
+            "user": "username",
+            "password": "password",
+            "database": "database-name",
+            "driver": "mysql",
+            "multipleStatements": true
+        },
+    "sql-file":true
+}
+```
+- `npx db-migrate create <migrtaion_file_name>`
+  to create migrations in migrations folder there would be two files created one would contain the sql command to upgrade and one to downgrade
