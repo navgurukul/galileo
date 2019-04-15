@@ -152,36 +152,60 @@ export const sendCoursesUnlockedForUserEmail = (student: User, courses) => {
 };
 
 export const sendSubmissionReport = (student: User, courses) => {
+  
   //console.log('insid sendCoursesUnlockedForUserEmail', courses);
   let emailTemplate = `
     <div>
       <h5>
         Hi Admin, <br />
-        
       </h5>
       <div> <span>User Wise : </span>
         <table>
         <tr><td>Location</td><td>Name</td><td>Submission Count</td></tr>`;
-  for (const [key, value] of Object.entries(courses.userWise)) {
-    emailTemplate = emailTemplate + ` <tr><td>${key}</td><td></td><td></td></tr>`;
-    for (let i = 0; i < value.length; i++) {
-      emailTemplate = emailTemplate + ` <tr><td></td><td>${value[i].name}</td><td>${value[i].numberOfAssignmentSubmitted}</td></tr>`;
-    }
 
+  console.log(courses.userWise)
+  for (const [center, userSubmissionReport] of Object.entries(courses.userWise)) {
+    emailTemplate = emailTemplate + `<tr>
+      <td>${center}</td>
+      <td></td>
+      <td></td>
+    </tr>`;
+
+      for (const [i, val] of Object.entries(userSubmissionReport)) {
+        emailTemplate = emailTemplate + `<tr>
+          <td></td>
+          <td>${val.name}</td>
+          <td>${val.numberOfAssignmentSubmitted}</td></tr>`;
+      }
   }
-  emailTemplate = emailTemplate + `</table>
+  emailTemplate = emailTemplate + `
+    </table>
       </div>
+        <div> <span>Total Count: </span>
+          <table>
+            <tr>
+              <td>Location</td>
+              <td>TotalSubmission</td>
+              <td>Today</td>
+              <td>Yesterday</td>
+              <td>LastWeek</td>
+              <td>LastMonth</td>
+            </tr>`;
+  for (const [center, centerReport] of Object.entries(courses.totalCount)) {
 
-      <div> <span>Total Count: </span>
-        <table>
-        <tr><td>Location</td><td>TotalSubmission </td><td>Today</td><td>Yesterday</td><td>LastWeek</td><td>LastMonth</td></tr>`;
-  for (const [key, value] of Object.entries(courses.totalCount)) {
-
-    emailTemplate = emailTemplate + ` <tr><td>${key}</td><td>${value.numberOfPendingRequests}</td><td>${value.numberOfRequestCreated.requestTodays}</td><td>${value.numberOfRequestCreated.requestYesterday}</td><td>${value.numberOfRequestCreated.requestLastWeek}</td><td>${value.numberOfRequestCreated.requestLastMonth}</td></tr>`;
+    emailTemplate = emailTemplate + `<tr>
+          <td>${center}</td>
+          <td>${centerReport["numberOfPendingRequests"]}</td>
+          <td>${centerReport["numberOfRequestCreated"].requestTodays}</td>
+          <td>${centerReport["numberOfRequestCreated"].requestYesterday}</td>
+          <td>${centerReport["numberOfRequestCreated"].requestLastWeek}</td>
+          <td>${centerReport["numberOfRequestCreated"].requestLastMonth}</td>
+        </tr>`;
 
 
   }
-  emailTemplate = emailTemplate + `</table>
+  emailTemplate = emailTemplate + `
+        </table>
       </div>
     </div>
   `;

@@ -45,6 +45,7 @@ export interface CouseConfigurations {
 
 export interface ScheduleConfigurations {
     timeInSecond: number;
+    receiverEmail: string;
 }
 
 export interface CliqConfigurations {
@@ -88,6 +89,5 @@ export function getSentryConfig(){
 
 export function getCliqConfig():CliqConfigurations{
     checkConfigEnvironment()
-   
     return configs.get("cliqConfig");
 }

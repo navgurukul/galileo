@@ -4,7 +4,7 @@ import * as CustomRequest from "request";
 import * as Configs from "./configurations";
 
 interface Details {
-    receiverEmail: string;
+    receiverId: string;
     message: string;
 
 }
@@ -15,14 +15,18 @@ export const sendCliqIntimation = (details: Details) => {
     // Email template
 
     return new Promise(function (resolve, reject) {
-    
-        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverEmail}/message?authtoken=${cliqConfigs.authtoken}`, {
+
+        let cliqBaseApiUrl = "https://cliq.zoho.com/api/v2/buddies";
+        let email = details.receiverId;
+        let authToken = cliqConfigs.authtoken;
+
+        let sendMessageToCliqUrl = `${cliqBaseApiUrl}/${email}/message?authtoken=${authToken}`
+
+        CustomRequest.post(sendMessageToCliqUrl , {
             json: {
                 text: `${details.message}`
             }
         }, function (error, response, body) {
-
-           
 
             if (!error && response.statusCode == 204) {
 
@@ -33,14 +37,6 @@ export const sendCliqIntimation = (details: Details) => {
                 console.log(body);
                 return resolve(body);
             }
-
-
-
-
-
         })
     });
-
-
-
 };

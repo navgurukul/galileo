@@ -44,10 +44,6 @@ export default class AssignmentController {
 
     public postExerciseSubmission(request, h) {
         return new Promise((resolve, reject) => {
-
-
-
-
             database("course_enrolments")
                 .select("*")
                 .where({
@@ -393,20 +389,19 @@ export default class AssignmentController {
                                     })
                                     .then(rows => {
                                         // send email using aws to the student and the reviewer--
-                                        sendAssignmentReviewPendingEmail(
-                                            student,
-                                            reviewer,
-                                            rows[0]
-                                        );
-
+                                        // sendAssignmentReviewPendingEmail(
+                                        //     student,
+                                        //     reviewer,
+                                        //     rows[0]
+                                        // );
 
                                         let reviewerObject = {
-                                            "receiverId": reviewer,
-                                            "message": `${student.name} as submitted his assignment. Please review it`
+                                            "receiverId": reviewer.email,
+                                            "message": `${student.name} as submitted his assignment. Please review it http://saral.navgurukul.org/assignment-review?submissionId=${rows[0].submissionId}`
                                         }
                                         let studentObject = {
                                             "receiverId": student.email,
-                                            "message": `Reviewer has been intimated for your assignment review`
+                                            "message": `${reviewer.name} has been intimated for your assignment review`
                                         }
 
 
@@ -416,8 +411,6 @@ export default class AssignmentController {
                                         sendCliqIntimation(studentObject).then(result => {
                                             console.log("What i am getting ", result)
                                         })
-
-
 
                                         resolve(rows[0]);
                                     });
@@ -564,7 +557,8 @@ export default class AssignmentController {
             //request.userId = 29;
             let developerEmails = [
                 "amar17@navgurukul.org",
-                "diwakar17@navgurukul.org"
+                "diwakar17@navgurukul.org",
+                "a@navgurukul.org"
                 // 'lalita17@navgurukul.org',
                 // 'kanika17@navgurukul.org',
                 // 'rani17@navgurukul.org',
@@ -743,9 +737,6 @@ export default class AssignmentController {
                                             //moved the check for validaity of submission Id to top section
 
                                             let submission = rows[0];
-                                            console.log('submission sss');
-                                            console.log(submission);
-                                            console.log('submission sss');
                                             // submissions once reviewed shouldn't be reviewed again.
                                             if (submission.state !== "pending") {
                                                 reject(
@@ -910,24 +901,22 @@ export default class AssignmentController {
                                                                         })
                                                                         .then(
                                                                             rows => {
-
-
-
                                                                                 let studentObject = {
-                                                                                    "receiverId": student.email,
-                                                                                    "message": ` Hi ${student.name}, Apka assignment check hogya ha`
+                                                                                    "receiverId": student.name,
+                                                                                    "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
+                                                                                                `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
                                                                                 }
 
 
-                                                                                sendCliqIntimation(studentObject).then(result => {
+                                                                                // sendAssignmentReviewCompleteEmail(
+                                                                                //     student,
+                                                                                //     reviewer,
+                                                                                //     rows[0]
+                                                                                // );
+                                                                                return sendCliqIntimation(studentObject).then(result => {
                                                                                     console.log("What i am getting ", result)
                                                                                 })
 
-                                                                                return sendAssignmentReviewCompleteEmail(
-                                                                                    student,
-                                                                                    reviewer,
-                                                                                    rows[0]
-                                                                                );
                                                                             }
                                                                         );
                                                                 });
@@ -1006,19 +995,19 @@ export default class AssignmentController {
                                                                 })
                                                                 .then(rows => {
                                                                     let studentObject = {
-                                                                        "receiverId": student.email,
-                                                                        "message": ` Hi ${student.name}, Apka assignment check hogya ha`
+                                                                        "receiverId": student.name,
+                                                                        "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
+                                                                                    `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
                                                                     }
 
-
-                                                                    sendCliqIntimation(studentObject).then(result => {
+                                                                    return sendCliqIntimation(studentObject).then(result => {
                                                                         console.log("What i am getting ", result)
                                                                     })
-                                                                    return sendAssignmentReviewCompleteEmail(
-                                                                        student,
-                                                                        reviewer,
-                                                                        rows[0]
-                                                                    );
+                                                                //     return sendAssignmentReviewCompleteEmail(
+                                                                //         student,
+                                                                //         reviewer,
+                                                                //         rows[0]
+                                                                //     );
                                                                 });
                                                         });
                                                     })
@@ -1225,17 +1214,14 @@ export default class AssignmentController {
             let coursesName = _.pluck(courses, "name").toString();
             let studentObject = {
                 "receiverId": student.email,
-                "message": ` Hi ${student.name}, Apka assignment check hogya ha`
+                "message": `Hi ${student.name}, Apka yeh ${coursesName} unlockced hogya ha.`
             }
 
 
             sendCliqIntimation(studentObject).then(result => {
                 console.log("What i am getting ", result)
             })
-            sendCoursesUnlockedForUserEmail(student, coursesName);
-            console.log("coursesName");
-            console.log(coursesName);
-            console.log("coursesName");
+            // sendCoursesUnlockedForUserEmail(student, coursesName);
         });
     }
 }

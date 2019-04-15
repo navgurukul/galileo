@@ -3,8 +3,9 @@ import * as Configs from "../configurations";
 import database from "../";
 
 export const getforIndivisualTimePeriod = function (centerId: string, date: string) {
+
     return database("submissions")
-        .count('submissions.id as itemcounts')
+        .count('submissions.id as itemCounts')
         .innerJoin('users', 'users.id', 'submissions.userId')
         .where({
 
@@ -43,14 +44,6 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
 
                     break;
                 }
-                // case "lastMonth": {
-                //     //statements; 
-                //     this.whereRaw(
-                //         "date(submittedAt) >= date(DATE_SUB(NOW(), INTERVAL 1 month))"
-                //     );
-
-                //     break;
-                // }
                 case "today": {
                     //statements; 
                     this.whereRaw(
@@ -64,18 +57,12 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
 
         })
         .whereNotNull("users.center")
-
-
         .then(rows => {
 
             // check if he is a facilitator?
             if (rows.length < 1) {
-
+                return Promise.resolve({itemCounts:0});
             } else {
-                //console.log("total record", rows);
-                // return rows[0].itemcount
-                // return  totalRecord = rows[0].itemcount
-
                 return Promise.resolve(rows[0]);
 
             }
@@ -105,12 +92,8 @@ export const getNumberOfAssignmentSubmittedPerUser = function (centerId: string)
 
             // check if he is a facilitator?
             if (rows.length < 1) {
-
+                return Promise.resolve([]);
             } else {
-              //  console.log(`total record for ${centerId} =`, rows);
-                // return rows[0].itemcount
-                // return  totalRecord = rows[0].itemcount
-
                 return Promise.resolve(rows);
 
             }

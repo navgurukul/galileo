@@ -782,12 +782,12 @@ export default class ReportController {
             Promise.all([totalRecord, todaysRecord, yesterdayRecord, lastWeekRecord, lastMonthRecord]).then(() => {
 
                 let finalResult = {
-                    "numberOfPendingRequests": numberOfPendingRequests.itemcounts,
+                    "numberOfPendingRequests": numberOfPendingRequests.itemCounts,
                     "numberOfRequestCreated": {
-                        "requestTodays": requestTodays.itemcounts,
-                        "requestYesterday": requestYesterday.itemcounts,
-                        "requestLastWeek": requestLastWeek.itemcounts,
-                        "requestLastMonth": requestLastMonth.itemcounts,
+                        "requestTodays": requestTodays.itemCounts,
+                        "requestYesterday": requestYesterday.itemCounts,
+                        "requestLastWeek": requestLastWeek.itemCounts,
+                        "requestLastMonth": requestLastMonth.itemCounts,
                     }
                 }
                 // console.log(finalResult);
@@ -810,11 +810,10 @@ export default class ReportController {
             getNumberOfAssignmentSubmittedPerUser(request.query.centerId).then(rows => {
                 // check if he is a facilitator?
                 if (rows.length < 1) {
-                    reject(
-                        Boom.expectationFailed(
-                            "no submission is pending for this center"
-                        )
-                    );
+                    resolve([{
+                        name: "No Students",
+                        numberOfAssignmentSubmitted:"No assignment have been submitted"
+                    }])
                 } else {
                     resolve(rows);
                 }
@@ -902,11 +901,11 @@ export default class ReportController {
                 forAll
             ]).then(() => {
                 let student = { "email": '', "name": 'Admin' };
-               
-                let  scheduleConf=getScheduleConfigs();
                 
-                student.email =scheduleConf.receiverEmail;
-               
+                let scheduleConf = getScheduleConfigs();
+                
+                student.email = scheduleConf.receiverEmail;
+
                 let result = {
                     "userWise": {
                         "dharamshala": userWiseDharmshalaCount,
@@ -919,31 +918,13 @@ export default class ReportController {
                         "all": totalAllCount,
                     }
                 }
-                // for (const [key, value] of Object.entries(result.totalCount)) {
-
-                //     console.log(key);
-                //     console.log(value);
-                //     console.log(value.numberOfPendingRequests)
-                //     console.log(value.numberOfRequestCreated.requestYesterday)
-                //     // for (let i=0; i< value.length;i++) {
-                //     //     console.log(value.numberOfPendingRequests)
-                //     //     console.log(value.numberOfRequestCreated.requestYesterday)
-                //     // }
-                // }
-
                 let response = sendSubmissionReport(student, result);
-                console.log(response);
                 response.then(res => {
-                    console.log(res);
                     if (res == 'sent') {
-                        console.log("Email Send Successfully");
                         resolve("Email Send Successfully")
                     }
                 })
-
             });
-
-
         });
 
 

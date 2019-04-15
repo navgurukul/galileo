@@ -1,6 +1,6 @@
 import * as Boom from "boom";
 import * as Hapi from "hapi";
-import * as knex from "knex";
+// import * as knex from "knex";
 
 import database from "../../";
 import {
@@ -392,7 +392,7 @@ export default class CourseController {
                         "submissions.userId"
                     )
                     .leftJoin("submissions", function () {
-                        this.on("submissions.id", "=", knex.raw(xyz)).on(
+                        this.on("submissions.id", "=", database.raw(xyz)).on(
                             "submissions.userId",
                             "=",
                             request.userId
