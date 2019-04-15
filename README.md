@@ -97,7 +97,8 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 
 *We will make sure to have frequent merges from `dev` into `master` and release stuff into production*
 
-# Need to write about db-migrate.
-# add database.json
-# configs
-# db-migrate create <migrtaion_file_name>
+### Migrations
+- npx db-migrate up
+- npx db-migrate down
+- database.json has the configurations
+- npx db-migrate create <migrtaion_file_name>
