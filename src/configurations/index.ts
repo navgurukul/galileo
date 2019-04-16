@@ -61,7 +61,7 @@ export function checkConfigEnvironment(): void {
 
 export function getDatabaseConfig(): IDataConfiguration {
     checkConfigEnvironment();
-    //console.log("Node Environment: ", process.env.NODE_ENV);
+    //
     return configs.get("database");
 }
 

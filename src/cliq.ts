@@ -30,11 +30,11 @@ export const sendCliqIntimation = (details: Details) => {
 
             if (!error && response.statusCode == 204) {
 
-                console.log('message sent successsfully')
+                
                 return resolve(response.statusCode);
-                //console.log(body) // Show the HTML for the Google homepage.
+                //
             } else {
-                console.log(body);
+                
                 return resolve(body);
             }
         })

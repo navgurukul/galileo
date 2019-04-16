@@ -25,7 +25,7 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
     let inside = false;
     let insideInnerList = false;
     let isSolutionToken;
-    console.log(globals)
+    
     for (let i=1; i<tokens.length-1; i++) {
         tokens[i]["text"] = tokens[i]["text"] ? tokens[i]["text"].trim() : undefined;
         if (tokens[i]["type"]==="list_start" && inside===true) {
@@ -72,7 +72,7 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
             inside=false;
         }
     }
-    // console.log(seqNumbers)
+    // 
     return seqNumbers;
 };
 

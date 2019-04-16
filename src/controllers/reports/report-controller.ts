@@ -730,7 +730,7 @@ export default class ReportController {
                             );
                         });
 
-                        // console.log(exercises);
+                        // 
                         resolve({
                             ...response.courseData,
                             menteesExercisesReport: menteeSubmissions,
@@ -790,7 +790,7 @@ export default class ReportController {
                         "requestLastMonth": requestLastMonth.itemCounts,
                     }
                 }
-                // console.log(finalResult);
+                // 
                 resolve(finalResult);
 
             })
@@ -830,7 +830,7 @@ export default class ReportController {
 
 
         return new Promise((resolve, reject) => {
-            //  console.log("==============i am here in the new Funcion==========");
+            //  
             let userWiseDharmshalaCount,
                 userWiseBangaloreCount,
                 userWiseAllCount,
@@ -840,26 +840,26 @@ export default class ReportController {
                 ;
 
             request.query.centerId = 'dharamshala';
-            // console.log(request.query.centerId);
+            // 
             let userWsieforDharamshala = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
-                //  console.log("in side then Result:>>>>>>>>:", result);
+                //  
                 userWiseDharmshalaCount = result;
                 return Promise.resolve(userWiseDharmshalaCount)
             });
 
 
             request.query.centerId = 'bangalore';
-            // console.log(request.query.centerId);
+            // 
             let userWsieforBangalore = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
-                // console.log("in side then Result:>>>>>>>>:", result);
+                // 
                 userWiseBangaloreCount = result;
                 return Promise.resolve(userWiseBangaloreCount)
             });
 
             request.query.centerId = 'All';
-            //console.log(request.query.centerId);
+            //
             let userWsieforAll = this.numberOfAssignmentSubmittedPerUser(request, h).then(result => {
-                // console.log("in side then Result:>>>>>>>>:", result);
+                // 
                 userWiseAllCount = result;
                 return Promise.resolve(userWiseAllCount)
             });
@@ -868,26 +868,26 @@ export default class ReportController {
 
 
             request.query.centerId = 'dharamshala';
-            // console.log(request.query.centerId);
+            // 
             let forDharamshala = this.numberOfAssignmentSubmitted(request, h).then(result => {
-                //  console.log("in side then Result:>>>>>>>>:", result);
+                //  
                 totalDharmshalaCount = result;
                 return Promise.resolve(totalDharmshalaCount)
             });
 
 
             request.query.centerId = 'bangalore';
-            // console.log(request.query.centerId);
+            // 
             let forBangalore = this.numberOfAssignmentSubmitted(request, h).then(result => {
-                // console.log("in side then Result:>>>>>>>>:", result);
+                // 
                 totalBangaloreCount = result;
                 return Promise.resolve(totalBangaloreCount)
             });
 
             request.query.centerId = 'All';
-            // console.log(request.query.centerId);
+            // 
             let forAll = this.numberOfAssignmentSubmitted(request, h).then(result => {
-                // console.log("in side then Result:>>>>>>>>:", result);
+                // 
                 totalAllCount = result;
                 return Promise.resolve(totalAllCount)
             });

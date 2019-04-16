@@ -29,7 +29,7 @@ const server = Server.init(serverConfigs, databaseConfig)
 
        
         if (!module.parent) {
-            // console.log("yahan"); 
+            // 
             server.start(() => {
                 console.log('Server running at:', server.info.uri);
             });
@@ -43,8 +43,8 @@ const server = Server.init(serverConfigs, databaseConfig)
 
                     // Sentry.captureMessage('Something went wrong');
                     // Sentry.captureMessage(`${event.error ? event.error.message : 'unknown'}`);
-                    // console.log(`koushik Request ${event.request} error: ${event.error ? event.error.message : 'unknown'}`);
-                    //console.log(event.error);
+                    // 
+                    //
                     var subStr = [];
                     if (event.error != undefined) {
                         if (event.error.stack != undefined) {
@@ -90,8 +90,8 @@ const server = Server.init(serverConfigs, databaseConfig)
                 
                 request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
                     if (!error && response.statusCode == 200) {
-                        console.log('im ok')
-                         //console.log(body) // Show the HTML for the Google homepage.
+                        
+                         //
                     }
                 })
             });

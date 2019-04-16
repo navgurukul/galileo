@@ -68,7 +68,7 @@ export default class CourseController {
                     });
                 });
             } else if (request.headers.authorization !== "") {
-                console.log('inside else');
+                
                 enrolledQ = database("course_enrolments")
                     .select(
                         "courses.id",
@@ -324,10 +324,10 @@ export default class CourseController {
 
         // query.then((rows) => {
         //     let exercise = rows[0];
-        //     console.log(rows);
+        //     
         //     for (let i = 0; i < rows.length; i++) {
         //        if (parseInt(exercise.sequenceNum, 10) < 100) {
-        //             console.log("yaha");
+        //             
         //             exercise = rows[i];
         //             if (!Number.isInteger(exercise.sequenceNum)) {
         //                 let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
@@ -338,7 +338,7 @@ export default class CourseController {
         //             }
         //         } else {
         //            exercise = rows[i];
-        //            console.log(exercise.sequenceNum + " vahan");
+        //            
         //            if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
         //               let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
         //               exercises[parentIndex].childExercises.push(exercise);
@@ -663,7 +663,7 @@ export default class CourseController {
         });
     }
     // public enrollInCourse(request, h) {
-    //     //console.log('###########################');
+    //     //
     //     //this.isStudentEligibleToEnroll(request.userId, request.params.courseId);
     //     //return;
     //     return new Promise((resolve, reject) => {
@@ -684,15 +684,15 @@ export default class CourseController {
     //             .then((response) => {
     //                 if (response.alreadyEnrolled === false) {
     //                     // if(this.isStudentEligibleToEnroll(request.userId, request.params.courseId)) {
-    //                     //     console.log('aaaaaa');
+    //                     //     
     //                     //     return Promise.resolve({studentCanBeEnrolled: true});
     //                     // } else {
-    //                     //     console.log('bbbbbbbbbbbb');
+    //                     //     
     //                     //     reject(Boom.expectationFailed('the course does not atistfy dependency'));
     //                     // }
     //                     this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((data) => {
-    //                         console.log('data');
-    //                         console.log(data);
+    //                         
+    //                         
     //                     });
     //                 }
     //             })
@@ -1063,7 +1063,7 @@ export default class CourseController {
                 
                 
                             // sendCliqIntimation(studentObject).then(result => {
-                            //     console.log("What i am getting ", result)
+                            //     
                             // })
 
 
@@ -1289,7 +1289,7 @@ export default class CourseController {
                                         )
                                     );
                                 } else {
-                                    //  console.log(rows);
+                                    //  
                                     resolve({ data: rows });
                                 }
                             });
@@ -1417,7 +1417,7 @@ export default class CourseController {
 
 
                 }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
-                    console.log(isAdmin, isFacilitator, isTnp, userRole);
+                    
                     // only admin facilitator or tnp  are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
                         let mentorListResult = [],
@@ -1465,7 +1465,7 @@ export default class CourseController {
                             .whereNotIn("mentors.mentor", subquery)
                             .orderBy("mentors.mentor")
                             .groupBy("mentors.mentor");
-                        //console.log(mentorList.toString());
+                        //
 
                         mentorList.then(rows => {
                             for (let j = 0; j < rows.length; j++) {
@@ -1520,7 +1520,7 @@ export default class CourseController {
                             })
                             .orderBy("mentors.mentee");
 
-                        //console.log(menteeList.toString());
+                        //
                         menteeList.then(rows => {
                             if (rows.length < 1) {
                                 reject(
@@ -1628,7 +1628,7 @@ export default class CourseController {
                         Promise.all([mentor, mentee])
                             .then(() => {
                                 if (mentorExist && menteeExist) {
-                                    console.log(mentorExist, menteeExist);
+                                    
 
                                     return database("mentors")
                                         .select("*")
@@ -1729,7 +1729,7 @@ export default class CourseController {
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     const center = access.center;
-                    console.log("all accesss:", access);
+                    
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
 
 
@@ -1814,7 +1814,7 @@ export default class CourseController {
 
                                 let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
                                 allCenter = Array.from(locationSet);
-                                console.log("all center:", allCenter);
+                                
                                 let getMentorMenteeQuery = database('mentors').select('mentors.id as mentorsTableId', 'users.id as userID')
                                     .innerJoin('users', 'users.id', 'mentors.mentor')
                                     .where({
@@ -1844,7 +1844,7 @@ export default class CourseController {
                                                 this.whereIn('users.center', allCenter)
                                         }).then((mentors) => {
 
-                                            //  console.log("data i received:", centerWiseRows);
+                                            //  
                                             // if the course for given id doesn't exist
                                             if (mentors.length < 1) {
                                                 reject(Boom.expectationFailed(`You are not allowed to delete record for this location `));

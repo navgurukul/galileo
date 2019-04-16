@@ -29,7 +29,7 @@ export default (): IPlugin => {
                     options: opts
                 })
                 .then(() => {
-                //   console.log("hello")
+                //   
                   resolve();
                 });
             });

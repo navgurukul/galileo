@@ -41,7 +41,7 @@ import { resolve } from "dns";
  */
 
 const Sentry = Configs.getSentryConfig();
-// console.log(Sentry)
+// 
 // Check if the --courseDir parameter is correct
 
 let p = validateCourseDirParam()
@@ -83,15 +83,15 @@ let p = validateCourseDirParam()
         return Promise.resolve(courseId);
     })
     .then(courseId => {
-        // console.log(globals)
+        // 
         // add or update the exercises in the DB
         let promises = addOrUpdateExercises(globals.exercises, courseId);
         Promise.all(promises);
     })
     .then(() => {
         // say your goodbyes :)
-        // console.log( colors.green("The requested course has been seeded/updated into the DB.") );
-        // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
+        // 
+        // 
         setTimeout(function() {
             database.destroy();
             process.exit();

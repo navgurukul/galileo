@@ -47,7 +47,7 @@ const sendEmail = (receiverEmails: Array<string>, htmlTemplate: string, subject:
 
   // Handle promise's fulfilled/rejected states
   return sendPromise.then(function (data) {
-    console.log(data.MessageId);
+    
     return Promise.resolve("sent");
   })
     .catch(function (err) {
@@ -107,7 +107,7 @@ export const sendAssignmentReviewPendingEmail = (student: User, reviewer: User, 
 
 
 export const sendAssignmentReviewCompleteEmail = (student: User, reviewer: User, exerciseDetail: ExerciseDetail) => {
-  console.log('sendAssignmentReviewCompleteEmail', student, exerciseDetail, 'sendAssignmentReviewCompleteEmail');
+  
   let emailTemplate = `
       <div>
         <h5>
@@ -132,7 +132,7 @@ export const sendAssignmentReviewCompleteEmail = (student: User, reviewer: User,
 };
 
 export const sendCoursesUnlockedForUserEmail = (student: User, courses) => {
-  //console.log('insid sendCoursesUnlockedForUserEmail', courses);
+  //
   let emailTemplate = `
     <div>
       <h5>
@@ -153,7 +153,7 @@ export const sendCoursesUnlockedForUserEmail = (student: User, courses) => {
 
 export const sendSubmissionReport = (student: User, courses) => {
   
-  //console.log('insid sendCoursesUnlockedForUserEmail', courses);
+  //
   let emailTemplate = `
     <div>
       <h5>
@@ -163,7 +163,7 @@ export const sendSubmissionReport = (student: User, courses) => {
         <table>
         <tr><td>Location</td><td>Name</td><td>Submission Count</td></tr>`;
 
-  console.log(courses.userWise)
+  
   for (const [center, userSubmissionReport] of Object.entries(courses.userWise)) {
     emailTemplate = emailTemplate + `<tr>
       <td>${center}</td>

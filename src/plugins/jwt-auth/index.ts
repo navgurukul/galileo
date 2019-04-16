@@ -11,11 +11,11 @@ export default (): IPlugin => {
 
                 server.register(require('hapi-auth-jwt2'))
                 .then(() => {
-                    //console.log("hello")
+                    //
                     const validateUser = (decoded, request) => {
                         request.userId = decoded.id;
-                        console.log('this is the id', request.userId);
-                        // console.log( decoded);
+                        
+                        // 
                         // return cb(null, true);
                         return {
                             isValid:true

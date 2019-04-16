@@ -63,7 +63,7 @@ export function parseAndUploadImage(
             };
             s3.upload(params, function(err, data) {
                 if (err) {
-                    console.log("error in s3 upload", err);
+                    
                 } else {
                     return resolve({
                         relativePath: imagePath,

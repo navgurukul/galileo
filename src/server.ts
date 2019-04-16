@@ -42,7 +42,7 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
         // Register all the routes once all plugins have been initialized
-        // console.log(pluginPromises);
+        // 
         Promise.all(pluginPromises).then(() => {
             Users.init(server, serverConfigs, databaseConfig);
             Courses.init(server, serverConfigs, databaseConfig);

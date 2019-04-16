@@ -199,7 +199,7 @@ export default class UserController {
         let that = this;
 
         return new Promise((resolve, reject) => {
-            //console.log(request.payload.uploadImage);
+            //
 
             let imageString = request.payload.uploadImage;
             let extension = undefined;
@@ -265,12 +265,12 @@ export default class UserController {
                                 )
                             );
                         } else {
-                            //console.log('---------------------', data);
+                            //
 
                             userDeatils.profilePicture =
                                 "https://s3.ap-south-1.amazonaws.com/saralng/" +
                                 imagepath;
-                            //console.log(userDeatils);
+                            //
                             that.userModel
                                 .upsert(
                                     userDeatils,

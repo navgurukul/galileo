@@ -406,10 +406,10 @@ export default class AssignmentController {
 
 
                                         sendCliqIntimation(reviewerObject).then(result => {
-                                            console.log("What i am getting ", result)
+                                            
                                         })
                                         sendCliqIntimation(studentObject).then(result => {
-                                            console.log("What i am getting ", result)
+                                            
                                         })
 
                                         resolve(rows[0]);
@@ -439,7 +439,7 @@ export default class AssignmentController {
         //         }
         //     });
         //     stream.on('error', (err) => {
-        //         console.log(err);
+        //         
         //         return reply(Boom.badImplementation("There was some problem uploading the file. Please try again."));
         //     });
         //     stream.on('finish', () => {
@@ -621,9 +621,9 @@ export default class AssignmentController {
                         .innerJoin("users", "submissions.userId", "users.id")
                         .where(response.whereClause)
                         .orderBy("submittedAt", "desc")
-                        // console.log(p.toSQL())
+                        // 
                         .then(rows => {
-                            console.log(rows)
+                            
                             let submissions = [];
                             for (let i = 0; i < rows.length; i++) {
                                 let submission = rows[i];
@@ -634,7 +634,7 @@ export default class AssignmentController {
                                 }
                                 submissions.push(submission);
                             }
-                            // console.log(submissions)
+                            // 
                             resolve({ data: submissions });
                         });
                 });
@@ -676,7 +676,7 @@ export default class AssignmentController {
                         return Promise.reject("Rejected");
                     }
                     let submission = rows[0];
-                    //console.log('submission', submission, 'submission' );
+                    //
                     // submissions once reviewed shouldn't be reviewed again.
                     return Promise.resolve(submission);
                 })
@@ -684,11 +684,11 @@ export default class AssignmentController {
                     database('exercises').select('courseId').where({ 'exercises.id': submission.exerciseId }).then((rows) => {
 
                         courseId = rows[0].courseId;
-                        //console.log('courseId1', courseId, 'courseId1' );
+                        //
                         return Promise.resolve(courseId);
                     }).then(courseId => {
-                        console.log('arguments', request.userId, courseId), 'arguments';
-                        //console.log(courseId);
+                        
+                        //
                         database("course_enrolments")
                             .select("*")
                             .where({
@@ -769,7 +769,7 @@ export default class AssignmentController {
                                                     let usersFacilatorId = rows[0]
                                                         ? rows[0].userId
                                                         : null;
-                                                    //console.log(usersFacilator.userId);
+                                                    //
 
                                                     if (
                                                         usersId ===
@@ -822,7 +822,7 @@ export default class AssignmentController {
                                         })
                                         .then(({ updateFields, submission }) => {
                                             if (isAssigmentApproved) {
-                                                //console.log("isAssigmentApproved");
+                                                //
                                                 this.checkDependencyCourses(
                                                     request.userId
                                                 ).then(courses => {
@@ -914,7 +914,7 @@ export default class AssignmentController {
                                                                                 //     rows[0]
                                                                                 // );
                                                                                 return sendCliqIntimation(studentObject).then(result => {
-                                                                                    console.log("What i am getting ", result)
+                                                                                    
                                                                                 })
 
                                                                             }
@@ -929,7 +929,7 @@ export default class AssignmentController {
                                                         });
                                                 });
                                             } else {
-                                                //console.log("i am end here in the right position : ", updateFields, submission);
+                                                //
 
                                                 // Updating the submission with the reviewers review.
                                                 database("submissions")
@@ -1001,7 +1001,7 @@ export default class AssignmentController {
                                                                     }
 
                                                                     return sendCliqIntimation(studentObject).then(result => {
-                                                                        console.log("What i am getting ", result)
+                                                                        
                                                                     })
                                                                 //     return sendAssignmentReviewCompleteEmail(
                                                                 //         student,
@@ -1122,9 +1122,9 @@ export default class AssignmentController {
                                             );
                                         })
                                         .then(mergedResult => {
-                                            //console.log('@@@@@@@@@@@@@@@@@@@ mergedResult @@@@@@@@');
-                                            //console.log(mergedResult);
-                                            //console.log('%%%%%%%%%%%%%%%%%%%%%%%mergedResult%%%%%%%%%%%%%%%%%%%5');
+                                            //
+                                            //
+                                            //
                                             allAvailableCourses =
                                                 mergedResult[
                                                 "allAvailableCourses"
@@ -1139,9 +1139,9 @@ export default class AssignmentController {
                                                 ];
                                             courseReliesOn =
                                                 mergedResult["courseReliesOn"];
-                                            //console.log('availableCourses');
-                                            //console.log(availableCourses);
-                                            //console.log('availableCourses');
+                                            //
+                                            //
+                                            //
                                             availableCourses = manipulateResultSet(
                                                 totalExercisesPerCourse,
                                                 exerciseCompeletedPerCourse,
@@ -1151,9 +1151,9 @@ export default class AssignmentController {
                                             );
 
                                             resolve(availableCourses);
-                                            //console.log('availableCourses');
-                                            //console.log(availableCourses);
-                                            //console.log('availableCourses');
+                                            //
+                                            //
+                                            //
                                             //return Promise.resolve('abc');
                                         });
                                 });
@@ -1168,16 +1168,16 @@ export default class AssignmentController {
         userId
     ) {
         let initialAvaiblecourseIDs = _.pluck(initialAvailableCourses, "id");
-        // console.log('initial available courses');
-        // console.log(initialAvaiblecourseIDs);
-        // console.log('initial available courses');
+        // 
+        // 
+        // 
         let availableCoursesPostAssigmentApprovalIDs = _.pluck(
             availableCoursesPostAssigmentApproval,
             "id"
         );
-        // console.log('availableCoursesPostAssigmentApprovalIDs');
-        // console.log(availableCoursesPostAssigmentApprovalIDs);
-        // console.log('availableCoursesPostAssigmensstApprovalIDs');
+        // 
+        // 
+        // 
         let unlockedCourses = _.difference(
             availableCoursesPostAssigmentApprovalIDs,
             initialAvaiblecourseIDs
@@ -1185,9 +1185,9 @@ export default class AssignmentController {
         unlockedCourses.length > 0
             ? this.ProcessEmailNotification(unlockedCourses, userId)
             : null;
-        //console.log("unlockedCourse");
-        //console.log(unlockedCourses);
-        //console.log("unlockedCourse");
+        //
+        //
+        //
     }
 
     public ProcessEmailNotification(unlockedCourses, userId) {
@@ -1219,7 +1219,7 @@ export default class AssignmentController {
 
 
             sendCliqIntimation(studentObject).then(result => {
-                console.log("What i am getting ", result)
+                
             })
             // sendCoursesUnlockedForUserEmail(student, coursesName);
         });

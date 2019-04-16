@@ -110,19 +110,19 @@ export const listToTree = function(list) {
         map[list[i].menteeId] = i; // initialize the map
         list[i].children = []; // initialize the children
     }
-    // console.log(map)
+    // 
     // for (i = 0; i < list.length; i += 1) {
     for (i = 0; i < list.length; i++) {
         node = list[i];
 
-        // console.log(i,node.menteeId,node.mentorId,map[node.mentorId], list[map[node.mentorId]]);
+        // 
         //if (node.parent !== "0") {
         // if you have dangling branches check that map[node.parentId] exists
 
         //   if(map[node.mentorId]){
         if (map[node.mentorId] == 0 || map[node.mentorId] > 0) {
             list[map[node.mentorId]].children.push(node);
-            // console.log('-------',list,'--------');
+            // 
         } else {
             roots.push(node);
         }
@@ -215,24 +215,24 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
             availableCourses,
             courseConfig.courseCompleteionCriteria
         );
-        // console.log('coursesEligibleToEnrollIn');
-        // console.log(coursesEligibleToEnrollIn);
-        // console.log('coursesEligibleToEnrollIn');
+        // 
+        // 
+        // 
         return _.where(coursesEligibleToEnrollIn, { id: courseId }).length > 0
             ? true
             : false;
     });
 
     let result = await a;
-    // console.log('result');
-    // console.log(result);
-    // console.log('result');
+    // 
+    // 
+    // 
     return result;
 };
 
 export const addingRootNode = function(rootArray, ChildArray) {
     var i, j;
-    //console.log(rootArray);
+    //
     for (i = 0; i < rootArray.length; i += 1) {
         rootArray[i].children = [];
         for (j = 0; j < ChildArray.length; j += 1) {
