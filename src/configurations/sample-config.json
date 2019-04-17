@@ -47,6 +47,6 @@
       "authtoken": "f9a1f1ae5ab636824e062b6ccdb381cf"
    },
    "sentryConfig": {
-      "sentryDsn": "cd4de37634ca11e9878a4201c0a8d032"
+      "sentryDsn": "https://cd4de37634ca11e9878a4201c0a8d032@sentry.io/1398087"
    }
 }

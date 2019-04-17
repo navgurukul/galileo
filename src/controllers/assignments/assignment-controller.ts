@@ -15,8 +15,11 @@ import {
     sendCoursesUnlockedForUserEmail
 } from "../../sendEmail";
 import {
-    sendCliqIntimation
+    sendCliqIntimation,
+    sendCliqIntimationTest
 } from "../../cliq";
+import * as fs from "fs";
+let ejs = require('ejs')
 
 var _ = require("underscore");
 
@@ -44,6 +47,63 @@ export default class AssignmentController {
 
     public postExerciseSubmission(request, h) {
         return new Promise((resolve, reject) => {
+            request.userId = 1;
+            var imagepath =
+                "img/avatar/";
+            // var ret = ejs.render(imagepath, {
+            //     users: "adada",
+            //     filename: "test"
+            // });
+            // let people = ['geddy', 'neil', 'alex'],
+            // html = ejs.render('<%= people.join(", "); %>', {people: people});
+
+            // console.log("what i am getting layout---- :",html);
+
+
+
+        //   let   filePath=imagepath + 'index.html';
+        //     let myFileLoad = function (filePath) {
+        //         return 'myFileLoad: ' + fs.readFileSync(filePath);
+        //       };
+        //        let people = ['geddy', 'neil', 'alex'],
+        //     html = ejs.render(myFileLoad(filePath), {people: people});
+        //       console.log("what i am getting myFileLoad---- :",html);
+
+
+
+        let people = ['geddy', 'neil', 'alex']
+        let reviewer={"name":"koushik Santra"}
+            // ejs.renderFile(imagepath + 'index.html',{people:people,reviewer:reviewer},  null, function(err, str){
+            //         console.log("what i am getting :",str);
+            //     // str => Rendered HTML string
+            // });
+            let studentObject = {
+                "receiverId": "rahul17@navgurukul.org",
+                // "receiverId": "koushik.santra@accenture.com",
+                "reviewer":{"name":"koushik Santra"} 
+                
+            }
+
+
+            sendCliqIntimationTest('index.html',studentObject)
+
+
+            // fs.readFile(imagepath + 'index.html', "utf8", function (error, data) {
+            //     if (error) {
+            //         //  response.writeHead(404);
+            //         //   respone.write('file not found');
+            //         console.log("we are getting error",error)
+            //     } else {
+            //         console.log(data)
+            //         console.log("iam in side")
+            //         //  response.write(data);
+            //     }
+            //     // response.end();
+            // });
+
+            return false
+
+
             database("course_enrolments")
                 .select("*")
                 .where({
@@ -406,10 +466,10 @@ export default class AssignmentController {
 
 
                                         sendCliqIntimation(reviewerObject).then(result => {
-                                            
+
                                         })
                                         sendCliqIntimation(studentObject).then(result => {
-                                            
+
                                         })
 
                                         resolve(rows[0]);
@@ -623,7 +683,7 @@ export default class AssignmentController {
                         .orderBy("submittedAt", "desc")
                         // 
                         .then(rows => {
-                            
+
                             let submissions = [];
                             for (let i = 0; i < rows.length; i++) {
                                 let submission = rows[i];
@@ -687,7 +747,7 @@ export default class AssignmentController {
                         //
                         return Promise.resolve(courseId);
                     }).then(courseId => {
-                        
+
                         //
                         database("course_enrolments")
                             .select("*")
@@ -834,7 +894,7 @@ export default class AssignmentController {
                                                                 request.params
                                                                     .submissionId
                                                         })
-                                                        .then(rows => {
+                                                        .then(rows => {// this portion
                                                             this.checkDependencyCourses(
                                                                 request.userId
                                                             ).then(courses => {
@@ -903,8 +963,8 @@ export default class AssignmentController {
                                                                             rows => {
                                                                                 let studentObject = {
                                                                                     "receiverId": student.name,
-                                                                                    "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
-                                                                                                `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                    "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
+                                                                                        `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
                                                                                 }
 
 
@@ -914,7 +974,7 @@ export default class AssignmentController {
                                                                                 //     rows[0]
                                                                                 // );
                                                                                 return sendCliqIntimation(studentObject).then(result => {
-                                                                                    
+
                                                                                 })
 
                                                                             }
@@ -996,18 +1056,18 @@ export default class AssignmentController {
                                                                 .then(rows => {
                                                                     let studentObject = {
                                                                         "receiverId": student.name,
-                                                                        "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
-                                                                                    `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                        "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
+                                                                            `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
                                                                     }
 
                                                                     return sendCliqIntimation(studentObject).then(result => {
-                                                                        
+
                                                                     })
-                                                                //     return sendAssignmentReviewCompleteEmail(
-                                                                //         student,
-                                                                //         reviewer,
-                                                                //         rows[0]
-                                                                //     );
+                                                                    //     return sendAssignmentReviewCompleteEmail(
+                                                                    //         student,
+                                                                    //         reviewer,
+                                                                    //         rows[0]
+                                                                    //     );
                                                                 });
                                                         });
                                                     })
@@ -1219,7 +1279,7 @@ export default class AssignmentController {
 
 
             sendCliqIntimation(studentObject).then(result => {
-                
+
             })
             // sendCoursesUnlockedForUserEmail(student, coursesName);
         });

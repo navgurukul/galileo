@@ -3,40 +3,99 @@ import * as CustomRequest from "request";
 
 import * as Configs from "./configurations";
 
+import * as ejs from "ejs";
+
+
 interface Details {
     receiverId: string;
     message: string;
 
 }
 
-const cliqConfigs=Configs.getCliqConfig();
+const cliqConfigs = Configs.getCliqConfig();
 
 export const sendCliqIntimation = (details: Details) => {
-    // Email template
 
     return new Promise(function (resolve, reject) {
 
-        let cliqBaseApiUrl = "https://cliq.zoho.com/api/v2/buddies";
-        let email = details.receiverId;
-        let authToken = cliqConfigs.authtoken;
-
-        let sendMessageToCliqUrl = `${cliqBaseApiUrl}/${email}/message?authtoken=${authToken}`
-
-        CustomRequest.post(sendMessageToCliqUrl , {
+        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverId}/message?authtoken=${cliqConfigs.authtoken}`, {
             json: {
                 text: `${details.message}`
             }
         }, function (error, response, body) {
 
+
+
             if (!error && response.statusCode == 204) {
 
-                
+                console.log('message sent successsfully')
                 return resolve(response.statusCode);
-                //
+                //console.log(body) // Show the HTML for the Google homepage.
             } else {
-                
+                console.log(body);
                 return resolve(body);
             }
+
+
+
+
+
         })
     });
 };
+
+
+export const sendCliqIntimationTest = (filename, data) => {
+    // Email template
+
+    return new Promise(function (resolve, reject) {
+
+
+      
+        var filePath = "img/avatar/";
+
+        ejs.renderFile(filePath + filename, { data: data }, {async:true}, function (err, str) {
+            console.log("what i am getting :", str);
+
+            CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${data.receiverId}/message?authtoken=${cliqConfigs.authtoken}`, {
+                json: {
+                    text: `${str}`
+                }
+            }, function (error, response, body) {
+
+
+
+                if (!error && response.statusCode == 204) {
+
+                    console.log('message sent successsfully')
+                    return resolve(response.statusCode);
+                    //console.log(body) // Show the HTML for the Google homepage.
+                } else {
+                    console.log(body);
+                    return resolve(body);
+                }
+
+
+
+
+
+            })
+
+
+
+
+
+            // str => Rendered HTML string
+        });
+
+       
+
+
+
+
+
+
+
+
+    });
+}

@@ -35,7 +35,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: postSubmission
             },
-            auth: 'jwt',
+           // auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.postExerciseSubmission
         }
@@ -171,6 +171,22 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.editPeerReviewRequest
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/assignments/peerReview',
+        config: {
+            description: 'List of peer review requests.',
+            response: {
+                // schema: Joi.object({
+                //     // 'data': Joi.array().items(peerReviewSubmission)
+                // })
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: assignmentController.getPeerReviewRequests
         }
     });
 
