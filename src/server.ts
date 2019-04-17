@@ -36,13 +36,13 @@ export function init(serverConfigs: IServerConfigurations, databaseConfig: any):
             let plugin: IPlugin = (require('./plugins/' + pluginName)).default();
             console.log(`Register Plugin ${plugin.info().name} v${plugin.info().version}`);
             // sentry should only be used in production.
-            if (plugin.info().name === 'Sentry logging' && process.env.GALILEO_ENV === 'dev'){
+            if (plugin.info().name === 'Sentry logging'){
                 return;
             }
             pluginPromises.push(plugin.register(server, pluginOptions));
         });
         // Register all the routes once all plugins have been initialized
-        // console.log(pluginPromises);
+        // 
         Promise.all(pluginPromises).then(() => {
             Users.init(server, serverConfigs, databaseConfig);
             Courses.init(server, serverConfigs, databaseConfig);

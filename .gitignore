@@ -124,7 +124,9 @@ typings/
 # dotenv environment variables file
 .env
 
-migrations
+
+database.json
+sqlScripts/
 # !migrations/migration_1.sql
 
 curriculum

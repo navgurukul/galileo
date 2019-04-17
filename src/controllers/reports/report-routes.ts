@@ -1,12 +1,12 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import {IServerConfigurations} from "../../configurations";
+import { IServerConfigurations } from "../../configurations";
 // import * as Boom from "boom";
 
 import ReportController from "./report-controller";
-import { 
-    courseReportSchema, 
-    menteeSchema, 
+import {
+    courseReportSchema,
+    menteeSchema,
     exerciseReportSchema,
 } from "./report-schemas";
 
@@ -85,26 +85,104 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/reports/course/{courseId}',
         config: {
             description: 'Progress report of exercises of a course for all the mentee assgin to a Mentor' +
-                        ' or a center to a facilitator.',
+                ' or a center to a facilitator.',
             validate: {
                 params: {
                     courseId: Joi.number(),
                 }
             },
             response: {
-                schema: Joi.object({
-                    courseId: Joi.number(),
-                    courseName: Joi.string(),
-                    courseType: Joi.string(),
-                    courseLogo: Joi.string(),
-                    courseShortDescription: Joi.string(),
-                    menteesExercisesReport: Joi.array().items(exerciseReportSchema),
-                    mentees: Joi.array().items(menteeSchema),
-                })
+                // schema: Joi.object({
+                //     courseId: Joi.number(),
+                //     courseName: Joi.string(),
+                //     courseType: Joi.string(),
+                //     courseLogo: Joi.string(),
+                //     courseShortDescription: Joi.string(),
+                //     menteesExercisesReport: Joi.array().items(exerciseReportSchema),
+                //     mentees: Joi.array().items(menteeSchema),
+                // })
             },
             auth: 'jwt',
             tags: ['api'],
             handler: reportController.getMenteesExercisesReport,
+        }
+    });
+
+    
+    server.route({
+        method: 'GET',
+        path: '/reports/assignmentSubmissionPending',
+        config: {
+            description: 'count the no of submission done by student center wise who has a center ',
+            validate: {
+                query: {
+                    centerId: Joi.string().required(),
+                    timePeriod: Joi.string().default('today'),
+                }
+            },
+            response: {
+                schema: Joi.object({
+                    numberOfPendingRequests: Joi.number(),
+                    numberOfRequestCreated: Joi.object({
+                        requestTodays: Joi.number(),
+                        requestYesterday: Joi.number(),
+                        requestLastWeek: Joi.number(),
+                        requestLastMonth: Joi.number(),
+                    })
+
+                })
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.numberOfAssignmentSubmitted,
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/reports/assignmentSubmissionPendingPerUser',
+        config: {
+            description: 'Get the submission report center wise per user ',
+            validate: {
+                query: {
+                    centerId: Joi.string().required(),
+
+                }
+            },
+            response: {
+                schema: Joi.array().items(Joi.object({
+                    name: Joi.string(),
+                    numberOfAssignmentSubmitted: Joi.number(),
+
+                }))
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.numberOfAssignmentSubmittedPerUser,
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/reports/getSubmissionReport',
+        config: {
+            description: 'This route is to send admin the total submission report in email center wise and all ',
+            validate: {
+                // query: {
+                //     centerId: Joi.string().required(),
+
+                // }
+            },
+            response: {
+                // schema:Joi.array().items( Joi.object({
+                //     name: Joi.string(),
+                //     numberOfAssignmentSubmitted: Joi.number(),
+
+                // }))
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: reportController.sendSubmissionReport,
         }
     });
 }

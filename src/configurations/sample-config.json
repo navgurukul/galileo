@@ -1,41 +1,52 @@
 {
-   "database":{
-      "client":"mysql",
-      "connection":{
-         "database":"dbname",
-         "host":"localhost_or_some_server_url",
-         "user":"dbuser",
-         "password":"dbpass",
-         "requestTimeout":90000,
-         "connectionTimeout":30000,
-         "acquireConnectionTimeout":30000
+   "database": {
+      "client": "mysql",
+      "connection": {
+         "database": "dbname",
+         "host": "localhost_or_some_server_url",
+         "user": "dbuser",
+         "password": "dbpass",
+         "requestTimeout": 90000,
+         "connectionTimeout": 30000,
+         "acquireConnectionTimeout": 30000
       },
-      "pool":{
-         "min":4,
-         "max":10
+      "pool": {
+         "min": 4,
+         "max": 10
       }
    },
-   "server":{
-      "port":5000,
-      "jwtSecret":"random-secret-password",
-      "jwtExpiration":"1h",
-      "plugins":[
+   "server": {
+      "port": 5000,
+      "jwtSecret": "random-secret-password",
+      "jwtExpiration": "1h",
+      "plugins": [
          "logger",
          "bell",
          "jwt-auth",
-         "swagger",
-         "hapi-sentry"
+         "swagger"
       ],
-      "googleAuth":{
-         "clientId":"googleAppClientId",
-         "clientSecret":"googleAppClientSecret"
+      "googleAuth": {
+         "clientId": "googleAppClientId",
+         "clientSecret": "googleAppClientSecret"
       },
-      "awsEmailConfig":{
-        "accessKeyId": "AWS-SES accessKeyId",
-        "secretAccessKey": "AWS-SES secretAccessKey",
+      "awsEmailConfig": {
+         "accessKeyId": "AWS-SES accessKeyId",
+         "secretAccessKey": "AWS-SES secretAccessKey"
       },
-      "facilitatorEmails":[
-      ],
-      "defaultBatchId":1
+      "facilitatorEmails": [],
+      "defaultBatchId": 1
+   },
+   "courseConfig": {
+      "courseCompleteionCriteria": 70
+   },
+   "scheduleConfig": {
+      "timeInSecond": 84600,
+      "receiverEmail": "amar17@navgurukul.org"
+   },
+   "cliqConfig": {
+      "authtoken": "f9a1f1ae5ab636824e062b6ccdb381cf"
+   },
+   "sentryConfig": {
+      "sentryDsn": "cd4de37634ca11e9878a4201c0a8d032"
    }
 }

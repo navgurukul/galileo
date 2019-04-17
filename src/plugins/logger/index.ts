@@ -10,7 +10,7 @@ export default (): IPlugin => {
                         interval:1000,
                     },
                     reporters: {
-                        myConsoleReporter: [
+                        console: [
                             {
                                 module: 'good-squeeze',
                                 name: 'Squeeze',
@@ -29,7 +29,7 @@ export default (): IPlugin => {
                     options: opts
                 })
                 .then(() => {
-                //   console.log("hello")
+                //   
                   resolve();
                 });
             });

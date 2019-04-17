@@ -32,7 +32,7 @@ gulp.task('tslint', () => {
 
 function compileTS(args, cb) {
     return exec(tscCmd + args, (err, stdout, stderr) => {
-        //console.log(stdout);
+        //
 
         if (stderr) {
             console.log(stderr);

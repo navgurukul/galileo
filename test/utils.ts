@@ -32,7 +32,7 @@
 //     Promise.all([promiseUser, promiseTask]).then(() => {
 //         done();
 //     }).catch((error) => {
-//         console.log(error);
+//         
 //     });
 // }
 
@@ -47,7 +47,7 @@
 //         }).then((task) => {
 //             done();
 //         }).catch((error) => {
-//             console.log(error);
+//             
 //         });
 // }
 
@@ -57,6 +57,6 @@
 //             done();
 //         })
 //         .catch((error) => {
-//             console.log(error);
+//             
 //         });
 // }

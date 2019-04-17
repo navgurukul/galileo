@@ -1,13 +1,14 @@
-import * as GoogleAuth from 'google-auth-library';
-import * as Hapi from 'hapi';
+import * as GoogleAuth from "google-auth-library";
+import * as Hapi from "hapi";
 import database from "../../";
-import { IServerConfigurations } from '../../configurations';
-import { NotesModel } from '../../models/notes-model';
-import { UserModel } from '../../models/user-model';
+import { IServerConfigurations } from "../../configurations";
+import { NotesModel } from "../../models/notes-model";
+import { UserModel } from "../../models/user-model";
 
+import * as fs from "fs";
+import * as Boom from "boom";
 
 export default class UserController {
-
     private configs: IServerConfigurations;
     private database: any;
     private userModel: UserModel;
@@ -160,7 +161,7 @@ export default class UserController {
                                                 isAdmin,
                                                 isAlumni,
                                             });
-                                      });
+                                    });
                         }
                     })
                     .then((user) => {
@@ -176,39 +177,142 @@ export default class UserController {
     public getUserInfo(request, h) {
         let id = request.params.userId;
         return new Promise((resolve, reject) => {
-            this.userModel.findOne({id: id})
-                .then((obj) => {
-                    resolve(obj);
+            this.userModel.findOne({ id: id }).then(obj => {
+                resolve(obj);
+            });
+        });
+    }
+
+    /**
+     * Update User details
+     * @param request
+     * @param h
+     */
+    public updateUserInfo(request, h) {
+        let userDeatils = {
+            githubLink: request.payload.githubLink,
+            linkedinLink: request.payload.linkedinLink,
+            mediumLink: request.payload.mediumLink,
+            profilePicture: null
+        };
+
+        let that = this;
+
+        return new Promise((resolve, reject) => {
+            //
+
+            let imageString = request.payload.uploadImage;
+            let extension = undefined;
+            let lowerCase = imageString.toLowerCase();
+            if (lowerCase.indexOf("png") !== -1) extension = "png";
+            else if (
+                lowerCase.indexOf("jpg") !== -1 ||
+                lowerCase.indexOf("jpeg") !== -1
+            )
+                extension = "jpg";
+            else extension = "tiff";
+
+            var base64Data = imageString.replace(
+                /^data:image\/png;base64,/,
+                ""
+            );
+
+            var imagepath =
+                "img/avatar/avatar_" + request.userId + "." + extension;
+
+            fs.writeFile(imagepath, base64Data, "base64", function(err) {
+                if (err) {
+                    reject(
+                        Boom.expectationFailed(
+                            `There was a error at the time of image saving: ${err} `
+                        )
+                    );
+                }
+
+                var AWS = require("aws-sdk");
+                var s3 = new AWS.S3();
+                var myBucket = "saralng";
+
+                fs.readFile(imagepath, function(err, data) {
+                    if (err) {
+                        reject(
+                            Boom.expectationFailed(
+                                `There was a error at the time of image reading: ${err} `
+                            )
+                        );
+                    }
+
+                    let contentType = "application/octet-stream";
+                    if (
+                        extension === "png" ||
+                        extension === "jpg" ||
+                        extension === "gif"
+                    ) {
+                        contentType = "image/" + extension;
+                    }
+
+                    var params = {
+                        Bucket: myBucket,
+                        Key: imagepath,
+                        Body: data,
+                        ContentType: contentType
+                    };
+                    s3.upload(params, function(err, data) {
+                        if (err) {
+                            reject(
+                                Boom.expectationFailed(
+                                    `There was a error at the time of S3 upload: ${err} `
+                                )
+                            );
+                        } else {
+                            //
+
+                            userDeatils.profilePicture =
+                                "https://s3.ap-south-1.amazonaws.com/saralng/" +
+                                imagepath;
+                            //
+                            that.userModel
+                                .upsert(
+                                    userDeatils,
+                                    { id: request.params.userId },
+                                    true
+                                )
+                                .then(user => {
+                                    resolve({ user: user });
+                                });
+                        }
+                    });
                 });
+            });
         });
     }
 
     public postUserNotes(request, h) {
-        let note = {'student': request.params.userId, 'text': request.payload.text, 'facilitator': request.userId};
+        let note = {
+            student: request.params.userId,
+            text: request.payload.text,
+            facilitator: request.userId
+        };
         return new Promise((resolve, reject) => {
-            this.notesModel.insert(note)
-                .then((status) => {
-                    resolve({status: status});
-                });
+            this.notesModel.insert(note).then(status => {
+                resolve({ status: status });
+            });
         });
     }
 
     public getUserNotes(request, h) {
         return new Promise((resolve, reject) => {
-            this.notesModel.getUserNotes(request.params.userId)
-                .then((rows) => {
-                    resolve({data: rows});
-                });
+            this.notesModel.getUserNotes(request.params.userId).then(rows => {
+                resolve({ data: rows });
+            });
         });
     }
 
     public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
         return new Promise((resolve, reject) => {
-            this.notesModel.del(request.params.noteId)
-                .then((status) => {
-                    resolve({status: status});
-                });
+            this.notesModel.del(request.params.noteId).then(status => {
+                resolve({ status: status });
+            });
         });
-
     }
 }

@@ -5,7 +5,7 @@ declare var module: any;
 import * as fs from "fs-extra";
 import * as marked from "marked";
 import * as Joi from "joi";
-import * as colors from "colors";
+// import * as colors from "colors";
 import { showErrorAndExit } from "./utils";
 import { exerciseInfoSchema } from './schema';
 import { updateContentWithImageLinks } from './utils';
@@ -25,6 +25,7 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
     let inside = false;
     let insideInnerList = false;
     let isSolutionToken;
+    
     for (let i=1; i<tokens.length-1; i++) {
         tokens[i]["text"] = tokens[i]["text"] ? tokens[i]["text"].trim() : undefined;
         if (tokens[i]["type"]==="list_start" && inside===true) {
@@ -57,20 +58,21 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
             }
             if (!inside) {
                 if (isSolutionToken) {
-                l1++;
-                seqNumbers[tokens[i]["text"]] = l1*1000;
-                globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': true};
+                    l1++;
+                    seqNumbers[tokens[i]["text"]] = l1*1000;
+                    globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': true};
                 } else {
-                l1++;
-                seqNumbers[tokens[i]["text"]] = l1*1000;
-                globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': false};
+                    l1++;
+                    seqNumbers[tokens[i]["text"]] = l1*1000;
+                    globals.revSeqNumbers[l1] = {"name" : tokens[i]["text"], 'isSolutionFile': false};
                 }
                 
             }
-       } else if (tokens[i]["type"]==="list_end") {
+        } else if (tokens[i]["type"]==="list_end") {
             inside=false;
-       }
+        }
     }
+    // 
     return seqNumbers;
 };
 
@@ -106,7 +108,7 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
                     childExercises: []
                 });
             }
-               exercises.push({
+            exercises.push({
                 type: 'exercise',
                 path: mFile+"/"+ globals.revSeqNumbers[i]["children"][0]["name"],
                 isSolutionFile: globals.revSeqNumbers[i]["children"][0]["isSolutionFile"],
@@ -165,15 +167,15 @@ const _getFileName = (path) => {
 
     // change the first letter of each word to upper case
     for(let i = 0; i < wordInFileName.length; i++){
-      temp = wordInFileName[i];
-      temp = temp[0].toUpperCase() + temp.slice(1, temp.length);
+        temp = wordInFileName[i];
+        temp = temp[0].toUpperCase() + temp.slice(1, temp.length);
 
-      // don't add spaces if it is the last word
-      if (i === wordInFileName.length-1){
-        newFileName += temp;
-      } else {
-        newFileName += `${temp} `;
-      }
+        // don't add spaces if it is the last word
+        if (i === wordInFileName.length-1){
+            newFileName += temp;
+        } else {
+            newFileName += `${temp} `;
+        }
     };
 
     return newFileName;
@@ -197,11 +199,11 @@ let _getExerciseInfo = function(path, sequenceNum, isSolutionFile) {
     else{
         exInfo  = parseNgMetaText(tokens[0]['text']);
         try {
-          if (exInfo['name'] === null || exInfo['name'] === undefined){
-            exInfo['name'] = fileName;
-          }
+            if (exInfo['name'] === null || exInfo['name'] === undefined){
+                exInfo['name'] = fileName;
+            }
         } catch {
-          showErrorAndExit(`There is some error in ${path}`);
+            showErrorAndExit(`There is some error in ${path}`);
         }
 
         if (!exInfo['completionMethod']){
@@ -234,58 +236,58 @@ export const getAllExercises = function(exercises) {
 };
 
 let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
-  let uploadPromises = [];
-  let images = exercise['content'].match(/!\[(.*?)\]\((.*?)\)/g);
-  if (images!=null) {
-    for (let j = 0; j < images.length; j++) {
-      let sequenceNum;
-      if (parentSequenceNum){
-        sequenceNum = parentSequenceNum + '/' + exercise['sequenceNum'];
-      }
-      else{
-        sequenceNum = exercise['sequenceNum'];
-      }
-      let img =  parseAndUploadImage(images[j], sequenceNum, exercise['path'], iIndex, jIndex);
+    let uploadPromises = [];
+    let images = exercise['content'].match(/!\[(.*?)\]\((.*?)\)/g);
+    if (images!=null) {
+        for (let j = 0; j < images.length; j++) {
+        let sequenceNum;
+        if (parentSequenceNum){
+            sequenceNum = parentSequenceNum + '/' + exercise['sequenceNum'];
+        }
+        else{
+            sequenceNum = exercise['sequenceNum'];
+        }
+        let img =  parseAndUploadImage(images[j], sequenceNum, exercise['path'], iIndex, jIndex);
 
-      uploadPromises.push( img );
+        uploadPromises.push( img );
+        }
     }
-  }
-  return Promise.all(uploadPromises);
+    return Promise.all(uploadPromises);
 };
 
 
 export const uploadImagesAndUpdateContent = () => {
-      let exPromises = [];
-      let exChildPromises = [];
-      for (var i = 0; i < globals.exercises.length; i++){
+    let exPromises = [];
+    let exChildPromises = [];
+    for (var i = 0; i < globals.exercises.length; i++){
         let exercise = globals.exercises[i];
         exPromises.push( _uploadContentImages(exercise, i).then( ( uploadedImages ) => {
-          if(uploadedImages.length){
+        if(uploadedImages.length){
 
             let iIndex, content;
             iIndex = uploadedImages[0].iIndex;
             content = exercise['content'];
             globals.exercises[iIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
-          };
+        };
         }));
         let childExercises = exercise['childExercises'];
         if (childExercises){
-          for (var j = 0; j < childExercises.length; j++){
+        for (var j = 0; j < childExercises.length; j++){
 
             exChildPromises.push( _uploadContentImages(childExercises[j], i, exercise['sequenceNum'], j).then( ( uploadedImages ) => {
-              if(uploadedImages.length){
+            if(uploadedImages.length){
                 let iIndex, jIndex, content;
                 iIndex = uploadedImages[0].iIndex;
                 jIndex = uploadedImages[0].jIndex;
                 content = childExercises[jIndex]['content'];
                 globals.exercises[iIndex]['childExercises'][jIndex]['content'] = updateContentWithImageLinks(uploadedImages, content);
-              };
+            };
             }));
-          };
         };
-      };
-      return {
+        };
+    };
+    return {
         exPromises,
         exChildPromises
-      };
+    };
 };

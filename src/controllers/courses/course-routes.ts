@@ -1,16 +1,19 @@
 import * as Hapi from "hapi";
 import * as Joi from "joi";
-import {IServerConfigurations} from "../../configurations";
+import { IServerConfigurations } from "../../configurations";
 
 import CourseController from "./course-controller";
 import {
-          courseSchema,
-          enrolledCourseSchema,
-          completedCoursesSchema,
-          exerciseSchema,
-          topicSchema,
-          courseSequenceSchema,
-        } from "./course-schemas";
+    courseSchema,
+    enrolledCourseSchema,
+    completedCoursesSchema,
+    exerciseSchema,
+    topicSchema,
+    courseSequenceSchema,
+} from "./course-schemas";
+
+import { userRoleSchema } from "../users/user-schemas";
+import { join } from "path";
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
@@ -218,22 +221,22 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courseRelation/{userId}/{courseId}/{reliesOn}/add',
+        path: '/courseRelation/{courseId}/{reliesOn}/add',
         config: {
             description: 'Add course relation in the course with the given ID.',
             validate: {
                 params: {
-                    userId: Joi.number(),
+                    // userId: Joi.number(),
                     courseId: Joi.number(),
                     reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
                 }
             },
             response: {
-                // schema: {
-                //     "enrolled": Joi.bool()
-                // }
+                schema: {
+                    "Added": Joi.bool()
+                }
             },
-            // auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.addCourseRelation
         }
@@ -246,7 +249,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             description: 'Get complete list of course relations for all the courses',
             response: {
                 schema: Joi.object({
-                    "data": Joi.array().items(exerciseSchema)
+                    "data": Joi.array().items(Joi.object({
+                        id: Joi.number().required(),
+                        courseId: Joi.number(),
+                        reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
+                    })),
+                    "message": Joi.string()
                 })
             },
             tags: ['api'],
@@ -266,10 +274,11 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
             response: {
-              schema: {
-                "deleted": Joi.bool()
-              }
+                schema: {
+                    "deleted": Joi.bool()
+                }
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteCourseRelation
         }
@@ -297,4 +306,136 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             handler: courseController.courseComplete
         }
     });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/studentsWithoutMentor',
+        config: {
+            description: 'Get complete list of student for whome mentore has not been assigned',
+            validate: {
+                query: {
+                    centerId: Joi.string().allow(null),
+                }
+            },
+            response: {
+
+                schema: Joi.object({
+                    "data": Joi.array().items(userRoleSchema)
+                })
+
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.getStudentsWithoutMentorList
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/studentsWithMentor/{mentorId}',
+        config: {
+            description: `Get complete list of student with a mentor 
+                           where mentorId will be params and centerId 
+                           will be query parameter`,
+            validate: {
+                query:{
+                    centerId: Joi.string().allow(null)
+                },
+                params: {
+                    mentorId: Joi.number().required()
+                    
+                }
+            },
+            response: {
+
+                schema: Joi.object({
+                    "data": Joi.array().items(userRoleSchema)
+                })
+
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.getStudentsWithMentorList
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/courses/centerMentorMentee',
+        config: {
+            description: `Get complete list of student and mentor
+                          where pass centerId as a query parameter `,
+            validate: {
+                query: {
+
+                    centerId: Joi.string().allow(null)
+                }
+            },
+            response: {
+
+                // schema: Joi.object({
+                //     'mentorListResult': Joi.array().items(userRoleSchema),
+                //    // 'menteeListResult': Joi.array().items(userRoleSchema)
+
+                // })
+
+                schema: Joi.array()
+
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.getMentorsOrMenteesList
+        }
+    });
+
+
+    server.route({
+        method: 'DELETE',
+        path: '/courses/deleteMenteeMentor/{menteeId}/{mentorId}',
+        config: {
+            description: 'Delete the mentor and mentee record.',
+            validate: {
+                params: {
+                    mentorId: Joi.number(),
+                    menteeId: Joi.number()
+                }
+
+            },
+            response: {
+                schema: {
+                    "deleted": Joi.bool()
+                }
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.deleteMentorMentee
+        }
+    });
+
+    server.route({
+        method: 'DELETE',
+        path: '/courses/deleteMenteeByIdMentorByEmailOrId',
+        config: {
+            description: 'Delete the mentee by id and mentor by id or email.',
+            validate: {
+                
+                payload: {
+                    mentorId: Joi.number().allow(null),
+                    mentorEmail: Joi.string().email().allow(null),
+                    menteeId: Joi.number()
+                }
+
+            },
+            response: {
+                schema: {
+                    "deleted": Joi.bool()
+                }
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.deleteMentorMenteeByidOrEmail
+        }
+    });
+
+
 }

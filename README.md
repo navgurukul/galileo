@@ -50,7 +50,7 @@ Made using hapi.js, the repository uses mysql database.
 * *npm install yarn* (required for installing dev-dependencies)
 * *yarn install* (install dependencies and dev-dependencies from package.json)
 * *npm run setup* (install nuget packages & typings)
-* Install python and setup it's enviroment variable for pip and python3.
+* Install python and setup it's enviroment variable for pip and python3(pip is installed along with python3, ).
 * *pip install awscli* (required aws sdk)
 
 **Configuration**
@@ -64,6 +64,8 @@ Made using hapi.js, the repository uses mysql database.
 * *aws configure* (to setup aws-sdk provide the keyId, SecretKey and region which has access to upload images to AWS).
 
 **DB SETUP**
+* download mysql from https://www.mysql.com/products/workbench/. 
+* 
 * Create a database *davinci*, add the access credentials of the database to your `config` file.
 * Import schema.sql to import the database schema.
 * `bash courseUpdateWindows.sh all` in git Bash to import all the courses to your local database.
@@ -94,3 +96,23 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 3. After being merged into dev, we will deploy it to staging environment.
 
 *We will make sure to have frequent merges from `dev` into `master` and release stuff into production*
+
+### Migrations
+- `npx db-migrate up` to upgrade migrations
+- `npx db-migrate down` to downgrade migrations
+- create database.json in the root folder with following the configurations
+```js
+{
+    "dev": {
+            "host": "host",
+            "user": "username",
+            "password": "password",
+            "database": "database-name",
+            "driver": "mysql",
+            "multipleStatements": true
+        },
+    "sql-file":true
+}
+```
+- `npx db-migrate create <migrtaion_file_name>`
+  To create migrations in migrations folder there would be two files created one would contain the sql command to upgrade and one to downgrade

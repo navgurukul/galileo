@@ -21,8 +21,8 @@ import * as process from 'process';
  *
  */
 
-//console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT STARTS -------") );
-//console.log( colors.green("Ensure that you are running this script from the `root` directory of `galileo`") );
+//
+//
 
 // Helper method to throw an error with the given text and exit the script
 
@@ -99,7 +99,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     return new Promise((resolve, reject) => {
         fs.readFile(completePath, function (err,data) {
           if (err) {
-             return console.log(err);
+             return 
           }
 
           let extn = completePath.split('.').pop();
@@ -117,7 +117,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
         	var params = {Bucket: myBucket, Key: filePath, Body: data, ContentType: contentType};
         	s3.upload(params, function(err, data) {
                 if (err) {
-                    console.log("error in s3 upload", err);
+                    
                 } else {
                     return resolve({
                         relativePath: imagePath,
@@ -352,7 +352,7 @@ let validateCourseDirParam = function() {
     // return fs.readFile(courseNotesFile, 'utf-8').then( (data) => {
     //     return Promise.resolve(data);
     // }).catch( (err) => {
-    //     console.log(err);
+    //     
     //     showErrorAndExit("`details/notes.md` does not exist.");
     // });
 // };
@@ -364,7 +364,7 @@ let validateCourseInfo = function() {
     return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
-        console.log(ngMetaBlock);
+        
         let courseInfo = parseNgMetaText(tokens[0]['text']);
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         courseData['info'] = courseInfo;
@@ -648,8 +648,8 @@ validateCourseDirParam()
     Promise.all(promises);
 }).then(() => {
     // say your goodbyes :)
-    // console.log( colors.green("The requested course has been seeded/updated into the DB.") );
-    // console.log( colors.blue.bold("------- CONTENT SEEDING SCRIPT ENDS -------") );
+    // 
+    // 
     setTimeout(function() {
         database.destroy();
     	  process.exit();
