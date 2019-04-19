@@ -176,7 +176,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/assignments/peerReview',
+        path: '/assignments/peerReviews',
         config: {
             description: 'List of peer review requests.',
             response: {
@@ -186,7 +186,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             // auth: 'jwt',
             tags: ['api'],
-            handler: assignmentController.getPeerReviewRequests
+            handler: assignmentController.markCourseCompleted
         }
     });
 

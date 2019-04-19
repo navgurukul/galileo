@@ -61,18 +61,18 @@ export default class AssignmentController {
 
 
 
-        //   let   filePath=imagepath + 'index.html';
-        //     let myFileLoad = function (filePath) {
-        //         return 'myFileLoad: ' + fs.readFileSync(filePath);
-        //       };
-        //        let people = ['geddy', 'neil', 'alex'],
-        //     html = ejs.render(myFileLoad(filePath), {people: people});
-        //       console.log("what i am getting myFileLoad---- :",html);
+            //   let   filePath=imagepath + 'index.html';
+            //     let myFileLoad = function (filePath) {
+            //         return 'myFileLoad: ' + fs.readFileSync(filePath);
+            //       };
+            //        let people = ['geddy', 'neil', 'alex'],
+            //     html = ejs.render(myFileLoad(filePath), {people: people});
+            //       console.log("what i am getting myFileLoad---- :",html);
 
 
 
-        let people = ['geddy', 'neil', 'alex']
-        let reviewer={"name":"koushik Santra"}
+            let people = ['geddy', 'neil', 'alex']
+            let reviewer = { "name": "koushik Santra" }
             // ejs.renderFile(imagepath + 'index.html',{people:people,reviewer:reviewer},  null, function(err, str){
             //         console.log("what i am getting :",str);
             //     // str => Rendered HTML string
@@ -80,12 +80,12 @@ export default class AssignmentController {
             let studentObject = {
                 "receiverId": "rahul17@navgurukul.org",
                 // "receiverId": "koushik.santra@accenture.com",
-                "reviewer":{"name":"koushik Santra"} 
-                
+                "reviewer": { "name": "koushik Santra" }
+
             }
 
 
-            sendCliqIntimationTest('index.html',studentObject)
+            sendCliqIntimationTest('index.html', studentObject)
 
 
             // fs.readFile(imagepath + 'index.html', "utf8", function (error, data) {
@@ -895,6 +895,10 @@ export default class AssignmentController {
                                                                     .submissionId
                                                         })
                                                         .then(rows => {// this portion
+
+                                                            this.markCourseCompleted(submission.userId,courseId);
+
+
                                                             this.checkDependencyCourses(
                                                                 request.userId
                                                             ).then(courses => {
@@ -1282,6 +1286,77 @@ export default class AssignmentController {
 
             })
             // sendCoursesUnlockedForUserEmail(student, coursesName);
+        });
+    }
+
+
+    public markCourseCompleted(studentId,courseId) {
+        return new Promise((resolve, reject) => {
+            // let courseId = 18;
+            // let studentId = 83;
+         
+            let student, courses;
+            let cousresQ = database("courses")
+                .count("exercises.courseId as courseCount")
+                .innerJoin("exercises",
+                    "courses.id",
+                    "exercises.courseId")
+                .where("courses.id", courseId)
+                .then(rows => {
+
+                    
+                    courses = rows[0];
+                    return Promise.resolve(courses);
+                });
+
+            let studentQ = database("courses")
+                .count("submissions.id as submissionCount")
+                .innerJoin("exercises",
+                    "courses.id",
+                    "exercises.courseId")
+                .leftJoin("submissions",
+                    "submissions.exerciseId",
+                    "exercises.id")
+                .where({
+                    "submissions.userid": studentId
+                })
+                .andWhere({
+                    "courses.id": courseId
+                })
+                .then(rows => {
+                    
+                    student = rows[0];
+                    return Promise.resolve(student);
+                });
+
+            Promise.all([cousresQ, studentQ]).then(() => {
+                console.log(courses.courseCount, student.submissionCount);
+                if (courses.courseCount == student.submissionCount) {
+                    let submissionInsertQuery = database("course_enrolments")
+                        .update({
+                            'courseStatus': 'completed',
+                            'completedAt': new Date()
+                        })
+                        .where({
+                            studentId: studentId,
+                            courseId: courseId
+                        }).then(row => {
+                            return Promise.resolve();
+                        });
+
+
+                    // let studentObject = {
+                    //     "receiverId": student.email,
+                    //     "message": `Hi ${student.name}, Apka yeh ${coursesName} unlockced hogya ha.`
+                    // }
+
+
+                    // sendCliqIntimation(studentObject).then(result => {
+
+                    // })
+                    //sendCoursesUnlockedForUserEmail(student, coursesName);
+                }
+            });
         });
     }
 }
