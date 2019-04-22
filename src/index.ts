@@ -98,16 +98,16 @@ const server = Server.init(serverConfigs, databaseConfig)
                 second ( optional )
             **/
 
-            // cron.schedule(`${scheduleConfigs.timeInSecond} ${scheduleConfigs.minute} ${scheduleConfigs.hour} ${scheduleConfigs.dayOfMonth} ${scheduleConfigs.month} ${scheduleConfigs.dayOfWeek}`, function () {
-            //     console.log("Running Cron Job");
+            cron.schedule(`${scheduleConfigs.timeInSecond} ${scheduleConfigs.minute} ${scheduleConfigs.hour} ${scheduleConfigs.dayOfMonth} ${scheduleConfigs.month} ${scheduleConfigs.dayOfWeek}`, function () {
+                console.log("Running Cron Job");
                 
-            //     request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
-            //         if (!error && response.statusCode == 200) {
+                request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
                         
-            //              //
-            //         }
-            //     })
-            // });
+                         //
+                    }
+                })
+            });
 
 
 
