@@ -44,7 +44,12 @@ export interface CouseConfigurations {
 }
 
 export interface ScheduleConfigurations {
-    timeInSecond: number;
+    timeInSecond: any;
+    minute:any;
+    hour:any;
+    dayOfMonth:any;
+    month:any;
+    dayOfWeek:any;
     receiverEmail: string;
 }
 
