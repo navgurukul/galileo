@@ -16,7 +16,8 @@ import {
 } from "../../sendEmail";
 import {
     sendCliqIntimation,
-    sendCliqIntimationTest
+    sendCliqIntimationTest,
+    sendCliqIntimationMessagetest
 } from "../../cliq";
 import * as fs from "fs";
 let ejs = require('ejs')
@@ -48,8 +49,7 @@ export default class AssignmentController {
     public postExerciseSubmission(request, h) {
         return new Promise((resolve, reject) => {
             request.userId = 1;
-            var imagepath =
-                "img/avatar/";
+           
             // var ret = ejs.render(imagepath, {
             //     users: "adada",
             //     filename: "test"
@@ -71,21 +71,22 @@ export default class AssignmentController {
 
 
 
-            let people = ['geddy', 'neil', 'alex']
-            let reviewer = { "name": "koushik Santra" }
+           
             // ejs.renderFile(imagepath + 'index.html',{people:people,reviewer:reviewer},  null, function(err, str){
             //         console.log("what i am getting :",str);
             //     // str => Rendered HTML string
             // });
-            let studentObject = {
-                "receiverId": "rahul17@navgurukul.org",
-                // "receiverId": "koushik.santra@accenture.com",
-                "reviewer": { "name": "koushik Santra" }
-
-            }
 
 
-            sendCliqIntimationTest('index.html', studentObject)
+            // let studentObject = {
+            //     "receiverId": "rahul17@navgurukul.org",
+            //     // "receiverId": "koushik.santra@accenture.com",
+            //     "reviewer": { "name": "koushik Santra" }
+
+            // }
+
+
+            // sendCliqIntimationTest('index.html', studentObject);
 
 
             // fs.readFile(imagepath + 'index.html', "utf8", function (error, data) {
@@ -100,6 +101,18 @@ export default class AssignmentController {
             //     }
             //     // response.end();
             // });
+
+
+            let studentObject = {
+                "receiverId": "rahul17@navgurukul.org",
+                // "receiverId": "koushik.santra@accenture.com",
+                "reviewer": { "name": "koushik Santra" }
+
+            }
+
+
+            sendCliqIntimationMessagetest('getforIndivisualTimePeriod', studentObject)
+
 
             return false
 
@@ -1290,10 +1303,11 @@ export default class AssignmentController {
     }
 
 
-    public markCourseCompleted(studentId,courseId) {
+    // public markCourseCompleted(studentId,courseId) {
+    public markCourseCompleted(request,h) {
         return new Promise((resolve, reject) => {
-            // let courseId = 18;
-            // let studentId = 83;
+            let courseId = 18;
+            let studentId = 83;
          
             let student, courses;
             let cousresQ = database("courses")
@@ -1326,6 +1340,7 @@ export default class AssignmentController {
                 .then(rows => {
                     
                     student = rows[0];
+                   
                     return Promise.resolve(student);
                 });
 
