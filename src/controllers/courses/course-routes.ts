@@ -257,6 +257,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "message": Joi.string()
                 })
             },
+        //    auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseRelationList
         }
