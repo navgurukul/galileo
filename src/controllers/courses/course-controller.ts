@@ -1077,7 +1077,7 @@ export default class CourseController {
     }
 
     public getCourseRelationList(request, h) {
-        request.userId = 122;
+        //request.userId = 122;
 
         
         return new Promise((resolve, reject) => {
