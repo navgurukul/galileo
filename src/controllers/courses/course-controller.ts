@@ -16,7 +16,8 @@ import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
 import {
-    sendCliqIntimation
+    sendCliqIntimation,
+    sendCliqIntimationMessagetest
 } from "../../cliq";
 
 
@@ -68,7 +69,7 @@ export default class CourseController {
                     });
                 });
             } else if (request.headers.authorization !== "") {
-                
+
                 enrolledQ = database("course_enrolments")
                     .select(
                         "courses.id",
@@ -917,9 +918,10 @@ export default class CourseController {
     public courseComplete(request, h) {
         // only facilitator of the mentee center or
         // mentor of the mentee can mark the course complete
-        // request.userId = 1;
+        request.userId = 258;
         return new Promise((resolve, reject) => {
             // check if the student id exist or not.
+            let mentorsDeatils: any = null;
             database("users")
                 .select("*")
                 .where({
@@ -939,9 +941,14 @@ export default class CourseController {
                     }
                 })
                 .then(mentee => {
-                    // check if the is the mentor for the menteeId?
+                    // check if he is the mentor for the menteeId?
                     return database("mentors")
                         .select("*")
+                        .innerJoin(
+                            "users",
+                            "mentors.mentor",
+                            "users.id"
+                        )
                         .where({
                             "mentors.mentor": request.userId,
                             "mentors.mentee": mentee.id
@@ -953,6 +960,7 @@ export default class CourseController {
                                     mentee
                                 });
                             } else {
+                                mentorsDeatils = rows[0];
                                 return Promise.resolve({
                                     isMentor: true,
                                     mentee
@@ -1013,7 +1021,17 @@ export default class CourseController {
                 .then(() => {
                     // check if the student have enrolled in the course.
                     return database("course_enrolments")
-                        .select("*")
+                        .select("courseStatus", "courses.name as courseName", 'users.name as usersName', 'users.email as usersEmail')
+                        .innerJoin(
+                            'courses',
+                            'courses.id',
+                            'course_enrolments.courseId'
+                        )
+                        .innerJoin(
+                            'users',
+                            'users.id',
+                            'course_enrolments.studentId'
+                        )
                         .where({
                             "course_enrolments.studentId":
                                 request.payload.menteeId,
@@ -1037,11 +1055,13 @@ export default class CourseController {
                                 );
                                 return Promise.reject("Rejected");
                             } else {
-                                return Promise.resolve();
+                                return Promise.resolve(rows[0]);
                             }
                         });
                 })
-                .then(() => {
+                .then((result) => {
+
+
                     // mark the course complete here.
                     database("course_enrolments")
                         .update({
@@ -1055,17 +1075,31 @@ export default class CourseController {
                                 request.params.courseId
                         })
                         .then(rows => {
+                            console.log(rows);
+                            console.log("I am here======>", result, mentorsDeatils);
 
                             // let studentObject = {
                             //     "receiverId": student.email,
                             //     "message": ` Your course has been marked as completed `
                             // }
-                
-                
+
+
                             // sendCliqIntimation(studentObject).then(result => {
-                            //     
+
                             // })
 
+                            let mentorObject = {
+                                "receiverEmail": result.usersEmail,
+                                "messageArgs": {
+                                    "courseName": result.courseName,
+                                    "mentor": mentorsDeatils.name
+                                }
+                            }
+                            
+
+                            sendCliqIntimationMessagetest('courseMarkedCompletedManual', mentorObject).then(result => {
+
+                            })
 
 
                             resolve({
@@ -1397,6 +1431,7 @@ export default class CourseController {
      * @param h
      */
     public getMentorsOrMenteesList(request, h) {
+     //   request.userId=122;
         return new Promise((resolve, reject) => {
             database("user_roles")
                 .select("roles")
@@ -1417,7 +1452,7 @@ export default class CourseController {
 
 
                 }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
-                    
+
                     // only admin facilitator or tnp  are allowed to delete the courses
                     if (isAdmin || isFacilitator || isTnp) {
                         let mentorListResult = [],
@@ -1628,7 +1663,7 @@ export default class CourseController {
                         Promise.all([mentor, mentee])
                             .then(() => {
                                 if (mentorExist && menteeExist) {
-                                    
+
 
                                     return database("mentors")
                                         .select("*")
@@ -1704,7 +1739,7 @@ export default class CourseController {
         });
     }
 
-   
+
 
 
 
@@ -1715,7 +1750,7 @@ export default class CourseController {
      */
     public deleteMentorMenteeByidOrEmail(request, h) {
         return new Promise((resolve, reject) => {
-           
+
             database('user_roles').select('roles', 'center')
                 .where({
                     'userId': request.userId
@@ -1729,7 +1764,7 @@ export default class CourseController {
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
                     const center = access.center;
-                    
+
                     return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole, center });
 
 
@@ -1742,27 +1777,27 @@ export default class CourseController {
                         const menteeId = request.payload.menteeId;
                         const mentorEmail = request.payload.mentorEmail;
                         let mentorExist = false, menteeExist = false;
-                        let mentorByEmail={} ,mentor ={};
+                        let mentorByEmail = {}, mentor = {};
 
-                      
+
 
                         if (mentorId !== undefined) {
-                         mentor = database('mentors').select('*')
-                            .where({
-                                'mentor': mentorId,
+                            mentor = database('mentors').select('*')
+                                .where({
+                                    'mentor': mentorId,
 
-                            }).then((rows) => {
-                                if (rows.length < 1) {
-                                    // reject(Boom.expectationFailed(` This mentor doesn't exists.`));
-                                    //return Promise.reject("Rejected");
+                                }).then((rows) => {
+                                    if (rows.length < 1) {
+                                        // reject(Boom.expectationFailed(` This mentor doesn't exists.`));
+                                        //return Promise.reject("Rejected");
 
-                                    return Promise.resolve(mentorExist);
-                                } else {
+                                        return Promise.resolve(mentorExist);
+                                    } else {
 
-                                    mentorExist = true;
-                                    return Promise.resolve(mentorExist);
-                                }
-                            });
+                                        mentorExist = true;
+                                        return Promise.resolve(mentorExist);
+                                    }
+                                });
                         }
                         let mentee = database('mentors').select('*')
                             .where({
@@ -1782,39 +1817,39 @@ export default class CourseController {
                                 }
                             });
                         if (mentorEmail !== undefined) {
-                             mentorByEmail = database('mentors').select('*').
+                            mentorByEmail = database('mentors').select('*').
                                 innerJoin('users', 'users.id', 'mentors.mentor')
                                 .where({
                                     'users.email': mentorEmail
 
                                 }).then((rows) => {
 
-                                    
+
                                     if (rows.length < 1) {
                                         //  reject(Boom.expectationFailed(` This mentee doesn't exists.`));
                                         //return Promise.reject("Rejected");
-                                        
+
                                         return Promise.resolve(mentorExist);
                                     } else {
-                                       
+
                                         mentorExist = true;
 
-                                     
+
                                         return Promise.resolve(mentorExist);
 
                                     }
                                 });
                         }
-                       
-                        Promise.all([mentor, mentee,mentorByEmail]).then(() => {
-                           
+
+                        Promise.all([mentor, mentee, mentorByEmail]).then(() => {
+
                             if (mentorExist && menteeExist) {
 
                                 let allCenter = [];
 
                                 let locationSet = new Set(allCenter.concat(center.isAdmin, center.isFacilitator, center.isTnp));
                                 allCenter = Array.from(locationSet);
-                                
+
                                 let getMentorMenteeQuery = database('mentors').select('mentors.id as mentorsTableId', 'users.id as userID')
                                     .innerJoin('users', 'users.id', 'mentors.mentor')
                                     .where({

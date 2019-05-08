@@ -48,73 +48,8 @@ export default class AssignmentController {
 
     public postExerciseSubmission(request, h) {
         return new Promise((resolve, reject) => {
-            request.userId = 1;
-           
-            // var ret = ejs.render(imagepath, {
-            //     users: "adada",
-            //     filename: "test"
-            // });
-            // let people = ['geddy', 'neil', 'alex'],
-            // html = ejs.render('<%= people.join(", "); %>', {people: people});
+            //  request.userId = 83;
 
-            // console.log("what i am getting layout---- :",html);
-
-
-
-            //   let   filePath=imagepath + 'index.html';
-            //     let myFileLoad = function (filePath) {
-            //         return 'myFileLoad: ' + fs.readFileSync(filePath);
-            //       };
-            //        let people = ['geddy', 'neil', 'alex'],
-            //     html = ejs.render(myFileLoad(filePath), {people: people});
-            //       console.log("what i am getting myFileLoad---- :",html);
-
-
-
-           
-            // ejs.renderFile(imagepath + 'index.html',{people:people,reviewer:reviewer},  null, function(err, str){
-            //         console.log("what i am getting :",str);
-            //     // str => Rendered HTML string
-            // });
-
-
-            // let studentObject = {
-            //     "receiverId": "rahul17@navgurukul.org",
-            //     // "receiverId": "koushik.santra@accenture.com",
-            //     "reviewer": { "name": "koushik Santra" }
-
-            // }
-
-
-            // sendCliqIntimationTest('index.html', studentObject);
-
-
-            // fs.readFile(imagepath + 'index.html', "utf8", function (error, data) {
-            //     if (error) {
-            //         //  response.writeHead(404);
-            //         //   respone.write('file not found');
-            //         console.log("we are getting error",error)
-            //     } else {
-            //         console.log(data)
-            //         console.log("iam in side")
-            //         //  response.write(data);
-            //     }
-            //     // response.end();
-            // });
-
-
-            let studentObject = {
-                "receiverId": "rahul17@navgurukul.org",
-                // "receiverId": "koushik.santra@accenture.com",
-                "reviewer": { "name": "koushik Santra" }
-
-            }
-
-
-            sendCliqIntimationMessagetest('getforIndivisualTimePeriod', studentObject)
-
-
-            return false
 
 
             database("course_enrolments")
@@ -468,20 +403,34 @@ export default class AssignmentController {
                                         //     rows[0]
                                         // );
 
+                                        // let reviewerObject = {
+                                        //     "receiverId": reviewer.email,
+                                        //     "message": `${student.name} as submitted his assignment. Please review it http://saral.navgurukul.org/assignment-review?submissionId=${rows[0].submissionId}`
+                                        // }
+                                        // let studentObject = {
+                                        //     "receiverId": student.email,
+                                        //     "message": `${reviewer.name} has been intimated for your assignment review`
+                                        // }
+
+
+                                        // sendCliqIntimation(reviewerObject).then(result => {
+
+                                        // })
+                                        // sendCliqIntimation(studentObject).then(result => {
+
+                                        // })
+
+                                        
+
                                         let reviewerObject = {
-                                            "receiverId": reviewer.email,
-                                            "message": `${student.name} as submitted his assignment. Please review it http://saral.navgurukul.org/assignment-review?submissionId=${rows[0].submissionId}`
+                                            "receiverEmail": reviewer.email,
+                                            "messageArgs": {
+                                                "reviewerName": reviewer.name,
+                                                "submitterName": student.name
+                                            }
                                         }
-                                        let studentObject = {
-                                            "receiverId": student.email,
-                                            "message": `${reviewer.name} has been intimated for your assignment review`
-                                        }
 
-
-                                        sendCliqIntimation(reviewerObject).then(result => {
-
-                                        })
-                                        sendCliqIntimation(studentObject).then(result => {
+                                        sendCliqIntimationMessagetest('newPeerReviewRequest', reviewerObject).then(result => {
 
                                         })
 
@@ -716,7 +665,7 @@ export default class AssignmentController {
 
     public editPeerReviewRequest(request, h) {
         //const usersId = 29;
-        //request.userId = 29;
+     //   request.userId = 29;
         let isAssigmentApproved = false;
         let initialAvailableCourses;
         let availableCoursesPostAssigmentApproval;
@@ -760,7 +709,7 @@ export default class AssignmentController {
                         //
                         return Promise.resolve(courseId);
                     }).then(courseId => {
-
+                        
                         //
                         database("course_enrolments")
                             .select("*")
@@ -769,6 +718,7 @@ export default class AssignmentController {
                                 courseId: courseId
                             })
                             .then(rows => {
+                                
                                 if (rows.length > 0) {
                                     return Promise.resolve({
                                         isAlreadyEnrolled: true,
@@ -909,7 +859,7 @@ export default class AssignmentController {
                                                         })
                                                         .then(rows => {// this portion
 
-                                                            this.markCourseCompleted(submission.userId,courseId);
+                                                            this.markCourseCompleted(submission.userId, courseId);
 
 
                                                             this.checkDependencyCourses(
@@ -946,7 +896,7 @@ export default class AssignmentController {
                                                                     .select("*")
                                                                     .where({
                                                                         "users.id":
-                                                                            submission.userId
+                                                                            submission.peerReviewerId
                                                                     })
                                                                     .then(rows => {
                                                                         reviewer =
@@ -978,21 +928,38 @@ export default class AssignmentController {
                                                                         })
                                                                         .then(
                                                                             rows => {
-                                                                                let studentObject = {
-                                                                                    "receiverId": student.name,
-                                                                                    "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
-                                                                                        `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                // let studentObject = {
+                                                                                //     "receiverId": student.name,
+                                                                                //     "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
+                                                                                //         `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                // }
+
+
+                                                                                // // sendAssignmentReviewCompleteEmail(
+                                                                                // //     student,
+                                                                                // //     reviewer,
+                                                                                // //     rows[0]
+                                                                                // // );
+                                                                                // return sendCliqIntimation(studentObject).then(result => {
+
+                                                                                // })
+                                                                              
+                                                                                let menteeObject = {
+                                                                                    "receiverEmail": reviewer.email,
+                                                                                    "messageArgs": {
+                                                                                        "submitterName": student.name,
+                                                                                        "reviewerName": reviewer.name,
+                                                                                        "courseId": rows[0].courseId,
+                                                                                        "exercieseSlug": rows[0].slug
+                                                                                    }
                                                                                 }
 
-
-                                                                                // sendAssignmentReviewCompleteEmail(
-                                                                                //     student,
-                                                                                //     reviewer,
-                                                                                //     rows[0]
-                                                                                // );
-                                                                                return sendCliqIntimation(studentObject).then(result => {
+                                                                                sendCliqIntimationMessagetest('assignmentApproved', menteeObject).then(result => {
 
                                                                                 })
+
+
+
 
                                                                             }
                                                                         );
@@ -1021,6 +988,8 @@ export default class AssignmentController {
                                                          *  Finding the student and the reviewer details to send email
                                                          * to them about the assignment review.
                                                          */
+
+                                                      
                                                         let student, reviewer;
                                                         let studentQ = database(
                                                             "users"
@@ -1041,7 +1010,7 @@ export default class AssignmentController {
                                                             .select("*")
                                                             .where({
                                                                 "users.id":
-                                                                    submission.userId
+                                                                    submission.peerReviewerId
                                                             })
                                                             .then(rows => {
                                                                 reviewer = rows[0];
@@ -1071,13 +1040,28 @@ export default class AssignmentController {
                                                                         submission.id
                                                                 })
                                                                 .then(rows => {
-                                                                    let studentObject = {
-                                                                        "receiverId": student.name,
-                                                                        "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
-                                                                            `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                    // let studentObject = {
+                                                                    //     "receiverId": student.name,
+                                                                    //     "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` +
+                                                                    //         `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                    // }
+
+                                                                    // return sendCliqIntimation(studentObject).then(result => {
+
+                                                                    // })
+                                                                  
+
+                                                                    let menteeObject = {
+                                                                        "receiverEmail": reviewer.email,
+                                                                        "messageArgs": {
+                                                                            "submitterName": student.name,
+                                                                            "reviewerName": reviewer.name,
+                                                                            "courseId": rows[0].courseId,
+                                                                            "exercieseSlug": rows[0].slug
+                                                                        }
                                                                     }
 
-                                                                    return sendCliqIntimation(studentObject).then(result => {
+                                                                    sendCliqIntimationMessagetest('assignmentRejected', menteeObject).then(result => {
 
                                                                     })
                                                                     //     return sendAssignmentReviewCompleteEmail(
@@ -1270,11 +1254,11 @@ export default class AssignmentController {
     public ProcessEmailNotification(unlockedCourses, userId) {
         let student, courses;
         let cousresQ = database("courses")
-            .select("name")
+            .select("name", "id")
             .whereIn("id", unlockedCourses)
             .then(rows => {
                 courses = rows;
-                return Promise.resolve();
+                return Promise.resolve(courses);
             });
 
         let studentQ = database("users")
@@ -1289,13 +1273,17 @@ export default class AssignmentController {
 
         Promise.all([cousresQ, studentQ]).then(() => {
             let coursesName = _.pluck(courses, "name").toString();
-            let studentObject = {
-                "receiverId": student.email,
-                "message": `Hi ${student.name}, Apka yeh ${coursesName} unlockced hogya ha.`
+         
+
+            let courseObject = {
+                "receiverEmail": student.email,
+                "messageArgs": {
+                    "percent": "",
+                    "courseDetails": courses
+                }
             }
 
-
-            sendCliqIntimation(studentObject).then(result => {
+            sendCliqIntimationMessagetest('courseDependencyUnlocked', courseObject).then(result => {
 
             })
             // sendCoursesUnlockedForUserEmail(student, coursesName);
@@ -1303,49 +1291,66 @@ export default class AssignmentController {
     }
 
 
-    // public markCourseCompleted(studentId,courseId) {
-    public markCourseCompleted(request,h) {
+    public markCourseCompleted(studentId, courseId) {
+    // public markCourseCompleted(request, h) {
+
+
+
         return new Promise((resolve, reject) => {
-            let courseId = 18;
-            let studentId = 83;
-         
+            // let courseId = 18;
+            // let studentId = 83;
+
             let student, courses;
             let cousresQ = database("courses")
                 .count("exercises.courseId as courseCount")
+                .select("courses.name")
                 .innerJoin("exercises",
                     "courses.id",
                     "exercises.courseId")
                 .where("courses.id", courseId)
                 .then(rows => {
 
-                    
+
                     courses = rows[0];
+
                     return Promise.resolve(courses);
                 });
 
             let studentQ = database("courses")
                 .count("submissions.id as submissionCount")
+                .select("users.email")
                 .innerJoin("exercises",
                     "courses.id",
                     "exercises.courseId")
                 .leftJoin("submissions",
                     "submissions.exerciseId",
                     "exercises.id")
+                .innerJoin("users",
+                    "users.id",
+                    "submissions.userId")
+
                 .where({
-                    "submissions.userid": studentId
+                    "submissions.userId": studentId
                 })
                 .andWhere({
                     "courses.id": courseId
                 })
                 .then(rows => {
-                    
+
                     student = rows[0];
-                   
+
                     return Promise.resolve(student);
                 });
 
+
             Promise.all([cousresQ, studentQ]).then(() => {
-                console.log(courses.courseCount, student.submissionCount);
+
+
+
+                // console.log(courses.courseCount, student.submissionCount);
+
+
+
                 if (courses.courseCount == student.submissionCount) {
                     let submissionInsertQuery = database("course_enrolments")
                         .update({
@@ -1359,6 +1364,18 @@ export default class AssignmentController {
                             return Promise.resolve();
                         });
 
+
+                    let mentorObject = {
+                        "receiverEmail": student.email,
+                        "messageArgs": {
+
+                        }
+                    }
+
+
+                    sendCliqIntimationMessagetest('courseMarkedCompletedAutomatic', mentorObject).then(result => {
+
+                    })
 
                     // let studentObject = {
                     //     "receiverId": student.email,

@@ -86,7 +86,7 @@ let p = validateCourseDirParam()
         // 
         // add or update the exercises in the DB
         let promises = addOrUpdateExercises(globals.exercises, courseId);
-        Promise.all(promises);
+      //  Promise.all(promises);
     })
     .then(() => {
         // say your goodbyes :)

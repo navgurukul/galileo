@@ -35,7 +35,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             response: {
                 schema: postSubmission
             },
-           // auth: 'jwt',
+            auth: 'jwt',
             tags: ['api'],
             handler: assignmentController.postExerciseSubmission
         }

@@ -97,19 +97,19 @@ const server = Server.init(serverConfigs, databaseConfig)
                 | minute
                 second ( optional )
             **/
-            let schedule = `${scheduleConfigs['timeInSecond']} ${scheduleConfigs['minute']} ${scheduleConfigs['hour']}`;
-            schedule += ` ${scheduleConfigs['dayOfMonth']} ${scheduleConfigs['month']} ${scheduleConfigs['dayOfWeek']}`;
-            console.log(schedule);
-            cron.schedule(schedule, function () {
-                console.log("Running Cron Job");
+            // let schedule = `${scheduleConfigs['timeInSecond']} ${scheduleConfigs['minute']} ${scheduleConfigs['hour']}`;
+            // schedule += ` ${scheduleConfigs['dayOfMonth']} ${scheduleConfigs['month']} ${scheduleConfigs['dayOfWeek']}`;
+            // console.log(schedule);
+            // cron.schedule(schedule, function () {
+            //     console.log("Running Cron Job");
                 
-                request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
+            //     request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
+            //         if (!error && response.statusCode === 200) {
                         
-                        console.log("Sent mail");
-                    }
-                });
-            });
+            //             console.log("Sent mail");
+            //         }
+            //     });
+            // });
 
 
 

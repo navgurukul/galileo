@@ -105,31 +105,32 @@ export const sendCliqIntimationMessagetest = (functionname, details) => {
     // Email template
 
     return new Promise(function (resolve, reject) { 
-        let p=`${functionname}`;
-       //console.log(p);
-      // console.log(messageHelper["getforIndivisualTimePeriod"]());
-     // console.log(messageHelper[`${functionname}`](details.reviewer));
+      
+      
+     // console.log(messageHelper["getforIndivisualTimePeriod"]());
+     console.log("Message is goint to sent===>",messageHelper[`${functionname}`](details.messageArgs),"------");
+
        
-
-        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverId}/message?authtoken=${cliqConfigs.authtoken}`, {
-            json: {
-                text: messageHelper[`${functionname}`](details.reviewer)
-            }
-        }, function (error, response, body) {
-
-
-
-            if (!error && response.statusCode == 204) {
-
-                console.log('message sent successsfully')
-                return resolve(response.statusCode);
-                //console.log(body) // Show the HTML for the Google homepage.
-            } else {
-                console.log(body);
-                return resolve(body);
-            }
+ 
+        // CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverEmail}/message?authtoken=${cliqConfigs.authtoken}`, {
+        //     json: {
+        //         text: messageHelper[`${functionname}`](details.messageArgs)
+        //     }
+        // }, function (error, response, body) {
 
 
-        })
+
+        //     if (!error && response.statusCode == 204) {
+
+        //         console.log('message sent successsfully')
+        //         return resolve(response.statusCode);
+        //         //console.log(body) // Show the HTML for the Google homepage.
+        //     } else {
+        //         console.log(body);
+        //         return resolve(body);
+        //     }
+
+
+        // })
     });
 }
