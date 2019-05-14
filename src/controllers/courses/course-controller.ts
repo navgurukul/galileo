@@ -1078,7 +1078,7 @@ export default class CourseController {
 
     public getCourseRelationList(request, h) {
         //request.userId = 122;
-
+        
         
         return new Promise((resolve, reject) => {
             database("user_roles")
@@ -1086,18 +1086,26 @@ export default class CourseController {
                 .where({
                     userId: request.userId
                 })
-                .then(rows => {
-                    const isAdmin =
-                        rows.length > 0 && getUserRoles(rows).isAdmin === true
-                            ? true
-                            : false;
-                    return Promise.resolve(isAdmin);
-                })
-                .then(isAdmin => {
+                // .whereIn(
+                //     'center', [request.query.centerId, 'all']
+                // )
 
-                    
-                    // only admin are allowed to add the courses
-                    if (isAdmin) {
+                .then((rows) => {
+
+                    const access = getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
+
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+
+                    // only admin are allowed to delete the courses
+                    if (isAdmin || isFacilitator || isTnp) {
+
 
                         let query = database("course_relation").select("*");
 
