@@ -2,7 +2,8 @@ import * as Hapi from "hapi";
 import * as Boom from "boom";
 import {
     manipulateResultSet,
-    isStudentEligibleToEnroll
+    isStudentEligibleToEnroll,
+    calculatePercentageOfaCourse
 } from "../../helpers/courseHelper";
 // import * as GoogleCloudStorage from "@google-cloud/storage";
 import * as Configs from "../../configurations";
@@ -869,7 +870,8 @@ export default class AssignmentController {
                                                                 this.checkIfDependencyCourseUnlocked(
                                                                     initialAvailableCourses,
                                                                     availableCoursesPostAssigmentApproval,
-                                                                    request.userId
+                                                                    request.userId,
+                                                                    courseId
                                                                 );
                                                                 /*  Finding the student and the reviewer details to send email
                                                                  * to them about the assignment review.
@@ -1210,7 +1212,7 @@ export default class AssignmentController {
                                                 allAvailableCourses,
                                                 courseConfig.courseCompleteionCriteria
                                             );
-
+                                              
                                             resolve(availableCourses);
                                             //
                                             //
@@ -1226,7 +1228,8 @@ export default class AssignmentController {
     public checkIfDependencyCourseUnlocked(
         initialAvailableCourses,
         availableCoursesPostAssigmentApproval,
-        userId
+        userId,
+        courseId
     ) {
         let initialAvaiblecourseIDs = _.pluck(initialAvailableCourses, "id");
         // 
@@ -1244,14 +1247,14 @@ export default class AssignmentController {
             initialAvaiblecourseIDs
         );
         unlockedCourses.length > 0
-            ? this.ProcessEmailNotification(unlockedCourses, userId)
+            ? this.ProcessEmailNotification(unlockedCourses, userId,courseId)
             : null;
         //
         //
         //
     }
 
-    public ProcessEmailNotification(unlockedCourses, userId) {
+    public ProcessEmailNotification(unlockedCourses, userId,parentCourseId) {
         let student, courses;
         let cousresQ = database("courses")
             .select("name", "id")
@@ -1270,6 +1273,14 @@ export default class AssignmentController {
                 student = rows[0];
                 return Promise.resolve();
             });
+            
+            let percentage
+            let callbackReturn =  calculatePercentageOfaCourse(userId,parentCourseId);
+            callbackReturn.then(e=>{
+                percentage=e
+                  console.log("What i am getting back ", e)
+              })
+            
 
         Promise.all([cousresQ, studentQ]).then(() => {
             let coursesName = _.pluck(courses, "name").toString();
@@ -1278,7 +1289,7 @@ export default class AssignmentController {
             let courseObject = {
                 "receiverEmail": student.email,
                 "messageArgs": {
-                    "percent": "",
+                    "percent": percentage,
                     "courseDetails": courses
                 }
             }

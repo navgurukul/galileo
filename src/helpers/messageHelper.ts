@@ -35,10 +35,10 @@ export const assignmentRejected = (args) => {
 
 
 export const courseDependencyUnlocked = (args) => {
-  let str = `Congrats, Apne yeh course ${args.percent} complete karlia hai isliye apke liye 3 naye courses unlock hogye`;
+  let str = `Congrats, Apne yeh course ${args.percent} complete karlia hai isliye apke liye  naye courses unlock hogye`;
 
-  args.courseDetails.map((key, value) => {
-    str = str + `Course ${key} (Url - http://saral.navgurukul.org/course?id=${value.courseId}&slug=${args.exercieseSlug})`
+  args.courseDetails.map(( value,key ) => {
+    str = str + `Course ${key} (Url - http://saral.navgurukul.org/course?id=${value.courseId})`
   })
 
 
