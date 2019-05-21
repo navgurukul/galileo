@@ -11,7 +11,9 @@ import {
 } from "../cliq";
 
 
-let excerciseDetails = [];
+let count = 1;
+
+let upperCountthen = 1;
 
 let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
     let query = database('exercises')
@@ -31,7 +33,10 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
                         temp['slug'] = rows[0].slug;
                         temp['courseId'] = rows[0].courseId;
                         temp['flag'] = 'update';
+                        temp['upperCountthen'] = upperCountthen;
+                        upperCountthen++;
                         //   return Promise.resolve(rows[0].id);
+
                         return Promise.resolve(temp);
                     })
                     .then((exerciseId) => {
@@ -60,12 +65,20 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
                         temp['slug'] = exerciseInfo.slug;
                         temp['courseId'] = exerciseInfo.courseId;
                         temp['flag'] = 'insert';
+                        temp['upperCountthen'] = upperCountthen;
+                        upperCountthen++;
 
                         return Promise.resolve(temp);
                         // return Promise.resolve(rows[0]);
                     });
             }
-        });
+        })
+    // .then((result) => {
+
+    //     // console.log("I am in end Result==>",excerciseDetails.length)
+    //     // console.log("I am in database. then upperCountthen==>",upperCountthen)
+    //     // upperCountthen++
+    // });
     return query;
 };
 
@@ -111,72 +124,70 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
 //         });
 // };
 
-export const addOrUpdateExercises = function (exercises, courseId, promiseObj?) {
+export const addOrUpdateExercises = function (exercises, courseId, promiseObj?, testingArray?) {
     let exInsertQs = [];
-    let courseDeatils = [];
     let solution;
-   
-        for (let i = 0; i < exercises.length; i++) {
-            if (!(exercises[i]["isSolutionFile"])) {
-                solution = null;
-                if (i < (exercises.length - 1) && exercises[i + 1]["isSolutionFile"]) {
-                    solution = exercises[i + 1]["content"];
-                }
-                let exerciseObj = {
-                    courseId: courseId,
-                    name: exercises[i]['name'],
-                    slug: exercises[i]['slug'],
-                    sequenceNum: exercises[i]['sequenceNum'],
-                    reviewType: 'peer',//exercises[i]['completionMethod'],
-                    content: exercises[i]['content'],
-                    solution: solution,
-                    submissionType: exercises[i]['submissionType'],
-                    githubLink: exercises[i]['githubLink']
-                };
 
-                let query, temp;
-                if (!promiseObj) {
-                    temp = _generateExerciseAddOrUpdateQuery(exerciseObj);
-
-                    console.log(temp);
-                    query = temp;
-                    query.then((result) => {
-                        courseDeatils.push(result);
-                        // console.log("inside !promiseObj Result====>", result)
-                    })
-
-                } else {
-                    promiseObj.then((exerciseId) => {
-                        //  console.log("inside promiseObj-------exerciseId--------", exerciseId)
-
-                        // exerciseObj['parentExerciseId'] = exerciseId;
-                        exerciseObj['parentExerciseId'] = exerciseId.id;
-
-                        //  console.log( "exerciseObj['parentExerciseId']", exerciseObj['parentExerciseId'])
-                        temp = _generateExerciseAddOrUpdateQuery(exerciseObj);
-                        console.log(temp);
-                        query = temp;
-                        query.then((result) => {
-                            // console.log("inside promiseObj Result====>", result)
-                            courseDeatils.push(result);
-                        })
-
-                        return query;
-                    });
-                }
-
-                if (exercises[i].childExercises && exercises[i].childExercises.length > 0) {
-                    addOrUpdateExercises(exercises[i].childExercises, courseId, query);
-                }
-
-                exInsertQs.push(query);
+    // console.log("Count===>", count,testingArray);
+    // count++;
+    // testingArray++;
+    for (let i = 0; i < exercises.length; i++) {
+        if (!(exercises[i]["isSolutionFile"])) {
+            solution = null;
+            if (i < (exercises.length - 1) && exercises[i + 1]["isSolutionFile"]) {
+                solution = exercises[i + 1]["content"];
             }
-        }
-Promise.all([]).then((p) => {
+            let exerciseObj = {
+                courseId: courseId,
+                name: exercises[i]['name'],
+                slug: exercises[i]['slug'],
+                sequenceNum: exercises[i]['sequenceNum'],
+                reviewType: 'peer',//exercises[i]['completionMethod'],
+                content: exercises[i]['content'],
+                solution: solution,
+                submissionType: exercises[i]['submissionType'],
+                githubLink: exercises[i]['githubLink']
+            };
 
-        console.log("i am here inside all")
-        console.log(p);
-    })
+            let query;
+            if (!promiseObj) {
+                query = _generateExerciseAddOrUpdateQuery(exerciseObj);
+                testingArray.totalArray.push(query)
+                query.then((result) => {
+
+                    //testingArray.totalArray.push(result)
+                    // testingArray=result
+                    console.log("inside !promiseObj Result====>", result)
+                })
+               
+            } else {
+                promiseObj.then((exerciseId) => {
+                    
+                    // exerciseObj['parentExerciseId'] = exerciseId;
+                    exerciseObj['parentExerciseId'] = exerciseId.id;
+                    query = _generateExerciseAddOrUpdateQuery(exerciseObj);
+                 
+                    query.then((result) => {
+
+                        // testingArray.totalArray.push(result)
+                        // testingArray=result
+                        //console.log("inside promiseObj Result====>", result)
+                    })
+                    return query;
+                });
+                testingArray.totalArray.push(query)
+            }
+
+            if (exercises[i].childExercises && exercises[i].childExercises.length > 0) {
+                addOrUpdateExercises(exercises[i].childExercises, courseId, query, testingArray);
+            }
+
+            exInsertQs.push(query);
+        }
+    }
+
+
+    // console.log("How many times I am getting executed",testingArray.totalArray,excerciseDetails.totalArray);
     return exInsertQs;
 };
 
