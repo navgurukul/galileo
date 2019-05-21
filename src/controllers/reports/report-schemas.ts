@@ -24,6 +24,7 @@ export const menteeSchema: Joi.ObjectSchema = Joi.object({
 
 const submissionSchema: Joi.ObjectSchema = Joi.object({
     submissionId: Joi.number(),
+    submitterNotes: Joi.string(),
     submissionState: Joi.string().allow('completed', 'rejected', 'pending'),
     submissionCompleted: Joi.bool(),
     menteeId: Joi.number(),
