@@ -83,32 +83,8 @@ let p = validateCourseDirParam()
         return Promise.resolve(courseId);
     })
     .then(courseId => {
-        // 
-        let testingArray = { totalArray: [] };
-
-       
-        // add or update the exercises in the DB
-       
-        let promises =  addOrUpdateExercises(globals.exercises, courseId, undefined, testingArray);
-
-        console.log("how many times its getting called",testingArray.totalArray.length)
-        testingArray.totalArray.map(value=>{
-
-          //  console.log("testing result value =====> ", value)
-            value.then(result=>{
-
-
-                console.log("testing result =========================== ", result)
-            })
-        })
-       // console.log("totalArray", testingArray.totalArray.length)
-     
-        // Promise.all([promises]).then((result) => {
-        //     console.log("totalArray", testingArray.totalArray.length)
-        //     // console.log("testingArray inside--------", testingArray);
-        //     // console.log("testingArray inside--------", result.length);
-
-        // });
+        let promises = addOrUpdateExercises(globals.exercises, courseId);
+        Promise.all(promises);
     })
     .then(() => {
         // say your goodbyes :)

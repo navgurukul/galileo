@@ -15,6 +15,40 @@ let count = 1;
 
 let upperCountthen = 1;
 
+let sendAllUserMessage = function (exerciseDetails,functionName) {
+    database('users')
+        .select('users.email', 'users.name')
+        .innerJoin(
+            "user_roles",
+            "user_roles.userId",
+            "users.id"
+        )
+
+        .where({ 'roles': 'student' })
+        .then((rows) => {
+            if (rows.length > 0) {
+
+                rows.map((usersDetails) => {
+
+                    // console.log(key)
+                    // console.log(usersDetails.email)
+                    let courseObject = {
+                        "receiverEmail": usersDetails.email,
+                        "messageArgs": {
+                            "studentName": usersDetails.name,
+                            "exerciseDetails": exerciseDetails
+                        }
+                    }
+                    // console.log(courseObject)
+                    sendCliqIntimationMessagetest(functionName, courseObject).then(result => {
+
+                    })
+                })
+
+            }
+        })
+}
+
 let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
     let query = database('exercises')
         .where({ 'slug': exerciseInfo['slug'] })
@@ -26,6 +60,9 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
                     .where({ 'id': rows[0].id })
                     .update(exerciseInfo)
                     .then(() => {
+                        return Promise.resolve(rows[0].id);
+                    })
+                    .then((exerciseId) => {
 
                         let temp = [];
                         temp['id'] = rows[0].id;
@@ -33,13 +70,10 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
                         temp['slug'] = rows[0].slug;
                         temp['courseId'] = rows[0].courseId;
                         temp['flag'] = 'update';
-                        temp['upperCountthen'] = upperCountthen;
-                        upperCountthen++;
-                        //   return Promise.resolve(rows[0].id);
 
-                        return Promise.resolve(temp);
-                    })
-                    .then((exerciseId) => {
+                        sendAllUserMessage(temp,'courseChangesConceptChanged');
+
+
                         // if the review type has changed then we will need to delete the submissions too
                         if (dbReviewType !== exerciseInfo['reviewType']) {
                             return database('submissions')
@@ -64,21 +98,15 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
                         temp['name'] = exerciseInfo.name;
                         temp['slug'] = exerciseInfo.slug;
                         temp['courseId'] = exerciseInfo.courseId;
+                        temp['courseName'] = globals.courseData['info']['name'];
                         temp['flag'] = 'insert';
-                        temp['upperCountthen'] = upperCountthen;
-                        upperCountthen++;
 
-                        return Promise.resolve(temp);
-                        // return Promise.resolve(rows[0]);
+                        sendAllUserMessage(temp,'courseChangesConceptAdded');
+
+                        return Promise.resolve(rows[0]);
                     });
             }
-        })
-    // .then((result) => {
-
-    //     // console.log("I am in end Result==>",excerciseDetails.length)
-    //     // console.log("I am in database. then upperCountthen==>",upperCountthen)
-    //     // upperCountthen++
-    // });
+        });
     return query;
 };
 
@@ -124,13 +152,9 @@ let _generateExerciseAddOrUpdateQuery = function (exerciseInfo) {
 //         });
 // };
 
-export const addOrUpdateExercises = function (exercises, courseId, promiseObj?, testingArray?) {
+export const addOrUpdateExercises = function (exercises, courseId, promiseObj?) {
     let exInsertQs = [];
     let solution;
-
-    // console.log("Count===>", count,testingArray);
-    // count++;
-    // testingArray++;
     for (let i = 0; i < exercises.length; i++) {
         if (!(exercises[i]["isSolutionFile"])) {
             solution = null;
@@ -152,42 +176,21 @@ export const addOrUpdateExercises = function (exercises, courseId, promiseObj?, 
             let query;
             if (!promiseObj) {
                 query = _generateExerciseAddOrUpdateQuery(exerciseObj);
-                testingArray.totalArray.push(query)
-                query.then((result) => {
-
-                    //testingArray.totalArray.push(result)
-                    // testingArray=result
-                    console.log("inside !promiseObj Result====>", result)
-                })
-               
             } else {
                 promiseObj.then((exerciseId) => {
-                    
-                    // exerciseObj['parentExerciseId'] = exerciseId;
-                    exerciseObj['parentExerciseId'] = exerciseId.id;
+                    exerciseObj['parentExerciseId'] = exerciseId;
                     query = _generateExerciseAddOrUpdateQuery(exerciseObj);
-                 
-                    query.then((result) => {
-
-                        // testingArray.totalArray.push(result)
-                        // testingArray=result
-                        //console.log("inside promiseObj Result====>", result)
-                    })
                     return query;
                 });
-                testingArray.totalArray.push(query)
             }
 
             if (exercises[i].childExercises && exercises[i].childExercises.length > 0) {
-                addOrUpdateExercises(exercises[i].childExercises, courseId, query, testingArray);
+                addOrUpdateExercises(exercises[i].childExercises, courseId, query);
             }
 
             exInsertQs.push(query);
         }
     }
-
-
-    // console.log("How many times I am getting executed",testingArray.totalArray,excerciseDetails.totalArray);
     return exInsertQs;
 };
 

@@ -112,25 +112,25 @@ export const sendCliqIntimationMessagetest = (functionname, details) => {
 
        
  
-        // CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverEmail}/message?authtoken=${cliqConfigs.authtoken}`, {
-        //     json: {
-        //         text: messageHelper[`${functionname}`](details.messageArgs)
-        //     }
-        // }, function (error, response, body) {
+        CustomRequest.post(`https://cliq.zoho.com/api/v2/buddies/${details.receiverEmail}/message?authtoken=${cliqConfigs.authtoken}`, {
+            json: {
+                text: messageHelper[`${functionname}`](details.messageArgs)
+            }
+        }, function (error, response, body) {
 
 
 
-        //     if (!error && response.statusCode == 204) {
+            if (!error && response.statusCode == 204) {
 
-        //         console.log('message sent successsfully')
-        //         return resolve(response.statusCode);
-        //         //console.log(body) // Show the HTML for the Google homepage.
-        //     } else {
-        //         console.log(body);
-        //         return resolve(body);
-        //     }
+                console.log('message sent successsfully')
+                return resolve(response.statusCode);
+                //console.log(body) // Show the HTML for the Google homepage.
+            } else {
+                console.log(body);
+                return resolve(body);
+            }
 
 
-        // })
+        })
     });
 }

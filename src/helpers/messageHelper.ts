@@ -73,19 +73,24 @@ export const newCourseAdded = (args) => {
 
 export const courseChangesConceptAdded = (args) => {
   let str = `Hi ${args.studentName},`;
-  str = str + `${args.courseName} course me kuch naye topic add hue hai aap ushe yahan click karke dekh sakte ha.`;
-  args.exerciseDetails.map(( value) => {
-    str = str + ` ${value.exerciseName} (Url - http://saral.navgurukul.org/course?id=${value.courseId}&slug=${value.exercieseSlug})`
-  })
+  str = str + `${args.exerciseDetails.courseName} course me kuch naye topic add hue hai aap ushe yahan click karke dekh sakte ha.`;
+  // args.exerciseDetails.map(( value) => {
+  //   str = str + ` ${value.exerciseName} (Url - http://saral.navgurukul.org/course?id=${value.courseId}&slug=${value.exercieseSlug})`
+  // })
+  
+    str = str + ` ${args.exerciseDetails.name} (Url - http://saral.navgurukul.org/course?id=${args.exerciseDetails.courseId}&slug=${args.exerciseDetails.slug})`
+  
   return str;
 };
 
 export const courseChangesConceptChanged = (args) => {
   let str = `Hi ${args.studentName},`;
   str = str + `Aur kuch purane topics me changes hue hai joh niche diye gaye hai.`;
-  args.exerciseDetails.map(( value) => {
-    str = str + ` ${value.exerciseName} (Url - http://saral.navgurukul.org/course?id=${value.courseId}&slug=${value.exercieseSlug})`
-  })
+  // args.exerciseDetails.map(( value) => {
+  //   str = str + ` ${value.exerciseName} (Url - http://saral.navgurukul.org/course?id=${value.courseId}&slug=${value.exercieseSlug})`
+  // })
+  str = str + ` ${args.exerciseDetails.name} (Url - http://saral.navgurukul.org/course?id=${args.exerciseDetails.courseId}&slug=${args.exerciseDetails.slug})`
+  
   return str;
 
 };
