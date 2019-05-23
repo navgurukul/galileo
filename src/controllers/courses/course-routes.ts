@@ -247,6 +247,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         path: '/courseRelation',
         config: {
             description: 'Get complete list of course relations for all the courses',
+            // validate: {
+               
+            //     query: {
+            //         centerId: Joi.string().allow(null),
+            //     }
+            // },
             response: {
                 schema: Joi.object({
                     "data": Joi.array().items(Joi.object({
@@ -257,6 +263,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "message": Joi.string()
                 })
             },
+            auth: 'jwt',
             tags: ['api'],
             handler: courseController.getCourseRelationList
         }

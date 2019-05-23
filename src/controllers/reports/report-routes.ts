@@ -132,7 +132,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
                 })
             },
-            auth: 'jwt',
+            //auth: 'jwt',
             tags: ['api'],
             handler: reportController.numberOfAssignmentSubmitted,
         }

@@ -1111,20 +1111,56 @@ export default class CourseController {
     }
 
     public getCourseRelationList(request, h) {
+        //request.userId = 122;
+        
+        
         return new Promise((resolve, reject) => {
-            let query = database("course_relation").select("*");
+            database("user_roles")
+                .select("roles")
+                .where({
+                    userId: request.userId
+                })
+                // .whereIn(
+                //     'center', [request.query.centerId, 'all']
+                // )
 
-            query.then(rows => {
-                if (rows.length > 0) {
-                    resolve({ data: rows });
-                } else {
-                    resolve({
-                        data: [],
-                        message:
-                            "Not added any course dependencies for the courses..."
-                    });
-                }
-            });
+                .then((rows) => {
+
+                    const access = getUserRoles(rows);
+                    const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
+                    const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
+                    const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
+                    const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
+
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
+
+
+                }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
+
+                    // only admin are allowed to delete the courses
+                    if (isAdmin || isFacilitator || isTnp) {
+
+
+                        let query = database("course_relation").select("*");
+
+                        query.then(rows => {
+                            if (rows.length > 0) {
+                                resolve({ data: rows });
+                            } else {
+                                resolve({
+                                    data: [],
+                                    message:
+                                        "Not added any course dependencies for the courses..."
+                                });
+                            }
+                        });
+
+
+                    }
+                })
+
+
+
         });
     }
 
