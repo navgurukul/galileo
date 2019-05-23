@@ -85,15 +85,30 @@ const server = Server.init(serverConfigs, databaseConfig)
                 }
             });
 
-            cron.schedule(`${scheduleConfigs.timeInSecond} * * * * *`, function () {
+
+
+            /**
+                * * * * * *
+                | | | | | |
+                | | | | | day of week
+                | | | | month
+                | | | day of month
+                | | hour
+                | minute
+                second ( optional )
+            **/
+            let schedule = `${scheduleConfigs.timeInSecond} ${scheduleConfigs.minute} ${scheduleConfigs.hour}`;
+            schedule += ` ${scheduleConfigs.dayOfMonth} ${scheduleConfigs.month} ${scheduleConfigs.dayOfWeek}`;
+            console.log(schedule);
+            cron.schedule(schedule, function () {
                 console.log("Running Cron Job");
                 
                 request(server.info.uri+'/reports/getSubmissionReport', function (error, response, body) {
-                    if (!error && response.statusCode == 200) {
+                    if (!error && response.statusCode === 200) {
                         
-                         //
+                        console.log("Sent mail");
                     }
-                })
+                });
             });
 
 

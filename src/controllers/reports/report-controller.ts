@@ -238,6 +238,7 @@ export default class ReportController {
     }
 
     public getMenteesCoursesReport(request, h) {
+        //request.userId=175;
         return new Promise((resolve, reject) => {
             request.userId = 1;
             let mentees = [],
@@ -493,7 +494,8 @@ export default class ReportController {
     }
 
     public getMenteesExercisesReport(request, h) {
-        // request.userId = 2;
+       console.log('--------------getMenteesExercisesReport----------------');
+       //request.userId = 175;
         return new Promise((resolve, reject) => {
             let mentees = [],
                 menteeSubmissions = [],
@@ -656,6 +658,7 @@ export default class ReportController {
                             .select(
                                 "submissions.id as submissionId",
                                 "submissions.state as submissionState",
+                                "submissions.submitterNotes as submitterNotes",
                                 "submissions.completed as submissionCompleted",
                                 "submissions.exerciseId as exerciseId",
                                 "users.id as menteeId",
@@ -682,10 +685,12 @@ export default class ReportController {
                                 "exercises.courseId":
                                     response.courseData.courseId
                             });
+                            console.log();
                     } else {
                         submissionQ = database("submissions")
                             .select(
                                 "submissions.id as submissionId",
+                                "submissions.submitterNotes as submitterNotes",
                                 "submissions.state as submissionState",
                                 "submissions.completed as submissionCompleted",
                                 "submissions.exerciseId as exerciseId",

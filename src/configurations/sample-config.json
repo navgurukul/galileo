@@ -40,13 +40,18 @@
       "courseCompleteionCriteria": 70
    },
    "scheduleConfig": {
-      "timeInSecond": 84600,
+      "timeInSecond": "*",
+      "minute":"59",
+      "hour":"23",
+      "dayOfMonth":"*",
+      "month":"*",
+      "dayOfWeek":"*",
       "receiverEmail": "amar17@navgurukul.org"
    },
    "cliqConfig": {
-      "authtoken": "f9a1f1ae5ab636824e062b6ccdb381cf"
+      "authtoken": "authtoken"
    },
    "sentryConfig": {
-      "sentryDsn": "cd4de37634ca11e9878a4201c0a8d032"
+      "sentryDsn": "dsn"
    }
 }
