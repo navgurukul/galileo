@@ -2,7 +2,7 @@ var _ = require("underscore");
 import * as Configs from "../configurations";
 import database from "../";
 
-export const getIsSolutionAvailable = function(exercise) {
+export const getIsSolutionAvailable = function (exercise) {
     let isSolutionAvailable = true;
     if (exercise.solution === null) {
         isSolutionAvailable = false;
@@ -10,7 +10,7 @@ export const getIsSolutionAvailable = function(exercise) {
     return isSolutionAvailable;
 };
 
-export const manipulateResultSet = function(
+export const manipulateResultSet = function (
     totalExercisesperCourse,
     exrcisesCompletedPerCourse,
     courseReliesOn,
@@ -72,7 +72,7 @@ export const manipulateResultSet = function(
             coursesNotCompletedWithDependency.push(courseId);
         }
     });
-    return _.reject(availableCourses, function(course) {
+    return _.reject(availableCourses, function (course) {
         return _.contains(coursesNotCompletedWithDependency, course.id);
     });
 };
@@ -100,7 +100,7 @@ function getIsCourseCompletionCriteriaMet(courseExerciseDetails, id) {
     let course = _.where(courseExerciseDetails, { courseId: id });
     return course[0].isCompletionCriteriaMet;
 }
-export const listToTree = function(list) {
+export const listToTree = function (list) {
     var map = {},
         node,
         roots = [],
@@ -131,7 +131,7 @@ export const listToTree = function(list) {
     return roots;
 }
 
-export const isStudentEligibleToEnroll = async function(studentId, courseId) {
+export const isStudentEligibleToEnroll = async function (studentId, courseId) {
     let TotalExercisesPerCourseQ;
     let exerciseCompeletedPerCourseQ;
     let courseReliesOnQ;
@@ -186,7 +186,7 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
             database("courses")
                 .distinct()
                 .select("courses.id")
-                .join("course_enrolments", function() {
+                .join("course_enrolments", function () {
                     this.on(
                         "courses.id",
                         "=",
@@ -230,7 +230,7 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
     return result;
 };
 
-export const addingRootNode = function(rootArray, ChildArray) {
+export const addingRootNode = function (rootArray, ChildArray) {
     var i, j;
     //
     for (i = 0; i < rootArray.length; i += 1) {
@@ -245,7 +245,7 @@ export const addingRootNode = function(rootArray, ChildArray) {
     return rootArray;
 };
 
-export const getUserRoles = function(userDetails) {
+export const getUserRoles = function (userDetails) {
     let userRoles = {
         isAdmin: false,
         isFacilitator: false,
@@ -286,3 +286,76 @@ export const getUserRoles = function(userDetails) {
 
     return userRoles;
 };
+
+
+export const calculatePercentageOfaCourse = async function (studentId, courseId) {
+    // let courseConfig = Configs.getCourseConfigs();
+    let TotalExercisesPerCourseQ = database("exercises")
+        .select(
+            "exercises.courseId",
+            database.raw("COUNT(exercises.id) as totalExercises")
+        ).where(
+            { "exercises.courseId": courseId, }
+        )
+        //.groupBy("exercises.courseId")
+        .then(rows => {
+
+            // console.log("I am side TotalExercisesPerCourseQ",rows)
+            return Promise.resolve(rows[0]);
+        });
+
+    let exerciseCompeletedPerCourseQ = database("exercises")
+        .select(
+            database.raw("COUNT(exercises.id) as totalExercisesCompleted"),
+            "exercises.courseId"
+        )
+        .where(
+            "exercises.id",
+            "in",
+            database("submissions")
+                .select("submissions.exerciseId")
+                .where({ "submissions.completed": 1 })
+                .andWhere("submissions.userId", "=", studentId)
+        )
+
+        // .andWhere(function () {
+        //         this.where({ "exercises.courseId": courseId })        
+        // })
+        .andWhere("exercises.courseId", "=", courseId)
+        //.groupBy("exercises.courseId")
+        .then(rows => {
+            // console.log("I am side exerciseCompeletedPerCourseQ",rows)
+            return Promise.resolve(rows[0]);
+        });
+
+
+    let a = Promise.all([
+
+        exerciseCompeletedPerCourseQ,
+        TotalExercisesPerCourseQ,
+
+    ]).then(resolvedValues => {
+
+        let exerciseCompeletedPerCourse = resolvedValues[0];
+        let totalExercisesPerCourse = resolvedValues[1];
+
+        let courseCompletionPecentage = parseFloat(
+            (
+                (exerciseCompeletedPerCourse["totalExercisesCompleted"] /
+                    totalExercisesPerCourse["totalExercises"])
+                *
+                100
+            ).toFixed(2)
+        );
+        console.log("Total Course percentage---", courseCompletionPecentage)
+        return courseCompletionPecentage;
+
+        //console.log("exerciseCompeletedPerCourseQ", resolvedValues[0])
+        //console.log("TotalExercisesPerCourseQ", resolvedValues[1])
+    })
+    let result = await a;
+    // 
+    // 
+    // 
+    return result;
+}

@@ -16,7 +16,8 @@ import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
 import {
-    sendCliqIntimation
+    sendCliqIntimation,
+    sendCliqIntimationMessagetest
 } from "../../cliq";
 
 
@@ -917,9 +918,10 @@ export default class CourseController {
     public courseComplete(request, h) {
         // only facilitator of the mentee center or
         // mentor of the mentee can mark the course complete
-        // request.userId = 1;
+        request.userId = 258;
         return new Promise((resolve, reject) => {
             // check if the student id exist or not.
+            let mentorsDeatils: any = null;
             database("users")
                 .select("*")
                 .where({
@@ -939,9 +941,14 @@ export default class CourseController {
                     }
                 })
                 .then(mentee => {
-                    // check if the is the mentor for the menteeId?
+                    // check if he is the mentor for the menteeId?
                     return database("mentors")
                         .select("*")
+                        .innerJoin(
+                            "users",
+                            "mentors.mentor",
+                            "users.id"
+                        )
                         .where({
                             "mentors.mentor": request.userId,
                             "mentors.mentee": mentee.id
@@ -953,6 +960,7 @@ export default class CourseController {
                                     mentee
                                 });
                             } else {
+                                mentorsDeatils = rows[0];
                                 return Promise.resolve({
                                     isMentor: true,
                                     mentee
@@ -1013,7 +1021,17 @@ export default class CourseController {
                 .then(() => {
                     // check if the student have enrolled in the course.
                     return database("course_enrolments")
-                        .select("*")
+                        .select("courseStatus", "courses.name as courseName", 'users.name as usersName', 'users.email as usersEmail')
+                        .innerJoin(
+                            'courses',
+                            'courses.id',
+                            'course_enrolments.courseId'
+                        )
+                        .innerJoin(
+                            'users',
+                            'users.id',
+                            'course_enrolments.studentId'
+                        )
                         .where({
                             "course_enrolments.studentId":
                                 request.payload.menteeId,
@@ -1037,11 +1055,13 @@ export default class CourseController {
                                 );
                                 return Promise.reject("Rejected");
                             } else {
-                                return Promise.resolve();
+                                return Promise.resolve(rows[0]);
                             }
                         });
                 })
-                .then(() => {
+                .then((result) => {
+
+
                     // mark the course complete here.
                     database("course_enrolments")
                         .update({
@@ -1055,6 +1075,8 @@ export default class CourseController {
                                 request.params.courseId
                         })
                         .then(rows => {
+                            console.log(rows);
+                            console.log("I am here======>", result, mentorsDeatils);
 
                             // let studentObject = {
                             //     "receiverId": student.email,
@@ -1063,9 +1085,21 @@ export default class CourseController {
 
 
                             // sendCliqIntimation(studentObject).then(result => {
-                            //     
+
                             // })
 
+                            let mentorObject = {
+                                "receiverEmail": result.usersEmail,
+                                "messageArgs": {
+                                    "courseName": result.courseName,
+                                    "mentor": mentorsDeatils.name
+                                }
+                            }
+                            
+
+                            sendCliqIntimationMessagetest('courseMarkedCompletedManual', mentorObject).then(result => {
+
+                            })
 
 
                             resolve({
@@ -1433,6 +1467,7 @@ export default class CourseController {
      * @param h
      */
     public getMentorsOrMenteesList(request, h) {
+     //   request.userId=122;
         return new Promise((resolve, reject) => {
             database("user_roles")
                 .select("roles")

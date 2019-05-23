@@ -164,20 +164,20 @@ export const sendSubmissionReport = (student: User, courses) => {
         <tr><td>Location</td><td>Name</td><td>Submission Count</td></tr>`;
 
   
-  for (const [center, userSubmissionReport] of Object.entries(courses.userWise)) {
-    emailTemplate = emailTemplate + `<tr>
-      <td>${center}</td>
-      <td></td>
-      <td></td>
-    </tr>`;
+  // for (const [center, userSubmissionReport] of Object.entries(courses.userWise)) {
+  //   emailTemplate = emailTemplate + `<tr>
+  //     <td>${center}</td>
+  //     <td></td>
+  //     <td></td>
+  //   </tr>`;
 
-      for (const [i, val] of Object.entries(userSubmissionReport)) {
-        emailTemplate = emailTemplate + `<tr>
-          <td></td>
-          <td>${val.name}</td>
-          <td>${val.numberOfAssignmentSubmitted}</td></tr>`;
-      }
-  }
+  //     for (const [i, val] of Object.entries(userSubmissionReport)) {
+  //       emailTemplate = emailTemplate + `<tr>
+  //         <td></td>
+  //         <td>${val.name}</td>
+  //         <td>${val.numberOfAssignmentSubmitted}</td></tr>`;
+  //     }
+  // }
   emailTemplate = emailTemplate + `
     </table>
       </div>
@@ -191,19 +191,19 @@ export const sendSubmissionReport = (student: User, courses) => {
               <td>LastWeek</td>
               <td>LastMonth</td>
             </tr>`;
-  for (const [center, centerReport] of Object.entries(courses.totalCount)) {
+  // for (const [center, centerReport] of Object.entries(courses.totalCount)) {
 
-    emailTemplate = emailTemplate + `<tr>
-          <td>${center}</td>
-          <td>${centerReport["numberOfPendingRequests"]}</td>
-          <td>${centerReport["numberOfRequestCreated"].requestTodays}</td>
-          <td>${centerReport["numberOfRequestCreated"].requestYesterday}</td>
-          <td>${centerReport["numberOfRequestCreated"].requestLastWeek}</td>
-          <td>${centerReport["numberOfRequestCreated"].requestLastMonth}</td>
-        </tr>`;
+  //   emailTemplate = emailTemplate + `<tr>
+  //         <td>${center}</td>
+  //         <td>${centerReport["numberOfPendingRequests"]}</td>
+  //         <td>${centerReport["numberOfRequestCreated"].requestTodays}</td>
+  //         <td>${centerReport["numberOfRequestCreated"].requestYesterday}</td>
+  //         <td>${centerReport["numberOfRequestCreated"].requestLastWeek}</td>
+  //         <td>${centerReport["numberOfRequestCreated"].requestLastMonth}</td>
+  //       </tr>`;
 
 
-  }
+  // }
   emailTemplate = emailTemplate + `
         </table>
       </div>

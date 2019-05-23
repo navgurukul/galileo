@@ -174,4 +174,36 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    // server.route({
+    //     method: 'GET',
+    //     path: '/assignments/peerReviews',
+    //     config: {
+    //         description: 'List of peer review requests.',
+    //         response: {
+    //             // schema: Joi.object({
+    //             //     // 'data': Joi.array().items(peerReviewSubmission)
+    //             // })
+    //         },
+    //         // auth: 'jwt',
+    //         tags: ['api'],
+    //         handler: assignmentController.markCourseCompleted
+    //     }
+    // });
+
+    server.route({
+        method: 'GET',
+        path: '/assignments/checkDependencyCourses',
+        config: {
+            description: 'List of peer review requests.',
+            response: {
+                // schema: Joi.object({
+                //     // 'data': Joi.array().items(peerReviewSubmission)
+                // })
+            },
+            // auth: 'jwt',
+            tags: ['api'],
+            handler: assignmentController.checkDependencyCourses
+        }
+    });
+
 }
