@@ -288,6 +288,22 @@ export default class CourseController {
         });
     }
 
+
+    public getAllCourses(request, h){
+        return new Promise((resolve, reject) => {
+            let exercises = [];
+            //let courseId = parseInt(request.params.courseId, 10);
+
+            let query = database("courses")
+                .select("courses.id", "courses.name")
+                .orderBy("courses.id", "asc");
+
+            query.then(rows => {
+                resolve(rows);
+            });
+        });
+    }
+
     public getCourseTopics(request, h) {
         return new Promise((resolve, reject) => {
             let exercises = [];

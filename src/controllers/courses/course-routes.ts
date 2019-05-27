@@ -46,6 +46,27 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
+        path: '/courses/all',
+        config: {
+            description: 'List of all the courss',
+            // response: {
+            //     schema: Joi.object({
+            //         "availableCourses": Joi.array().items(courseSchema),
+            //         "enrolledCourses": Joi.array().items(enrolledCourseSchema),
+            //         "completedCourses": Joi.array().items(completedCoursesSchema),
+            //     })
+            // },
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
+            tags: ['api'],
+            handler: courseController.getAllCourses
+        }
+    });
+
+    server.route({
+        method: 'GET',
         path: '/courses/{courseId}/topics',
         config: {
             description: 'Get complete list of topics in the course',
