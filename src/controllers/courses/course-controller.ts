@@ -1122,6 +1122,13 @@ export default class CourseController {
                         });
 
 
+                    } else {
+                        reject(
+                            Boom.expectationFailed(
+                                "Only Admins or facilitator or tnp are allowed to add the course dependencies."
+                            )
+                        );
+                        return Promise.reject("Rejected");
                     }
                 })
 
