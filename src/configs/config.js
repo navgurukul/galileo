@@ -18,7 +18,18 @@ module.exports = {
     },
   },
   server: {
-    port: 5000,
+    port: process.env.PORT || 5000,
+    routes: {
+      cors: {
+        headers: [
+          'Accept',
+          'Authorization',
+          'Content-Type',
+          'If-None-Match',
+          'Accept-language',
+        ],
+      },
+    },
     jwtSecret: process.env.JWY_SECRET,
     jwtExpiration: process.env.JWT_EXPIRATION_TIME,
     googleAuth: {
@@ -49,4 +60,10 @@ module.exports = {
   sentryConfig: {
     sentryDsn: process.env.SENTRY_DSN,
   },
+  bellConfig: {
+    password: 'cookie_encryption_password_secure',
+    provider: 'google',
+    isSecure: false,
+    location: (port) => `http://localhost:${port}/bell`
+  }
 };

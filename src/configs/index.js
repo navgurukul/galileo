@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
 const color = require('colors');
 const _ = require('underscore');
 const Sentry = require('@sentry/node');
@@ -11,10 +9,6 @@ class Configurations {
   constructor(configs, constants) {
     this._configs = configs;
     this._constants = constants;
-    if (!this._configs) {
-      console.error(color.red('Check GALILEO_ENV variable'));
-      throw new Error('Check GALILEO_ENV variable');
-    }
   }
 
   getDatabaseConfig() {

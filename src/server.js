@@ -24,18 +24,8 @@ function init(configs) {
 
   return new Promise(async (resolve) => {
     const server = new Hapi.Server({
-      port: process.env.port || serverConfigs.port,
-      routes: {
-        cors: {
-          headers: [
-            'Accept',
-            'Authorization',
-            'Content-Type',
-            'If-None-Match',
-            'Accept-language',
-          ],
-        },
-      },
+      port: serverConfigs.port,
+      routes: serverConfigs.routes,
     });
 
     const pluginOptions = {
