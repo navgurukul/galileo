@@ -1,0 +1,12 @@
+GOOGLE_AUTH_KEY = google-auth-key
+GOOGLE_AUTH_SECRET = google-auth-secret
+AWS_EMAIL_AUTH_KEY = AWS-ses-key
+AWS_EMAIL_AUTH_SECRET = AWS-ses-secret
+CLIG_AUTH_TOKEN = authToken
+SENTRY_DSN = sentry-dsn 
+REPORT_RECIEVER_EMAIL = reciever-email
+DB_NAME = db-name
+DB_USERNAME = db-username
+DB_PASSWORD = db-password
+DB_HOST = db-host
+JWT_EXPIRATION_TIME = 24h
