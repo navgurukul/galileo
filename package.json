@@ -18,7 +18,11 @@
     "dev": "export GALILEO_ENV='local' && nodemon --watch src src/index.js",
     "test": "jest",
     "lint": "eslint .",
-    "lint:fix": "eslint . -c .eslintrc.js --ext js --fix"
+    "lint:fix": "eslint . -c .eslintrc.js --ext js --fix",
+    "knex:init": "knex init",
+    "knex:migrate:up": "knex migrate:latest",
+    "knex:migrate:down": "knex migrate:rollback",
+    "knex:migrate:create": "knex migrate:make"
   },
   "dependencies": {
     "@sentry/node": "4.4.1",

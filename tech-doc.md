@@ -31,3 +31,8 @@ stubs and mocks
     - which to use here?
     
 plugins loading.
+
+
+- [CLI not found for MySQL in mac in after installing](https://stackoverflow.com/a/35338119)
+- [Using Objection with KnexJS](https://medium.com/velotio-perspectives/a-step-towards-simplified-querying-in-nodejs-8bfd9bb4097f)
+- [Preventing Sql Injection](noLinks)
