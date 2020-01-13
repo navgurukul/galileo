@@ -1,6 +1,6 @@
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const _ = require('underscore');
-const BusinessErrors = require('../../configs/businessErrors');
+const businessErrors = require('../../configs/businessErrors');
 
 const internals = {
 	version: '1.0.0',
@@ -8,10 +8,10 @@ const internals = {
 };
 
 module.exports = {
-	register: (server, options) => server.register({
+	register: (server, options = {businessErrors}) => server.register({
 		version: internals.version,
 		name: internals.name,
-		register: internals.register,
+		register: internals.register(options.businessErrors),
 	}),
 	info: () => ({
 		name: internals.name,
@@ -19,14 +19,14 @@ module.exports = {
 	}),
 };
 
-internals.register = async (server, options) => {
+internals.register = (businessErrors) => async (server, options) => {
 	server.decorate('server', 'boom', Boom);
 	server.decorate('toolkit', 'boom', Boom);
-	_.forEach(_.keys(BusinessErrors), (key) => {
+	_.forEach(_.keys(businessErrors), (key) => {
 		const {
 			statusCode,
 			message,
-		} = BusinessErrors[key];
+		} = businessErrors[key];
 		const method = (options = {}) => server.boom.boomify(new Error(message), {
 			statusCode,
 			...options,

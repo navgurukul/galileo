@@ -22,9 +22,13 @@
     "knex:init": "knex init",
     "knex:migrate:up": "knex migrate:latest",
     "knex:migrate:down": "knex migrate:rollback",
-    "knex:migrate:create": "knex migrate:make"
+    "knex:migrate:create": "knex migrate:make",
+    "setup": "npm i && npm run knex:migrate:up && npm run dev",
+    "precommit": "npm run lint && npm run test",
+    "update": "git pull && npm run knex:migrate:up"
   },
   "dependencies": {
+    "@hapi/boom": "^9.0.0",
     "@sentry/node": "4.4.1",
     "ajv": "5.2.0",
     "aws-sdk": "^2.374.0",

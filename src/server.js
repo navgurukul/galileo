@@ -5,6 +5,7 @@ const Plugins = require('./plugins');
 const Routes = require('./routes');
 const Services = require('./services');
 const Models = require('./models');
+const businessErrors = require('./configs/businessErrors');
 
 const mergePluginsIfProductionEnv = (Plugins) => {
 	if (process.env.GALILEO_ENV === 'prod') {
@@ -27,11 +28,12 @@ function init(configs) {
 			port: serverConfigs.port,
 			routes: serverConfigs.routes,
 		});
-		const databaseConnector = new knex(databaseConfig);
+
 		const pluginOptions = {
-			database: databaseConnector,
+			database: databaseConfig,
 			serverConfigs,
 			configs,
+			businessErrors
 		};
 
 		await Promise.all(mergePluginsIfProductionEnv(Plugins).map((plugin) => {
@@ -48,7 +50,7 @@ function init(configs) {
 			return plugin.register(server, pluginOptions);
 		}));
 
-		await Routes.forEach((route) => route.init(server, databaseConnector, configs));
+		await Routes.forEach((route) => route.init(server, databaseConfig, configs));
 		resolve(server);
 	});
 }

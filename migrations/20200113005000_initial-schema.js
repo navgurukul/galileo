@@ -38,36 +38,59 @@ exports.up = function (knex) {
 			table.datetime('createdAt').defaultTo(knex.fn.now());
 			table.datetime('updatedAt').defaultTo(knex.fn.now());
 		})
-		.createTable('exercises', table => {
+		.createTable('topics', table => {
 			table.increments('id').primary().unsigned();
-			table.integer('parentExerciseId')
+			table.integer('parentTopicId')
 				.unsigned()
 				.references('id')
-				.inTable('exercises')
+				.inTable('topics')
 				.onDelete('SET NULL')
 				.index();
 			table.integer('coursesId')
 				.unsigned()
 				.references('id')
 				.inTable('courses')
-				.onDelete('SET NULL')
 				.index();
 			table.string('name', nameMaxLength).notNullable();
 			table.string('slug').notNullable();
 			table.integer('sequenceNum').notNullable();
-			table.enu('reviewType', configs.getConstant('reviewType')).defaultTo('automatic');
-			table.enu('submissionType', configs.getConstant('submissionType')).notNullable();
+			// table.enu('reviewType', configs.getConstant('reviewType')).defaultTo('automatic');
+			// table.enu('submissionType', configs.getConstant('submissionType')).notNullable();
 			table.text('content', 'LONGTEXT');
-			table.text('solution', 'LONGTEXT');
+			// table.text('solution', 'LONGTEXT');
 			table.string('githubUrl', urlMaxLength).notNullable();
 			table.datetime('createdAt').defaultTo(knex.fn.now());
 			table.datetime('updatedAt').defaultTo(knex.fn.now());
+		})
+		.createTable('exercises', table => {
+			table.increments('id').primary().unsigned();
+			table.integer('topicId')
+				.unsigned()
+				.references('id')
+				.inTable('topics')
+				.index()
+				.notNullable();
+			table.text('question', 'LONGTEXT');
+			table.enu('exerciseType', ["MCQ", "NUMBER", "TEXT", 'NEED_REVIEWER']);
+		})
+		.createTable('exerciseOptions', table => {
+			table.increments('id').primary().unsigned();
+			table.integer('exerciseId')
+				.unsigned()
+				.references('id')
+				.inTable('exercises')
+				.index()
+				.notNullable();
+			table.boolean('isSolution').defaultTo(false);
+			table.text('content', 'LONGTEXT');
 		})
 };
 
 exports.down = function (knex) {
 	return knex.schema
+		.dropTableIfExists('exerciseOptions')
 		.dropTableIfExists('exercises')
+		.dropTableIfExists('topics')
 		.dropTableIfExists('courses')
 		.dropTableIfExists('users')
 		.dropTableIfExists('centers')
