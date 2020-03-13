@@ -216,4 +216,30 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/users/github/{email}',
+        config: {
+            description: 'Get GitHub access url',
+            validate: {
+                params: {
+                    email: Joi.string().required(),
+                },
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '200': {
+                            'description': 'User found.'
+                        },
+                        '404': {
+                            'description': 'User not found.'
+                        }
+                    }
+                }
+            },
+            tags: ['api'],
+            handler: userController.getGitHubAccessUrl,
+        }
+    });
 }
