@@ -14,8 +14,8 @@ const config = new nconf.Provider({
     env: true,
     argv: true,
     store: {
-      type: 'file',
-      file: `/home/pralhad/Navgurukul/galileo/src/configurations/config.${process.env.GALILEO_ENV}.json`
+        type: 'file',
+        file: `/home/pralhad/Navgurukul/galileo/src/configurations/config.${process.env.GALILEO_ENV}.json`
     }
 });
 
@@ -330,25 +330,21 @@ export default class UserController {
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;
         const gitHubAccessKey = config.get("gitHubAccess");
-        if(email.includes("@navgurukul")) {
-            return new Promise((resolve, reject) => {
-                this.userModel.findOne({ email: email }).
-                then(obj => { 
-                  const crypto = require('crypto');
-                  const SCHOOL_ID = gitHubAccessKey.SCHOOL_ID; //configuration
-                  const student_id = obj.id //fetch from db for email '%@navgurukul.org'
-                  const SECRET_KEY = gitHubAccessKey.SECRET_KEY //configuration
-                  const message_id = SCHOOL_ID.toString() + student_id.toString();
-                  const hashDigest = crypto.
-                    createHmac('sha256', SECRET_KEY).
-                    update(message_id).
-                    digest('hex');
-                  const url = "https://education.github.com/student/verify?school_id=" + SCHOOL_ID + "&student_id=" + student_id + "&signature=" + hashDigest;
-                  resolve({"url": url});
-                });
+        return new Promise((resolve, reject) => {
+          this.userModel.findOne({ email: email }).
+            then(obj => {
+              const crypto = require('crypto');
+              const SCHOOL_ID = gitHubAccessKey.SCHOOL_ID; //configuration
+              const student_id = obj.id //fetch from db for email '%@navgurukul.org'
+              const SECRET_KEY = gitHubAccessKey.SECRET_KEY //configuration
+              const message_id = SCHOOL_ID.toString() + student_id.toString();
+              const hashDigest = crypto.
+                createHmac('sha256', SECRET_KEY).
+                update(message_id).
+                digest('hex');
+              const url = "https://education.github.com/student/verify?school_id=" + SCHOOL_ID + "&student_id=" + student_id + "&signature=" + hashDigest;
+              resolve({ "url": url });
             });
-        } else {
-            return {url: false}
-        }
+        });
     }
 }
