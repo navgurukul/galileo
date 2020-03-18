@@ -43,7 +43,6 @@
     "good-console": "^7.1.0",
     "good-squeeze": "^5.1.0",
     "google-auth-library": "^0.10.0",
-    "gulp-cli": "^2.0.1",
     "hapi": "17",
     "hapi-auth-jwt2": "^8.2.0",
     "hapi-cors-headers": "1.0.0",
@@ -79,7 +78,8 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "gulp": "^3.6.2",
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.2.0",
     "gulp-env": "^0.4.0",
     "gulp-mocha": "^2.2.0",
     "gulp-nodemon": "^2.4.2",

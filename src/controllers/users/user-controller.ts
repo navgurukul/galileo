@@ -330,6 +330,8 @@ export default class UserController {
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;
         const gitHubAccessKey = config.get("gitHubAccess");
+        console.log(email, gitHubAccessKey);
+
         return new Promise((resolve, reject) => {
           this.userModel.findOne({ email: email }).
             then(obj => {

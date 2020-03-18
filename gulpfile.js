@@ -19,7 +19,7 @@ const clean = () => {
 /**
  * Lint all custom TypeScript files.
  */
-const tslint = () => {
+const lint = () => {
     return gulp.src('src/**/*.ts')
         .pipe(tslint({
             formatter: 'prose'
@@ -42,16 +42,11 @@ const compileTS = (args, cb) => {
     });
 }
 
-const compile = () => {
-    shell.task(['npm run tsc']);
-}
 
 /**
  * Watch for changes in TypeScript
  */
-const watch = () => {
-    shell.task(['npm run tsc-watch']);
-} 
+const watch = shell.task(['npm run tsc-watch']);
 
 /**
  * Copy config files
@@ -64,7 +59,7 @@ const configs = (cb) => {
 /**
  * Build the project.
  */
-const build = gulp.series(compile, configs);
+const build = gulp.series(shell.task(['npm run tsc']), configs);
 
 /**
  * Build the project when there are changes in TypeScript files
@@ -84,5 +79,8 @@ const develop = () => {
         })
 }
 
+exports.tslint = lint;
+exports.build = build;
 exports.default = build;
+exports.watch = watch;
 exports.develop = develop;
