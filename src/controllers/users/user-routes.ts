@@ -218,7 +218,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/nayan/{email}',
+        path: '/users/github/{email}',
         config: {
             description: 'Get GitHub access url',
             validate: {
