@@ -53,5 +53,9 @@
    },
    "sentryConfig": {
       "sentryDsn": "dsn"
+   },
+   "gitHubAccess": {
+      "SCHOOL_ID": "*",
+      "SECRET_KEY": "****"
    }
 }
