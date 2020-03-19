@@ -2,7 +2,7 @@
     "dev": {
             "host": "localhost",
             "user": "root",
-            "password": "root",
+            "password": "pralhad123",
             "database": "davinci",
             "driver": "mysql",
             "multipleStatements": true
