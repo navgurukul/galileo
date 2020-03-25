@@ -30,6 +30,10 @@ export interface IServerConfigurations {
     };
     facilitatorEmails: Array<string>;
     defaultBatchId: number;
+    githubAccess: {
+        SCHOOL_ID: string,
+        SECRET_KEY: string
+    }   
 }
 
 export interface IDataConfiguration {

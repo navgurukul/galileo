@@ -9,6 +9,9 @@ import * as fs from "fs";
 import * as Boom from "boom";
 import * as nconf from "nconf";
 
+import * as Configs from "../../configurations";
+const serverConfigs = Configs.getServerConfigs();
+
 //Read Configurations
 const config = new nconf.Provider({
     env: true,
@@ -329,20 +332,22 @@ export default class UserController {
 
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;
-        const gitHubAccessKey = config.get("gitHubAccess");
+        const githubAccessKey = serverConfigs.githubAccess;
         return new Promise((resolve, reject) => {
-          this.userModel.findOne({ email: email }).
+            this.userModel.findOne({ email: email }).
             then(obj => {
               const crypto = require('crypto');
-              const SCHOOL_ID = gitHubAccessKey.SCHOOL_ID; //configuration
+              const SCHOOL_ID = githubAccessKey.SCHOOL_ID; //configuration
               const student_id = obj.id //fetch from db for email '%@navgurukul.org'
-              const SECRET_KEY = gitHubAccessKey.SECRET_KEY //configuration
+              const SECRET_KEY = githubAccessKey.SECRET_KEY //configuration
               const message_id = SCHOOL_ID.toString() + student_id.toString();
               const hashDigest = crypto.
                 createHmac('sha256', SECRET_KEY).
                 update(message_id).
                 digest('hex');
+
               const url = "https://education.github.com/student/verify?school_id=" + SCHOOL_ID + "&student_id=" + student_id + "&signature=" + hashDigest;
+
               resolve({ "url": url });
             });
         });
