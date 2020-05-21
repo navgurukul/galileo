@@ -9,6 +9,8 @@ import * as Boom from 'boom';
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
 
     const userController = new UserController(serverConfigs, database);
+    
+    
     server.bind(userController);
 
     server.route({

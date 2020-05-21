@@ -1,4 +1,5 @@
 import * as GoogleAuth from "google-auth-library";
+
 import * as Hapi from "hapi";
 import database from "../../";
 import { IServerConfigurations } from "../../configurations";
@@ -48,6 +49,8 @@ export default class UserController {
                 let googleAuthPayload = login.getPayload();
 
                 let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                
+                
                 let isAdmin = false,
                     isAlumni = false;
 
@@ -57,13 +60,18 @@ export default class UserController {
                     profilePicture: googleAuthPayload['picture'],
                     googleUserId: googleAuthPayload['sub'],
                 };
+                
 
                 this.userModel.upsert(userObj, { 'email': userObj['email'] }, true)
                     .then((user) => {
+                        
                         return database('user_roles').select('*')
                             .where({ 'user_roles.userId': user.id })
                             .then((rows) => {
+                                
                                 if (rows.length < 1) {
+                                    // console.log(rows.length);
+                                    
                                     return Promise.resolve({
                                         shouldCreateRole: true,
                                         user
@@ -77,9 +85,12 @@ export default class UserController {
                             });
                     })
                     .then((response) => {
+                        
                         const { shouldCreateRole, user } = response;
+                        
 
                         if (shouldCreateRole === true) {
+                            
                             // when the user signup for the first time or
                             // didn't have any user_roles
                             let userRoles = {
@@ -111,6 +122,7 @@ export default class UserController {
                                         'user_roles.center': 'all'
                                     })
                                     .then((rows) => {
+                                        
                                         // if user had been added as facilitator after joining SARAL
                                         if (rows.length < 1 && isFacilitator) {
                                             return Promise.resolve({ createFacilitatorRole: true });
@@ -179,11 +191,14 @@ export default class UserController {
                         }
                     })
                     .then((user) => {
+                        
                         resolve({
                             'user': user,
                             'jwt': this.userModel.getJWTToken(user)
                         });
+                        
                     });
+                    
             });
         });
     }
@@ -192,6 +207,7 @@ export default class UserController {
         let id = request.params.userId;
         return new Promise((resolve, reject) => {
             this.userModel.findOne({ id: id }).then(obj => {
+                
                 resolve(obj);
             });
         });

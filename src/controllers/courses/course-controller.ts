@@ -1091,16 +1091,14 @@ export default class CourseController {
                 // )
 
                 .then((rows) => {
-
                     const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
-                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
-
-
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole }); 
+                    
                 }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
 
                     // only admin are allowed to delete the courses
@@ -1110,6 +1108,7 @@ export default class CourseController {
                         let query = database("course_relation").select("*");
 
                         query.then(rows => {
+                            
                             if (rows.length > 0) {
                                 resolve({ data: rows });
                             } else {
