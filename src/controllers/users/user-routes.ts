@@ -55,13 +55,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/users/{userId}',
+        path: '/users/{user_id}',
         config: {
             description: 'Get user info by ID.',
             auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number().required(),
+                    user_id: Joi.number().required(),
                 }
             },
             response: {
@@ -86,18 +86,18 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'PUT',
-        path: '/users/{userId}',
+        path: '/users/{user_id}',
         config: {
             description: 'upadte user info by ID.',
             auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number().required(),
+                    user_id: Joi.number().required(),
                 },
                 payload: {
-                    githubLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?github.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
-                    linkedinLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
-                    mediumLink: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?medium.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
+                    github_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?github.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
+                    linkedin_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
+                    medium_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?medium.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
                     uploadImage:Joi.string().allow(null)
                 },
                 failAction: async (request, h, err) => {
@@ -144,13 +144,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/users/{userId}/notes',
+        path: '/users/{user_id}/notes',
         config: {
             description: 'Will be used by the facilitator to create a new note against a user.',
             auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number().required(),
+                    user_id: Joi.number().required(),
                 },
                 payload: Joi.object({
                     text: Joi.string().required()
@@ -177,13 +177,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/users/{userId}/notes',
+        path: '/users/{user_id}/notes',
         config: {
             description: 'Get a list of notes (reverse chronologically sorted) of the user.',
             auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number().required(),
+                    user_id: Joi.number().required(),
                 }
             },
             response: {
@@ -198,13 +198,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'DELETE',
-        path: '/users/{userId}/notes/{noteId}',
+        path: '/users/{user_id}/notes/{noteId}',
         config: {
             description: 'Delete a note of the user with a given ID',
             auth: 'jwt',
             validate: {
                 params: {
-                    userId: Joi.number().required(),
+                    user_id: Joi.number().required(),
                     noteId: Joi.number().required(),
                 }
             },

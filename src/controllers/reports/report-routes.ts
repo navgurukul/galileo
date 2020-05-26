@@ -17,13 +17,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     // server.route({
     //     method: 'GET',
-    //     path: '/reports/batch/{batchId}/course/{courseId}',
+    //     path: '/reports/batch/{batchId}/course/{course_id}',
     //     config: {
     //         description: 'Details of all excercise attempts of the given batch and course.',
     //         validate: {
     //             params: {
     //                 batchId: Joi.number().required(),
-    //                 courseId: Joi.number().required()
+    //                 course_id: Joi.number().required()
     //             }
     //         },
     //         // #TODO: Leaving out the response right now.
@@ -41,13 +41,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/reports/users/{userId}/course/{courseId}',
+        path: '/reports/users/{user_id}/course/{course_id}',
         config: {
             description: 'List of all submissions on a course by a user.',
             validate: {
                 params: {
-                    courseId: Joi.number(),
-                    userId: Joi.number(),
+                    course_id: Joi.number(),
+                    user_id: Joi.number(),
                 }
             },
             // response: {
@@ -82,18 +82,18 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/reports/course/{courseId}',
+        path: '/reports/course/{course_id}',
         config: {
             description: 'Progress report of exercises of a course for all the mentee assgin to a Mentor' +
                 ' or a center to a facilitator.',
             validate: {
                 params: {
-                    courseId: Joi.number(),
+                    course_id: Joi.number(),
                 }
             },
             response: {
                 // schema: Joi.object({
-                //     courseId: Joi.number(),
+                //     course_id: Joi.number(),
                 //     courseName: Joi.string(),
                 //     courseType: Joi.string(),
                 //     courseLogo: Joi.string(),

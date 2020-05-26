@@ -47,8 +47,8 @@ export default class AssignmentController {
             database("course_enrolments")
                 .select("*")
                 .where({
-                    studentId: request.userId,
-                    courseId: request.params.courseId
+                    student_id: request.user_id,
+                    course_id: request.params.course_id
                 })
                 .then(rows => {
                     /**
@@ -68,10 +68,10 @@ export default class AssignmentController {
                 .then(response => {
                     if (response.canSubmit === true) {
                         let count, student, reviewer;
-                        /** Validate the exerciseId does the exercise exist or not not */
+                        /** Validate the exercise_id does the exercise exist or not not */
                         database("exercises")
                             .select()
-                            .where("id", request.params.exerciseId)
+                            .where("id", request.params.exercise_id)
                             .then(rows => {
                                 if (rows.length < 1) {
                                     reject(
@@ -88,8 +88,8 @@ export default class AssignmentController {
                                 return database("submissions")
                                     .count("id as count")
                                     .where({
-                                        "submissions.userId": request.userId,
-                                        exerciseId: request.params.exerciseId
+                                        "submissions.user_id": request.user_id,
+                                        exercise_id: request.params.exercise_id
                                     })
                                     .then(rows => {
                                         count = rows[0].count;
@@ -100,30 +100,30 @@ export default class AssignmentController {
                                 // let facilitatorIdQuery;
 
                                 /** Not in work */
-                                if (exercise.reviewType === "manual") {
+                                if (exercise.review_type === "manual") {
                                     return Promise.resolve({
-                                        exerciseId: request.params.exerciseId,
-                                        userId: request.userId,
+                                        exercise_id: request.params.exercise_id,
+                                        user_id: request.user_id,
                                         completed: 1,
                                         state: "completed",
-                                        completedAt: new Date()
+                                        completed_at: new Date()
                                     });
                                 } else if (
-                                    exercise.reviewType === "automatic"
+                                    exercise.review_type === "automatic"
                                 ) {
                                     /** Not in work */
                                     return Promise.resolve({
-                                        exerciseId: request.params.exerciseId,
-                                        userId: request.userId,
-                                        submitterNotes: request.payload.notes,
+                                        exercise_id: request.params.exercise_id,
+                                        user_id: request.user_id,
+                                        submitter_notes: request.payload.notes,
                                         // files: JSON.stringify(request.payload.files),
                                         state: "completed",
                                         completed: 1,
-                                        completedAt: new Date()
+                                        completed_at: new Date()
                                     });
                                 } else if (
-                                    exercise.reviewType === "peer" ||
-                                    exercise.reviewType === "facilitator"
+                                    exercise.review_type === "peer" ||
+                                    exercise.review_type === "facilitator"
                                 ) {
                                     let reviewerIdQuery, facilitatorIdQuery;
 
@@ -131,7 +131,7 @@ export default class AssignmentController {
                                     facilitatorIdQuery = database("users")
                                         .select("users.center as studentCenter")
                                         .where({
-                                            "users.id": request.userId
+                                            "users.id": request.user_id
                                         })
                                         .then(rows => {
                                             /** Find the student center. */
@@ -157,7 +157,7 @@ export default class AssignmentController {
                                         .then(studentCenter => {
                                             /** Find the facilitor of the student. */
                                             return database("user_roles")
-                                                .select("userId as reviewerID")
+                                                .select("user_id as reviewerID")
                                                 .where({
                                                     "user_roles.center": studentCenter,
                                                     "user_roles.roles":
@@ -227,24 +227,24 @@ export default class AssignmentController {
                                      * if any student has already completed the assignment,
                                      * then assign the assignment to the student.
                                      */
-                                    if (exercise.reviewType === "peer") {
+                                    if (exercise.review_type === "peer") {
                                         reviewerIdQuery = database(
                                             "submissions"
                                         )
                                             .select(
-                                                "submissions.userId as reviewerID"
+                                                "submissions.user_id as reviewerID"
                                             )
                                             .innerJoin(
                                                 "course_enrolments",
-                                                "submissions.userId",
-                                                "course_enrolments.studentId"
+                                                "submissions.user_id",
+                                                "course_enrolments.student_id"
                                             )
                                             .where({
                                                 "submissions.completed": 1,
-                                                "submissions.exerciseId":
-                                                    request.params.exerciseId,
-                                                "course_enrolments.courseId":
-                                                    request.params.courseId
+                                                "submissions.exercise_id":
+                                                    request.params.exercise_id,
+                                                "course_enrolments.course_id":
+                                                    request.params.course_id
                                             })
                                             .orderByRaw("RAND()")
                                             .limit(1);
@@ -258,7 +258,7 @@ export default class AssignmentController {
                                             let reviewerId;
                                             if (
                                                 rows.length < 1 &&
-                                                exercise.reviewType === "peer"
+                                                exercise.review_type === "peer"
                                             ) {
                                                 return facilitatorIdQuery.then(
                                                     rows => {
@@ -279,15 +279,15 @@ export default class AssignmentController {
                                         })
                                         .then(response => {
                                             return Promise.resolve({
-                                                exerciseId:
-                                                    request.params.exerciseId,
-                                                userId: request.userId,
-                                                submitterNotes:
+                                                exercise_id:
+                                                    request.params.exercise_id,
+                                                user_id: request.user_id,
+                                                submitter_notes:
                                                     request.payload.notes,
                                                 // files: JSON.stringify(request.payload.files),
                                                 state: "pending",
                                                 completed: 0,
-                                                peerReviewerId:
+                                                peer_reviewer_id:
                                                     response.reviewerId
                                             });
                                         });
@@ -306,17 +306,17 @@ export default class AssignmentController {
                                     )
                                         .select(`submissions.id`)
                                         .where({
-                                            "submissions.userId":
-                                                request.userId,
-                                            exerciseId:
-                                                request.params.exerciseId
+                                            "submissions.user_id":
+                                                request.user_id,
+                                            exercise_id:
+                                                request.params.exercise_id
                                         })
                                         .update(queryData)
                                         .then(row => {
                                             return Promise.resolve({
                                                 reviewerId:
-                                                    queryData.peerReviewerId,
-                                                studentId: queryData.userId
+                                                    queryData.peer_reviewer_id,
+                                                student_id: queryData.user_id
                                             });
                                         });
                                 } else {
@@ -328,8 +328,8 @@ export default class AssignmentController {
                                         .then(rows => {
                                             return Promise.resolve({
                                                 reviewerId:
-                                                    queryData.peerReviewerId,
-                                                studentId: queryData.userId
+                                                    queryData.peer_reviewer_id,
+                                                student_id: queryData.user_id
                                             });
                                         });
                                 }
@@ -343,7 +343,7 @@ export default class AssignmentController {
                                         let studentQuery = database("users")
                                             .select("users.email", "users.name")
                                             .where({
-                                                "users.id": response.studentId
+                                                "users.id": response.student_id
                                             })
                                             .then(rows => {
                                                 student = rows[0];
@@ -376,14 +376,14 @@ export default class AssignmentController {
                                                 .innerJoin(
                                                     "exercises",
                                                     "exercises.id",
-                                                    "submissions.exerciseId"
+                                                    "submissions.exercise_id"
                                                 )
                                                 .where({
-                                                    "submissions.userId":
-                                                        request.userId,
-                                                    exerciseId:
+                                                    "submissions.user_id":
+                                                        request.user_id,
+                                                    exercise_id:
                                                         request.params
-                                                            .exerciseId
+                                                            .exercise_id
                                                 });
                                         });
                                     })
@@ -429,7 +429,7 @@ export default class AssignmentController {
         // let bucket = gcs.bucket(this.configs.googleCloud.assignmentsBucket);
         // var fileData = request.payload.file;
         // if (fileData) {
-        //     let dir = request.userId + '/' + request.params.courseId + '/' + request.params.exerciseId;
+        //     let dir = request.user_id + '/' + request.params.course_id + '/' + request.params.exercise_id;
         //     let name = generateUID() + '.' + fileData.hapi.filename;
         //     let filePath = dir + '/' + name;
         //     let file = bucket.file(filePath);
@@ -456,45 +456,45 @@ export default class AssignmentController {
 
 
         return new Promise((resolve, reject) => {
-            // query to find all the submission of particular exerciseId
+            // query to find all the submission of particular exercise_id
             let submissionQuery = database("submissions")
                 .select(
                     // Submissions table fields
                     "submissions.id",
-                    "submissions.exerciseId",
-                    "submissions.submittedAt",
-                    "submissions.submitterNotes",
+                    "submissions.exercise_id",
+                    "submissions.submitted_at",
+                    "submissions.submitter_notes",
                     "submissions.files",
-                    "submissions.notesReviewer",
+                    "submissions.notes_reviewer",
                     "submissions.state",
                     "submissions.completed",
-                    "submissions.completedAt",
+                    "submissions.completed_at",
                     // Reviewer details
                     "reviewUsers.name as reviewerName",
                     "reviewUsers.id as reviewerId",
-                    "reviewUsers.profilePicture as reviewerProfilePicture",
+                    "reviewUsers.profile_picture as reviewerProfilePicture",
                     // 'reviewUsers.facilitator as isReviewerFacilitator',
                     // Submitter Details
                     "users.name as submitterName",
                     "users.id as submitterId",
-                    "users.profilePicture as submitterProfilePicture"
+                    "users.profile_picture as submitterProfilePicture"
                     // 'users.facilitator as isSubmitterFacilitator'
                 )
                 .leftJoin(
                     database.raw("users reviewUsers"),
-                    "submissions.peerReviewerId",
+                    "submissions.peer_reviewer_id",
                     "reviewUsers.id"
                 )
-                .leftJoin("users", "submissions.userId", "users.id");
+                .leftJoin("users", "submissions.user_id", "users.id");
 
             // Clauses to search the exercisesId
             let whereClause = {
-                "submissions.exerciseId": request.params.exerciseId
+                "submissions.exercise_id": request.params.exercise_id
             };
 
             // Wether to search submissions of the current user or not.
             if (request.query.submissionUsers === "current") {
-                whereClause["submissions.userId"] = request.userId;
+                whereClause["submissions.user_id"] = request.user_id;
             }
 
             // the state of the submissions of the student.
@@ -525,21 +525,21 @@ export default class AssignmentController {
             database("submissions")
                 .select(
                     "submissions.id",
-                    "submissions.exerciseId",
-                    "submissions.userId",
-                    "submissions.submittedAt",
-                    "submissions.submitterNotes",
+                    "submissions.exercise_id",
+                    "submissions.user_id",
+                    "submissions.submitted_at",
+                    "submissions.submitter_notes",
                     "submissions.files",
-                    "submissions.notesReviewer",
+                    "submissions.notes_reviewer",
                     "submissions.state",
                     "submissions.completed",
-                    "submissions.completedAt",
-                    "submissions.submittedAt",
+                    "submissions.completed_at",
+                    "submissions.submitted_at",
                     "users.name as reviewerName",
                     "users.id as reviewerId",
-                    "users.profilePicture as reviewerProfilePicture"
+                    "users.profile_picture as reviewerProfilePicture"
                 )
-                .leftJoin("users", "submissions.peerReviewerId", "users.id")
+                .leftJoin("users", "submissions.peer_reviewer_id", "users.id")
                 .where({ "submissions.id": request.params.submissionId })
                 .then(rows => {
                     let submission = rows[0];
@@ -554,7 +554,7 @@ export default class AssignmentController {
     public getPeerReviewRequests(request, h) {
         return new Promise((resolve, reject) => {
             // Hackish Solution to show all the review to the Developer.
-            //request.userId = 29;
+            //request.user_id = 29;
             let developerEmails = [
                 "amar17@navgurukul.org",
                 "diwakar17@navgurukul.org",
@@ -567,7 +567,7 @@ export default class AssignmentController {
 
             database("users")
                 .select("users.email")
-                .where({ "users.id": request.userId })
+                .where({ "users.id": request.user_id })
                 .then(rows => {
                     if (developerEmails.indexOf(rows[0].email) > -1) {
                         // Show all the Peer Review to the user when the User is Developer.
@@ -578,7 +578,7 @@ export default class AssignmentController {
                     // if not a developer show him the assignmnt assign to him for reviewing
                     return Promise.resolve({
                         whereClause: {
-                            "submissions.peerReviewerId": request.userId
+                            "submissions.peer_reviewer_id": request.user_id
                         }
                     });
                 })
@@ -589,38 +589,38 @@ export default class AssignmentController {
                         .select(
                             // Submissions table
                             "submissions.id",
-                            "submissions.exerciseId",
-                            "submissions.submittedAt",
-                            "submissions.submitterNotes",
+                            "submissions.exercise_id",
+                            "submissions.submitted_at",
+                            "submissions.submitter_notes",
                             "submissions.files",
-                            "submissions.notesReviewer",
+                            "submissions.notes_reviewer",
                             "submissions.state",
                             "submissions.completed",
-                            "submissions.completedAt",
-                            "submissions.submittedAt",
+                            "submissions.completed_at",
+                            "submissions.submitted_at",
                             // Exercises Table
-                            "exercises.id as exerciseId",
-                            "exercises.parentExerciseId as parentExerciseId",
-                            "exercises.courseId",
+                            "exercises.id as exercise_id",
+                            "exercises.parent_exercise_id as parent_exercise_id",
+                            "exercises.course_id",
                             "exercises.name as exerciseName",
                             "exercises.slug as exerciseSlug",
-                            "exercises.sequenceNum as exerciseSequenceNum",
-                            "exercises.reviewType",
+                            "exercises.sequence_num as exerciseSequenceNum",
+                            "exercises.review_type",
                             "exercises.content as exerciseContent",
                             // Users table
                             "users.id as submitterId",
                             "users.name as submitterName",
-                            "users.profilePicture as submitterProfilePicture"
+                            "users.profile_picture as submitterProfilePicture"
                             // 'users.facilitator as isSubmitterFacilitator'
                         )
                         .innerJoin(
                             "exercises",
-                            "submissions.exerciseId",
+                            "submissions.exercise_id",
                             "exercises.id"
                         )
-                        .innerJoin("users", "submissions.userId", "users.id")
+                        .innerJoin("users", "submissions.user_id", "users.id")
                         .where(response.whereClause)
-                        .orderBy("submittedAt", "desc")
+                        .orderBy("submitted_at", "desc")
                         // 
                         .then(rows => {
                             
@@ -643,27 +643,27 @@ export default class AssignmentController {
 
     public editPeerReviewRequest(request, h) {
         //const usersId = 29;
-        //request.userId = 29;
+        //request.user_id = 29;
         let isAssigmentApproved = false;
         let initialAvailableCourses;
         let availableCoursesPostAssigmentApproval;
-        let courseId;
+        let course_id;
         return new Promise((resolve, reject) => {
             // submitting the review of the submitted assignment
 
             database("submissions")
                 .select(
                     "submissions.id",
-                    "submissions.userId",
+                    "submissions.user_id",
                     "submissions.state",
-                    "submissions.peerReviewerId",
-                    "submissions.exerciseId",
+                    "submissions.peer_reviewer_id",
+                    "submissions.exercise_id",
                     "submissions.Id",
                     "mentors.mentor",
                     "users.center"
                 )
-                .leftJoin("mentors", "userId", "mentee")
-                .innerJoin("users", "submissions.userId", "users.id")
+                .leftJoin("mentors", "user_id", "mentee")
+                .innerJoin("users", "submissions.user_id", "users.id")
                 .where({ "submissions.id": request.params.submissionId })
                 .then(rows => {
                     // validate the submissionId
@@ -681,25 +681,25 @@ export default class AssignmentController {
                     return Promise.resolve(submission);
                 })
                 .then((submission) => {
-                    database('exercises').select('courseId').where({ 'exercises.id': submission.exerciseId }).then((rows) => {
+                    database('exercises').select('course_id').where({ 'exercises.id': submission.exercise_id }).then((rows) => {
 
-                        courseId = rows[0].courseId;
+                        course_id = rows[0].course_id;
                         //
-                        return Promise.resolve(courseId);
-                    }).then(courseId => {
+                        return Promise.resolve(course_id);
+                    }).then(course_id => {
                         
                         //
                         database("course_enrolments")
                             .select("*")
                             .where({
-                                studentId: request.userId,
-                                courseId: courseId
+                                student_id: request.user_id,
+                                course_id: course_id
                             })
                             .then(rows => {
                                 if (rows.length > 0) {
                                     return Promise.resolve({
                                         isAlreadyEnrolled: true,
-                                        courseId: courseId
+                                        course_id: course_id
                                     });
                                 } else {
                                     reject(
@@ -709,7 +709,7 @@ export default class AssignmentController {
                                     );
                                     return Promise.resolve({
                                         isAlreadyEnrolled: false,
-                                        courseId: courseId
+                                        course_id: course_id
                                     });
                                 }
                             })
@@ -717,16 +717,16 @@ export default class AssignmentController {
                                 if (response.isAlreadyEnrolled) {
                                     database("submissions")
                                         .select("submissions.id",
-                                            "submissions.userId",
+                                            "submissions.user_id",
                                             "submissions.state",
-                                            "submissions.peerReviewerId",
+                                            "submissions.peer_reviewer_id",
                                             "submissions.Id",
                                             "mentors.mentor",
                                             "users.center")
-                                        .leftJoin("mentors", "userId", "mentee")
+                                        .leftJoin("mentors", "user_id", "mentee")
                                         .innerJoin(
                                             "users",
-                                            "submissions.userId",
+                                            "submissions.user_id",
                                             "users.id"
                                         )
                                         .where({
@@ -752,7 +752,7 @@ export default class AssignmentController {
 
 
                                             let updateFields = {
-                                                notesReviewer: request.payload.notes
+                                                notes_reviewer: request.payload.notes
                                             };
                                             return database("user_roles")
                                                 .select("*")
@@ -764,16 +764,16 @@ export default class AssignmentController {
                                                     [submission.center, "all"] // or where the center is all
                                                 )
                                                 .then(rows => {
-                                                    let usersId = request.userId;
+                                                    let usersId = request.user_id;
 
                                                     let usersFacilatorId = rows[0]
-                                                        ? rows[0].userId
+                                                        ? rows[0].user_id
                                                         : null;
                                                     //
 
                                                     if (
                                                         usersId ===
-                                                        submission.peerReviewerId ||
+                                                        submission.peer_reviewer_id ||
                                                         usersId ===
                                                         submission.mentor ||
                                                         usersId === usersFacilatorId
@@ -788,10 +788,10 @@ export default class AssignmentController {
                                                             updateFields["state"] =
                                                                 "completed";
                                                             updateFields[
-                                                                "completedAt"
+                                                                "completed_at"
                                                             ] = new Date();
                                                             updateFields[
-                                                                "markCompletedBy"
+                                                                "mark_completed_by"
                                                             ] = usersId;
                                                         } else {
                                                             updateFields[
@@ -800,7 +800,7 @@ export default class AssignmentController {
                                                             updateFields["state"] =
                                                                 "rejected";
                                                             updateFields[
-                                                                "markCompletedBy"
+                                                                "mark_completed_by"
                                                             ] = usersId;
                                                         }
                                                     } else {
@@ -824,7 +824,7 @@ export default class AssignmentController {
                                             if (isAssigmentApproved) {
                                                 //
                                                 this.checkDependencyCourses(
-                                                    request.userId
+                                                    request.user_id
                                                 ).then(courses => {
                                                     initialAvailableCourses = courses;
                                                     database("submissions")
@@ -836,13 +836,13 @@ export default class AssignmentController {
                                                         })
                                                         .then(rows => {
                                                             this.checkDependencyCourses(
-                                                                request.userId
+                                                                request.user_id
                                                             ).then(courses => {
                                                                 availableCoursesPostAssigmentApproval = courses;
                                                                 this.checkIfDependencyCourseUnlocked(
                                                                     initialAvailableCourses,
                                                                     availableCoursesPostAssigmentApproval,
-                                                                    request.userId
+                                                                    request.user_id
                                                                 );
                                                                 /*  Finding the student and the reviewer details to send email
                                                                  * to them about the assignment review.
@@ -855,7 +855,7 @@ export default class AssignmentController {
                                                                     .select("*")
                                                                     .where({
                                                                         "users.id":
-                                                                            submission.userId
+                                                                            submission.user_id
                                                                     })
                                                                     .then(rows => {
                                                                         student =
@@ -869,7 +869,7 @@ export default class AssignmentController {
                                                                     .select("*")
                                                                     .where({
                                                                         "users.id":
-                                                                            submission.userId
+                                                                            submission.user_id
                                                                     })
                                                                     .then(rows => {
                                                                         reviewer =
@@ -886,14 +886,14 @@ export default class AssignmentController {
                                                                         "submissions"
                                                                     )
                                                                         .select(
-                                                                            "exercises.courseId",
+                                                                            "exercises.course_id",
                                                                             "exercises.slug",
                                                                             "exercises.name"
                                                                         )
                                                                         .innerJoin(
                                                                             "exercises",
                                                                             "exercises.id",
-                                                                            "submissions.exerciseId"
+                                                                            "submissions.exercise_id"
                                                                         )
                                                                         .where({
                                                                             "submissions.id":
@@ -904,7 +904,7 @@ export default class AssignmentController {
                                                                                 let studentObject = {
                                                                                     "receiverId": student.name,
                                                                                     "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
-                                                                                                `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                                `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].course_id}&slug=${rows[0].slug}`
                                                                                 }
 
 
@@ -951,7 +951,7 @@ export default class AssignmentController {
                                                             .select("*")
                                                             .where({
                                                                 "users.id":
-                                                                    submission.userId
+                                                                    submission.user_id
                                                             })
                                                             .then(rows => {
                                                                 student = rows[0];
@@ -964,7 +964,7 @@ export default class AssignmentController {
                                                             .select("*")
                                                             .where({
                                                                 "users.id":
-                                                                    submission.userId
+                                                                    submission.user_id
                                                             })
                                                             .then(rows => {
                                                                 reviewer = rows[0];
@@ -980,14 +980,14 @@ export default class AssignmentController {
                                                                 "submissions"
                                                             )
                                                                 .select(
-                                                                    "exercises.courseId",
+                                                                    "exercises.course_id",
                                                                     "exercises.slug",
                                                                     "exercises.name"
                                                                 )
                                                                 .innerJoin(
                                                                     "exercises",
                                                                     "exercises.id",
-                                                                    "submissions.exerciseId"
+                                                                    "submissions.exercise_id"
                                                                 )
                                                                 .where({
                                                                     "submissions.id":
@@ -997,7 +997,7 @@ export default class AssignmentController {
                                                                     let studentObject = {
                                                                         "receiverId": student.name,
                                                                         "message": `Hi ${student.name}, Apka assignment ${reviewer.name} ne check kardiya ha.` + 
-                                                                                    `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].courseId}&slug=${rows[0].slug}`
+                                                                                    `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].course_id}&slug=${rows[0].slug}`
                                                                     }
 
                                                                     return sendCliqIntimation(studentObject).then(result => {
@@ -1025,7 +1025,7 @@ export default class AssignmentController {
         });
     }
 
-    public checkDependencyCourses(userId) {
+    public checkDependencyCourses(user_id) {
         //let TotalExercisesPerCourseQ, exerciseCompeletedPerCourseQ, courseReliesOnQ, availableQ;
         var availableCourses = [];
         let mergedResult = {};
@@ -1042,8 +1042,8 @@ export default class AssignmentController {
                     "courses.name",
                     "courses.type",
                     "courses.logo",
-                    "courses.shortDescription",
-                    "courses.sequenceNum"
+                    "courses.short_description",
+                    "courses.sequence_num"
                 )
                 .where(
                     "courses.id",
@@ -1055,8 +1055,8 @@ export default class AssignmentController {
                             this.on(
                                 "courses.id",
                                 "=",
-                                "course_enrolments.courseId"
-                            ).andOn("course_enrolments.studentId", "=", userId);
+                                "course_enrolments.course_id"
+                            ).andOn("course_enrolments.student_id", "=", user_id);
                         })
                 )
                 .then(rows => {
@@ -1067,12 +1067,12 @@ export default class AssignmentController {
                 .then(mergedResult => {
                     database("exercises")
                         .select(
-                            "exercises.courseId",
+                            "exercises.course_id",
                             database.raw(
                                 "COUNT(exercises.id) as totalExercises"
                             )
                         )
-                        .groupBy("exercises.courseId")
+                        .groupBy("exercises.course_id")
                         .then(rows => {
                             //totalExercisesPerCourse = rows;
                             mergedResult["totalExercisesPerCourse"] = rows;
@@ -1084,21 +1084,21 @@ export default class AssignmentController {
                                     database.raw(
                                         "COUNT(exercises.id) as totalExercisesCompleted"
                                     ),
-                                    "exercises.courseId"
+                                    "exercises.course_id"
                                 )
                                 .where(
                                     "exercises.id",
                                     "in",
                                     database("submissions")
-                                        .select("submissions.exerciseId")
+                                        .select("submissions.exercise_id")
                                         .where({ "submissions.completed": 1 }) // ****change this with the enum value*****//
                                         .andWhere(
-                                            "submissions.userId",
+                                            "submissions.user_id",
                                             "=",
-                                            userId
-                                        ) //******replace 9 with request.userId*****//
+                                            user_id
+                                        ) //******replace 9 with request.user_id*****//
                                 )
-                                .groupBy("exercises.courseId")
+                                .groupBy("exercises.course_id")
                                 .then(rows => {
                                     mergedResult[
                                         "exerciseCompeletedPerCourse"
@@ -1109,8 +1109,8 @@ export default class AssignmentController {
                                 .then(mergedResult => {
                                     database("course_relation")
                                         .select(
-                                            "course_relation.courseId",
-                                            "course_relation.reliesOn"
+                                            "course_relation.course_id",
+                                            "course_relation.relies_on"
                                         )
                                         .then(rows => {
                                             //courseReliesOn = rows;
@@ -1165,7 +1165,7 @@ export default class AssignmentController {
     public checkIfDependencyCourseUnlocked(
         initialAvailableCourses,
         availableCoursesPostAssigmentApproval,
-        userId
+        user_id
     ) {
         let initialAvaiblecourseIDs = _.pluck(initialAvailableCourses, "id");
         // 
@@ -1183,14 +1183,14 @@ export default class AssignmentController {
             initialAvaiblecourseIDs
         );
         unlockedCourses.length > 0
-            ? this.ProcessEmailNotification(unlockedCourses, userId)
+            ? this.ProcessEmailNotification(unlockedCourses, user_id)
             : null;
         //
         //
         //
     }
 
-    public ProcessEmailNotification(unlockedCourses, userId) {
+    public ProcessEmailNotification(unlockedCourses, user_id) {
         let student, courses;
         let cousresQ = database("courses")
             .select("name")
@@ -1203,7 +1203,7 @@ export default class AssignmentController {
         let studentQ = database("users")
             .select("*")
             .where({
-                "users.id": userId
+                "users.id": user_id
             })
             .then(rows => {
                 student = rows[0];

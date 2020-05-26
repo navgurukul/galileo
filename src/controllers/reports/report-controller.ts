@@ -42,11 +42,11 @@ export default class ReportController {
     //
     //     let userQuery =
     //         database('course_enrolments')
-    //             .select('users.name', 'users.id', 'users.profilePicture', 'users.facilitator')
-    //             .innerJoin('users', 'course_enrolments.studentId', 'users.id')
+    //             .select('users.name', 'users.id', 'users.profile_picture', 'users.facilitator')
+    //             .innerJoin('users', 'course_enrolments.student_id', 'users.id')
     //             .where({
     //                 'course_enrolments.batchId': request.params.batchId,
-    //                 'course_enrolments.courseId': request.params.courseId
+    //                 'course_enrolments.course_id': request.params.course_id
     //             })
     //             .then((rows) => {
     //                 usersList = rows;
@@ -54,9 +54,9 @@ export default class ReportController {
     //
     //     let exercisesQuery =
     //         database('exercises')
-    //             .select('id', 'parentExerciseId', 'name', 'slug', 'sequenceNum', 'reviewType', 'content')
-    //             .where({'courseId': request.params.courseId})
-    //             .orderBy('sequenceNum', 'asc')
+    //             .select('id', 'parent_exercise_id', 'name', 'slug', 'sequence_num', 'review_type', 'content')
+    //             .where({'course_id': request.params.course_id})
+    //             .orderBy('sequence_num', 'asc')
     //             .then((rows) => {
     //                 for (let i = 0; i < rows.length; i++) {
     //                     exercisesList[rows[i].id] = rows[i];
@@ -66,11 +66,11 @@ export default class ReportController {
     //
     //     Promise.all([userQuery, exercisesQuery]).then(() => {
     //         return database('submissions')
-    //             .select('submissions.id', 'submissions.exerciseId', 'submissions.userId', 'submissions.submittedAt',
-    //                 'submissions.submitterNotes', 'submissions.files', 'submissions.state',
-    //                 'submissions.completed', 'submissions.completedAt')
-    //             .innerJoin('exercises', 'submissions.exerciseId', 'exercises.id')
-    //             .where({'exercises.courseId': request.params.courseId})
+    //             .select('submissions.id', 'submissions.exercise_id', 'submissions.user_id', 'submissions.submitted_at',
+    //                 'submissions.submitter_notes', 'submissions.files', 'submissions.state',
+    //                 'submissions.completed', 'submissions.completed_at')
+    //             .innerJoin('exercises', 'submissions.exercise_id', 'exercises.id')
+    //             .where({'exercises.course_id': request.params.course_id})
     //             .then((rows) => {
     //                 return Promise.resolve(rows);
     //             });
@@ -89,24 +89,24 @@ export default class ReportController {
     //                 */
     //                 let subStateOrder = ['rejected', 'pending', 'completed'];
     //                 let curSubState = subStateOrder.indexOf(submission.state);
-    //                 let storedSubmission = exercisesList[submission.exerciseId]['completionDetails'][submission.userId] || {};
+    //                 let storedSubmission = exercisesList[submission.exercise_id]['completionDetails'][submission.user_id] || {};
     //
     //                 // No submission is stored in the object
     //                 if (Object.keys(storedSubmission).length === 0) {
-    //                     exercisesList[submission.exerciseId]['completionDetails'][submission.userId] = submission;
-    //                     exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] = 1;
+    //                     exercisesList[submission.exercise_id]['completionDetails'][submission.user_id] = submission;
+    //                     exercisesList[submission.exercise_id]['completionDetails'][submission.user_id]['attempts'] = 1;
     //                 }
     //                 // If the submission is stored
     //                 else {
     //                     let storedSubState = subStateOrder.indexOf(storedSubmission.state);
-    //                     let attempts = exercisesList[submission.exerciseId]['completionDetails']
-    //                         [submission.userId]['attempts'] + 1;
+    //                     let attempts = exercisesList[submission.exercise_id]['completionDetails']
+    //                         [submission.user_id]['attempts'] + 1;
     //                     // Replace the stored submission with the current submission if
     //                     // the stored one is of a lesser level
     //                     if (storedSubState < curSubState) {
-    //                         exercisesList[submission.exerciseId]['completionDetails'][submission.userId] = submission;
+    //                         exercisesList[submission.exercise_id]['completionDetails'][submission.user_id] = submission;
     //                     }
-    //                     exercisesList[submission.exerciseId]['completionDetails'][submission.userId]['attempts'] = attempts;
+    //                     exercisesList[submission.exercise_id]['completionDetails'][submission.user_id]['attempts'] = attempts;
     //                 }
     //             }
     //
@@ -117,9 +117,9 @@ export default class ReportController {
     //             }
     //             // Sort the exercises on basis of sequence numbers
     //             _exercises.sort((a, b) => {
-    //                 if (a.sequenceNum < b.sequenceNum) {
+    //                 if (a.sequence_num < b.sequence_num) {
     //                     return -1;
-    //                 } else if (a.sequenceNum > b.sequenceNum) {
+    //                 } else if (a.sequence_num > b.sequence_num) {
     //                     return 1;
     //                 } else {
     //                     return 0;
@@ -129,8 +129,8 @@ export default class ReportController {
     //             let exercises = [];
     //             for (let i = 0; i < _exercises.length; i++) {
     //                 let exercise = _exercises[i];
-    //                 if (exercise.sequenceNum % 1 !== 0) {
-    //                     let parentIndex = Number(String(exercise.sequenceNum).split('.')[0]) - 1;
+    //                 if (exercise.sequence_num % 1 !== 0) {
+    //                     let parentIndex = Number(String(exercise.sequence_num).split('.')[0]) - 1;
     //                     exercises[parentIndex].childExercises.push(exercise);
     //                 } else {
     //                     exercise.childExercises = [];
@@ -152,24 +152,24 @@ export default class ReportController {
             database("submissions")
                 .select(
                     "submissions.id",
-                    "submissions.exerciseId",
-                    "submissions.userId",
-                    "submissions.submittedAt",
-                    "submissions.submitterNotes",
+                    "submissions.exercise_id",
+                    "submissions.user_id",
+                    "submissions.submitted_at",
+                    "submissions.submitter_notes",
                     "submissions.files",
                     "submissions.state",
                     "submissions.completed",
-                    "submissions.completedAt",
+                    "submissions.completed_at",
                     "exercises.name"
                 )
                 .innerJoin(
                     "exercises",
-                    "submissions.exerciseId",
+                    "submissions.exercise_id",
                     "exercises.id"
                 )
                 .where({
-                    "exercises.courseId": request.params.courseId,
-                    "submissions.userId": request.params.userId
+                    "exercises.course_id": request.params.course_id,
+                    "submissions.user_id": request.params.user_id
                 })
                 .then(rows => {
                     return Promise.resolve(rows);
@@ -195,12 +195,12 @@ export default class ReportController {
                             submission.state
                         );
                         let storedSubmission =
-                            submissionsObj[submission.exerciseId] || {};
+                            submissionsObj[submission.exercise_id] || {};
 
                         // No submission is stored in the object
                         if (Object.keys(storedSubmission).length === 0) {
-                            submissionsObj[submission.exerciseId] = submission;
-                            submissionsObj[submission.exerciseId][
+                            submissionsObj[submission.exercise_id] = submission;
+                            submissionsObj[submission.exercise_id][
                                 "attempts"
                             ] = 1;
                         }
@@ -210,24 +210,24 @@ export default class ReportController {
                                 storedSubmission.state
                             );
                             let attempts =
-                                submissionsObj[submission.exerciseId][
+                                submissionsObj[submission.exercise_id][
                                 "attempts"
                                 ] + 1;
                             // Replace the stored submission with the current submission if
                             // the stored one is of a lesser level
                             if (storedSubState < curSubState) {
                                 submissionsObj[
-                                    submission.exerciseId
+                                    submission.exercise_id
                                 ] = submission;
                             }
-                            submissionsObj[submission.exerciseId][
+                            submissionsObj[submission.exercise_id][
                                 "attempts"
                             ] = attempts;
                         }
                     }
-                    for (let exerciseId in submissionsObj) {
-                        if (submissionsObj.hasOwnProperty(exerciseId)) {
-                            submissionsList.push(submissionsObj[exerciseId]);
+                    for (let exercise_id in submissionsObj) {
+                        if (submissionsObj.hasOwnProperty(exercise_id)) {
+                            submissionsList.push(submissionsObj[exercise_id]);
                         }
                     }
                     resolve({
@@ -238,16 +238,16 @@ export default class ReportController {
     }
 
     public getMenteesCoursesReport(request, h) {
-        //request.userId=175;
+        //request.user_id=175;
         return new Promise((resolve, reject) => {
-            request.userId = 1;
+            request.user_id = 1;
             let mentees = [],
                 menteesCoursesReport = [];
 
             database("user_roles")
                 .select("*")
                 .where({
-                    "user_roles.userId": request.userId,
+                    "user_roles.user_id": request.user_id,
                     "user_roles.roles": "facilitator"
                 })
                 .then(rows => {
@@ -273,7 +273,7 @@ export default class ReportController {
                         return database("mentors")
                             .select("*")
                             .where({
-                                "mentors.mentor": request.userId
+                                "mentors.mentor": request.user_id
                             })
                             .then(rows => {
                                 if (rows.length < 1) {
@@ -294,9 +294,9 @@ export default class ReportController {
                     }
                 })
                 .then(response => {
-                    // Query to get totalExercises which has submissionType != NULL and it's submission status
+                    // Query to get totalExercises which has submission_type != NULL and it's submission status
                     const totalExercisesQ =
-                        "COUNT(CASE WHEN exercises.submissionType " +
+                        "COUNT(CASE WHEN exercises.submission_type " +
                         "IS NOT NULL THEN 1 END) as totalExercises";
                     const completedSubmissionsQ =
                         "COUNT(DISTINCT submissions.id) as completedSubmissions";
@@ -317,7 +317,7 @@ export default class ReportController {
                             .select("users.id", "users.name", "users.email")
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .where(whereClause)
@@ -331,8 +331,8 @@ export default class ReportController {
                             .select(
                                 // course details in which the mentee has enrolled
                                 "courses.name as courseName",
-                                "courses.id as courseId",
-                                "course_enrolments.courseStatus as menteeCourseStatus",
+                                "courses.id as course_id",
+                                "course_enrolments.course_status as menteeCourseStatus",
                                 database.raw(totalExercisesQ),
                                 database.raw(completedSubmissionsQ),
                                 // mentees details
@@ -342,27 +342,27 @@ export default class ReportController {
                             .innerJoin(
                                 "courses",
                                 "courses.id",
-                                "course_enrolments.courseId"
+                                "course_enrolments.course_id"
                             )
                             .innerJoin(
                                 "users",
-                                "course_enrolments.studentId",
+                                "course_enrolments.student_id",
                                 "users.id"
                             )
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .innerJoin(
                                 "exercises",
-                                "course_enrolments.courseId",
-                                "exercises.courseId"
+                                "course_enrolments.course_id",
+                                "exercises.course_id"
                             )
                             .leftJoin("submissions", function () {
-                                this.on("submissions.userId", "=", "users.id")
+                                this.on("submissions.user_id", "=", "users.id")
                                     .andOn(
-                                        "submissions.exerciseId",
+                                        "submissions.exercise_id",
                                         "=",
                                         "exercises.id"
                                     )
@@ -387,7 +387,7 @@ export default class ReportController {
                             .select("users.id", "users.name", "users.email")
                             .innerJoin("mentors", "mentors.mentee", "users.id")
                             .where({
-                                "mentors.mentor": request.userId
+                                "mentors.mentor": request.user_id
                             })
                             .then(rows => {
                                 mentees = rows;
@@ -399,8 +399,8 @@ export default class ReportController {
                             .select(
                                 // course details in which the mentee has enrolled
                                 "courses.name as courseName",
-                                "courses.id as courseId",
-                                "course_enrolments.courseStatus as menteeCourseStatus",
+                                "courses.id as course_id",
+                                "course_enrolments.course_status as menteeCourseStatus",
                                 database.raw(totalExercisesQ),
                                 database.raw(completedSubmissionsQ),
                                 // mentees details
@@ -410,34 +410,34 @@ export default class ReportController {
                             .innerJoin(
                                 "courses",
                                 "courses.id",
-                                "course_enrolments.courseId"
+                                "course_enrolments.course_id"
                             )
                             .innerJoin(
                                 "mentors",
-                                "course_enrolments.studentId",
+                                "course_enrolments.student_id",
                                 "mentors.mentee"
                             )
                             .innerJoin("users", "users.id", "mentors.mentee")
                             .innerJoin(
                                 "exercises",
-                                "course_enrolments.courseId",
-                                "exercises.courseId"
+                                "course_enrolments.course_id",
+                                "exercises.course_id"
                             )
                             .leftJoin("submissions", function () {
                                 this.on(
-                                    "submissions.userId",
+                                    "submissions.user_id",
                                     "=",
                                     "mentors.mentee"
                                 )
                                     .andOn(
-                                        "submissions.exerciseId",
+                                        "submissions.exercise_id",
                                         "=",
                                         "exercises.id"
                                     )
                                     .andOn("submissions.completed", "=", 1);
                             })
                             .where({
-                                "mentors.mentor": request.userId
+                                "mentors.mentor": request.user_id
                             })
                             .groupBy("course_enrolments.id")
                             .distinct("users.id as menteeId")
@@ -459,14 +459,14 @@ export default class ReportController {
                     for (let i = 0; i < menteesCoursesReport.length; i++) {
                         const {
                             courseName,
-                            courseId,
+                            course_id,
                             totalExercises,
                             ...userDetails
                         } = menteesCoursesReport[i];
 
                         if (courses[courseName] === undefined) {
                             courses[courseName] = {
-                                courseId,
+                                course_id,
                                 totalExercises,
                                 studentEnrolled: []
                             };
@@ -495,7 +495,7 @@ export default class ReportController {
 
     public getMenteesExercisesReport(request, h) {
        console.log('--------------getMenteesExercisesReport----------------');
-       //request.userId = 175;
+       //request.user_id = 175;
         return new Promise((resolve, reject) => {
             let mentees = [],
                 menteeSubmissions = [],
@@ -503,7 +503,7 @@ export default class ReportController {
             database("user_roles")
                 .select("*")
                 .where({
-                    "user_roles.userId": request.userId,
+                    "user_roles.user_id": request.user_id,
                     "user_roles.roles": "facilitator"
                 })
                 .then(rows => {
@@ -531,7 +531,7 @@ export default class ReportController {
                         return database("mentors")
                             .select("*")
                             .where({
-                                "mentors.mentor": request.userId
+                                "mentors.mentor": request.user_id
                             })
                             .then(rows => {
                                 if (rows.length < 1) {
@@ -554,15 +554,15 @@ export default class ReportController {
                 .then(response => {
                     return database("courses")
                         .select(
-                            "courses.id as courseId",
+                            "courses.id as course_id",
                             "courses.name as courseName ",
                             "courses.type as courseType",
                             "courses.logo as courseLogo",
-                            "courses.shortDescription as courseShortDescription"
+                            "courses.short_description as courseShortDescription"
                         )
-                        .where({ "courses.id": request.params.courseId })
+                        .where({ "courses.id": request.params.course_id })
                         .then(rows => {
-                            // what if the courseId doesn't exist
+                            // what if the course_id doesn't exist
                             if (rows.length < 1) {
                                 reject(
                                     Boom.expectationFailed(
@@ -593,7 +593,7 @@ export default class ReportController {
                             .select("users.id", "users.name", "users.email")
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .where(whereClause)
@@ -606,7 +606,7 @@ export default class ReportController {
                             .select("users.id", "users.name", "users.email")
                             .innerJoin("mentors", "mentors.mentee", "users.id")
                             .where({
-                                "mentors.mentor": request.userId
+                                "mentors.mentor": request.user_id
                             })
                             .then(rows => {
                                 mentees = rows;
@@ -616,24 +616,24 @@ export default class ReportController {
 
                     exerciseQ = database("exercises")
                         .select(
-                            "exercises.id as exerciseId",
+                            "exercises.id as exercise_id",
                             "exercises.slug as exerciseSlug",
                             "exercises.content as exerciseContent",
-                            "exercises.sequenceNum as exerciseSequenceNum",
+                            "exercises.sequence_num as exerciseSequenceNum",
                             "exercises.name as exerciseName",
-                            "exercises.submissionType as exerciseSubmissionType",
-                            "exercises.githubLink as exerciseGithubLink"
+                            "exercises.submission_type as exerciseSubmissionType",
+                            "exercises.github_link as exerciseGithubLink"
                         )
-                        .whereNotNull("exercises.submissionType")
+                        .whereNotNull("exercises.submission_type")
                         .andWhere({
-                            "exercises.courseId": response.courseData.courseId
+                            "exercises.course_id": response.courseData.course_id
                         })
-                        .orderBy("exercises.sequenceNum", "asc")
+                        .orderBy("exercises.sequence_num", "asc")
                         .then(rows => {
                             for (let i = 0; i < rows.length; i++) {
                                 let exercise = rows[i];
-                                exercises[exercise.exerciseId] = exercise;
-                                exercises[exercise.exerciseId][
+                                exercises[exercise.exercise_id] = exercise;
+                                exercises[exercise.exercise_id][
                                     "submissions"
                                 ] = [];
                             }
@@ -658,9 +658,9 @@ export default class ReportController {
                             .select(
                                 "submissions.id as submissionId",
                                 "submissions.state as submissionState",
-                                "submissions.submitterNotes as submitterNotes",
+                                "submissions.submitter_notes as submitter_notes",
                                 "submissions.completed as submissionCompleted",
-                                "submissions.exerciseId as exerciseId",
+                                "submissions.exercise_id as exercise_id",
                                 "users.id as menteeId",
                                 "users.name as menteeName",
                                 "users.email as menteeEmail"
@@ -668,32 +668,32 @@ export default class ReportController {
                             .innerJoin(
                                 "exercises",
                                 "exercises.id",
-                                "submissions.exerciseId"
+                                "submissions.exercise_id"
                             )
                             .innerJoin(
                                 "users",
                                 "users.id",
-                                "submissions.userId"
+                                "submissions.user_id"
                             )
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .where({
                                 ...whereClause,
-                                "exercises.courseId":
-                                    response.courseData.courseId
+                                "exercises.course_id":
+                                    response.courseData.course_id
                             });
                             console.log();
                     } else {
                         submissionQ = database("submissions")
                             .select(
                                 "submissions.id as submissionId",
-                                "submissions.submitterNotes as submitterNotes",
+                                "submissions.submitter_notes as submitter_notes",
                                 "submissions.state as submissionState",
                                 "submissions.completed as submissionCompleted",
-                                "submissions.exerciseId as exerciseId",
+                                "submissions.exercise_id as exercise_id",
                                 "users.id as menteeId",
                                 "users.name as menteeName",
                                 "users.email as menteeEmail"
@@ -701,32 +701,32 @@ export default class ReportController {
                             .innerJoin(
                                 "exercises",
                                 "exercises.id",
-                                "submissions.exerciseId"
+                                "submissions.exercise_id"
                             )
                             .innerJoin(
                                 "mentors",
                                 "mentors.mentee",
-                                "submissions.userId"
+                                "submissions.user_id"
                             )
                             .innerJoin("users", "users.id", "mentors.mentee")
                             .where({
-                                "exercises.courseId":
-                                    response.courseData.courseId,
-                                "mentors.mentor": request.userId
+                                "exercises.course_id":
+                                    response.courseData.course_id,
+                                "mentors.mentor": request.user_id
                             });
                     }
 
                     submissionQ.then(rows => {
                         // arrange the submissions of users exercise wise in exercises;
                         for (let i = 0; i < rows.length; i++) {
-                            let { exerciseId, ...submission } = rows[i];
-                            exercises[exerciseId]["submissions"].push(
+                            let { exercise_id, ...submission } = rows[i];
+                            exercises[exercise_id]["submissions"].push(
                                 submission
                             );
                         }
-                        // convert exercises from dictionary to list sorted by sequenceNum
-                        for (let exerciseId of Object.keys(exercises)) {
-                            menteeSubmissions.push(exercises[exerciseId]);
+                        // convert exercises from dictionary to list sorted by sequence_num
+                        for (let exercise_id of Object.keys(exercises)) {
+                            menteeSubmissions.push(exercises[exercise_id]);
                         }
                         // sorting them sequence wise
                         menteeSubmissions.sort(function (a, b) {
