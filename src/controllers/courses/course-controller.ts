@@ -39,8 +39,7 @@ export default class CourseController {
                 allAvailableCourses = [],
                 completedCourses = [];
 
-            if (request.headers.authorization === undefined) {
-                availableQ = database("courses")
+            let availableQ = database("courses")
                     .select(
                         "courses.id",
                         "courses.name",
@@ -61,7 +60,6 @@ export default class CourseController {
                         completedCourses: []
                     });
                 });
-            }
         });
     }
 
