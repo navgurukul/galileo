@@ -55,13 +55,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/users/{user_id}',
+        path: '/users/{userId}',
         config: {
             description: 'Get user info by ID.',
             auth: 'jwt',
             validate: {
                 params: {
-                    user_id: Joi.number().required(),
+                    userId: Joi.number().required(),
                 }
             },
             response: {
@@ -86,13 +86,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'PUT',
-        path: '/users/{user_id}',
+        path: '/users/{userId}',
         config: {
             description: 'upadte user info by ID.',
             auth: 'jwt',
             validate: {
                 params: {
-                    user_id: Joi.number().required(),
+                    userId: Joi.number().required(),
                 },
                 payload: {
                     github_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?github.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
@@ -144,13 +144,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/users/{user_id}/notes',
+        path: '/users/{userId}/notes',
         config: {
             description: 'Will be used by the facilitator to create a new note against a user.',
             auth: 'jwt',
             validate: {
                 params: {
-                    user_id: Joi.number().required(),
+                    userId: Joi.number().required(),
                 },
                 payload: Joi.object({
                     text: Joi.string().required()
@@ -177,13 +177,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/users/{user_id}/notes',
+        path: '/users/{userId}/notes',
         config: {
             description: 'Get a list of notes (reverse chronologically sorted) of the user.',
             auth: 'jwt',
             validate: {
                 params: {
-                    user_id: Joi.number().required(),
+                    userId: Joi.number().required(),
                 }
             },
             response: {
@@ -198,13 +198,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'DELETE',
-        path: '/users/{user_id}/notes/{noteId}',
+        path: '/users/{userId}/notes/{noteId}',
         config: {
             description: 'Delete a note of the user with a given ID',
             auth: 'jwt',
             validate: {
                 params: {
-                    user_id: Joi.number().required(),
+                    userId: Joi.number().required(),
                     noteId: Joi.number().required(),
                 }
             },

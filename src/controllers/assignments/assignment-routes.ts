@@ -14,13 +14,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courses/{course_id}/exercise/{exercise_id}/submission',
+        path: '/courses/{courseId}/exercise/{exerciseId}/submission',
         config: {
             description: 'Do an exercise submission.',
             validate: {
                 params: {
-                    course_id: Joi.number(),
-                    exercise_id: Joi.number()
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number()
                 },
                 payload: Joi.object({
                     // manualDone: Joi.bool(),
@@ -43,7 +43,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courses/{course_id}/exercise/{exercise_id}/submission/upload_files',
+        path: '/courses/{courseId}/exercise/{exerciseId}/submission/upload_files',
         config: {
             description: "Uploads the given file and returns a URL for the file",
             payload: {
@@ -54,8 +54,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             validate: {
                 params: {
-                    course_id: Joi.number(),
-                    exercise_id: Joi.number()
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number()
                 },
                 payload: {
                     file: Joi.object()
@@ -81,13 +81,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/exercise/{exercise_id}/submission',
+        path: '/courses/{courseId}/exercise/{exerciseId}/submission',
         config: {
             description: 'List of all submissions on an exercise.',
             validate: {
                 params: {
-                    course_id: Joi.number(),
-                    exercise_id: Joi.number(),
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number(),
                 },
                 query: {
                     submissionUsers: Joi.string().allow('current', 'all')
@@ -114,13 +114,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/exercise/{exercise_id}/submission/{submissionId}',
+        path: '/courses/{courseId}/exercise/{exerciseId}/submission/{submissionId}',
         config: {
             description: 'Details of submission of given ID.',
             validate: {
                 params: {
-                    course_id: Joi.number(),
-                    exercise_id: Joi.number(),
+                    courseId: Joi.number(),
+                    exerciseId: Joi.number(),
                     submissionId: Joi.number()
                 }
             },

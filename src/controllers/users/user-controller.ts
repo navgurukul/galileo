@@ -204,7 +204,7 @@ export default class UserController {
     }
 
     public getUserInfo(request, h) {
-        let id = request.params.user_id;
+        let id = request.params.userId;
         return new Promise((resolve, reject) => {
             this.userModel.findOne({ id: id }).then(obj => {
                 
@@ -319,7 +319,7 @@ export default class UserController {
 
     public postUserNotes(request, h) {
         let note = {
-            student: request.params.user_id,
+            student: request.params.userId,
             text: request.payload.text,
             facilitator: request.user_id
         };
@@ -332,7 +332,7 @@ export default class UserController {
 
     public getUserNotes(request, h) {
         return new Promise((resolve, reject) => {
-            this.notesModel.getUserNotes(request.params.user_id).then(rows => {
+            this.notesModel.getUserNotes(request.params.userId).then(rows => {
                 resolve({ data: rows });
             });
         });

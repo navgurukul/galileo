@@ -48,7 +48,7 @@ export default class AssignmentController {
                 .select("*")
                 .where({
                     student_id: request.user_id,
-                    course_id: request.params.course_id
+                    course_id: request.params.courseId
                 })
                 .then(rows => {
                     /**
@@ -71,7 +71,7 @@ export default class AssignmentController {
                         /** Validate the exercise_id does the exercise exist or not not */
                         database("exercises")
                             .select()
-                            .where("id", request.params.exercise_id)
+                            .where("id", request.params.exerciseId)
                             .then(rows => {
                                 if (rows.length < 1) {
                                     reject(
@@ -89,7 +89,7 @@ export default class AssignmentController {
                                     .count("id as count")
                                     .where({
                                         "submissions.user_id": request.user_id,
-                                        exercise_id: request.params.exercise_id
+                                        exercise_id: request.params.exerciseId
                                     })
                                     .then(rows => {
                                         count = rows[0].count;
@@ -102,7 +102,7 @@ export default class AssignmentController {
                                 /** Not in work */
                                 if (exercise.review_type === "manual") {
                                     return Promise.resolve({
-                                        exercise_id: request.params.exercise_id,
+                                        exercise_id: request.params.exerciseId,
                                         user_id: request.user_id,
                                         completed: 1,
                                         state: "completed",
@@ -113,7 +113,7 @@ export default class AssignmentController {
                                 ) {
                                     /** Not in work */
                                     return Promise.resolve({
-                                        exercise_id: request.params.exercise_id,
+                                        exercise_id: request.params.exerciseId,
                                         user_id: request.user_id,
                                         submitter_notes: request.payload.notes,
                                         // files: JSON.stringify(request.payload.files),
@@ -242,9 +242,9 @@ export default class AssignmentController {
                                             .where({
                                                 "submissions.completed": 1,
                                                 "submissions.exercise_id":
-                                                    request.params.exercise_id,
+                                                    request.params.exerciseId,
                                                 "course_enrolments.course_id":
-                                                    request.params.course_id
+                                                    request.params.courseId
                                             })
                                             .orderByRaw("RAND()")
                                             .limit(1);
@@ -280,7 +280,7 @@ export default class AssignmentController {
                                         .then(response => {
                                             return Promise.resolve({
                                                 exercise_id:
-                                                    request.params.exercise_id,
+                                                    request.params.exerciseId,
                                                 user_id: request.user_id,
                                                 submitter_notes:
                                                     request.payload.notes,
@@ -309,7 +309,7 @@ export default class AssignmentController {
                                             "submissions.user_id":
                                                 request.user_id,
                                             exercise_id:
-                                                request.params.exercise_id
+                                                request.params.exerciseId
                                         })
                                         .update(queryData)
                                         .then(row => {
@@ -383,7 +383,7 @@ export default class AssignmentController {
                                                         request.user_id,
                                                     exercise_id:
                                                         request.params
-                                                            .exercise_id
+                                                            .exerciseId
                                                 });
                                         });
                                     })
@@ -429,7 +429,7 @@ export default class AssignmentController {
         // let bucket = gcs.bucket(this.configs.googleCloud.assignmentsBucket);
         // var fileData = request.payload.file;
         // if (fileData) {
-        //     let dir = request.user_id + '/' + request.params.course_id + '/' + request.params.exercise_id;
+        //     let dir = request.user_id + '/' + request.params.courseId + '/' + request.params.exerciseId;
         //     let name = generateUID() + '.' + fileData.hapi.filename;
         //     let filePath = dir + '/' + name;
         //     let file = bucket.file(filePath);
@@ -489,7 +489,7 @@ export default class AssignmentController {
 
             // Clauses to search the exercisesId
             let whereClause = {
-                "submissions.exercise_id": request.params.exercise_id
+                "submissions.exercise_id": request.params.exerciseId
             };
 
             // Wether to search submissions of the current user or not.

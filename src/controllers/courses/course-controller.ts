@@ -294,7 +294,7 @@ export default class CourseController {
     public getCourseTopics(request, h) {
         return new Promise((resolve, reject) => {
             let exercises = [];
-            let course_id = parseInt(request.params.course_id, 10);
+            let course_id = parseInt(request.params.courseId, 10);
 
             let query = database("exercises")
                 .select("exercises.id", "exercises.name")
@@ -368,7 +368,7 @@ export default class CourseController {
                         "exercises.github_link",
                         "exercises.submission_type"
                     )
-                    .where({ "exercises.course_id": request.params.course_id })
+                    .where({ "exercises.course_id": request.params.courseId })
                     .orderBy("exercises.sequence_num", "asc");
             } else {
                 let xyz =
@@ -398,7 +398,7 @@ export default class CourseController {
                             request.user_id
                         );
                     })
-                    .where({ "exercises.course_id": request.params.course_id })
+                    .where({ "exercises.course_id": request.params.courseId })
                     .orderBy("exercises.sequence_num", "asc");
             }
 
@@ -459,7 +459,7 @@ export default class CourseController {
                 //             WHERE exercise_id = exercises.id ORDER BY state ASC LIMIT 1)')
                 //     );
                 // })
-                .where({ "exercises.id": request.params.exercise_id })
+                .where({ "exercises.id": request.params.exerciseId })
                 .then(rows => {
                     let exercise = rows[0];
                     resolve(exercise);
@@ -471,7 +471,7 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
             database("exercises")
                 .select("exercises.solution")
-                .where({ "exercises.id": request.params.exercise_id })
+                .where({ "exercises.id": request.params.exerciseId })
                 .then(rows => {
                     resolve(rows);
                 });
@@ -480,6 +480,7 @@ export default class CourseController {
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
+            
             let exerciseQuery;
             if (request.headers.authorization === undefined) {
                 exerciseQuery = database("exercises")
@@ -498,6 +499,8 @@ export default class CourseController {
                     .where({ "exercises.slug": request.query.slug });
                 exerciseQuery.then(rows => {
                     resolve(rows[0]);
+                
+                    
                 });
             } else {
                 let xyz =
@@ -586,7 +589,7 @@ export default class CourseController {
         return new Promise((resolve, reject) => {
             database("courses")
                 .select("notes")
-                .where("id", request.params.course_id)
+                .where("id", request.params.courseId)
                 .then(function (rows) {
                     let notes = rows[0].notes;
                     resolve({ notes: notes });
@@ -601,7 +604,7 @@ export default class CourseController {
                 .select("*")
                 .where({
                     student_id: request.user_id,
-                    course_id: request.params.course_id
+                    course_id: request.params.courseId
                 })
                 .then(rows => {
                     if (rows.length > 0) {
@@ -619,13 +622,13 @@ export default class CourseController {
                     if (response.alreadyEnrolled === false) {
                         isStudentEligibleToEnroll(
                             request.user_id,
-                            request.params.course_id
+                            request.params.courseId
                         ).then(isStudentEligible => {
                             if (isStudentEligible) {
                                 database("courses")
                                     .select("courses.id as course_id")
                                     .where({
-                                        "courses.id": request.params.course_id
+                                        "courses.id": request.params.courseId
                                     })
                                     .then(rows => {
                                         if (rows.length > 0) {
@@ -664,14 +667,14 @@ export default class CourseController {
     }
     // public enrollInCourse(request, h) {
     //     //
-    //     //this.isStudentEligibleToEnroll(request.user_id, request.params.course_id);
+    //     //this.isStudentEligibleToEnroll(request.user_id, request.params.courseId);
     //     //return;
     //     return new Promise((resolve, reject) => {
 
     //         database('course_enrolments').select('*')
     //             .where({
     //                 'student_id': request.user_id,
-    //                 'course_id': request.params.course_id
+    //                 'course_id': request.params.courseId
     //             })
     //             .then((rows) => {
     //                 if (rows.length > 0) {
@@ -683,14 +686,14 @@ export default class CourseController {
     //             })
     //             .then((response) => {
     //                 if (response.alreadyEnrolled === false) {
-    //                     // if(this.isStudentEligibleToEnroll(request.user_id, request.params.course_id)) {
+    //                     // if(this.isStudentEligibleToEnroll(request.user_id, request.params.courseId)) {
     //                     //     
     //                     //     return Promise.resolve({studentCanBeEnrolled: true});
     //                     // } else {
     //                     //     
     //                     //     reject(Boom.expectationFailed('the course does not atistfy dependency'));
     //                     // }
-    //                     this.isStudentEligibleToEnroll(request.user_id, request.params.course_id).then((data) => {
+    //                     this.isStudentEligibleToEnroll(request.user_id, request.params.courseId).then((data) => {
     //                         
     //                         
     //                     });
@@ -701,7 +704,7 @@ export default class CourseController {
     //                     database('courses')
     //                         .select('courses.id as course_id')
     //                         .where({
-    //                             'courses.id':request.params.course_id
+    //                             'courses.id':request.params.courseId
     //                         })
     //                         .then((rows) => {
     //                             if (rows.length > 0) {
@@ -829,7 +832,7 @@ export default class CourseController {
                 .then(isAdmin => {
                     // only admin are allowed to delete the courses
                     if (isAdmin) {
-                        const course_id = request.params.course_id;
+                        const course_id = request.params.courseId;
                         return database("courses")
                             .select("*")
                             .where({ id: course_id })
@@ -996,7 +999,7 @@ export default class CourseController {
                     // check if the course exist or not.
                     return database("courses")
                         .select("*")
-                        .where({ "courses.id": request.params.course_id })
+                        .where({ "courses.id": request.params.courseId })
                         .then(rows => {
                             if (rows.length < 1) {
                                 reject(
@@ -1018,7 +1021,7 @@ export default class CourseController {
                             "course_enrolments.student_id":
                                 request.payload.menteeId,
                             "course_enrolments.course_id":
-                                request.params.course_id
+                                request.params.courseId
                         })
                         .then(rows => {
                             if (rows.length < 1) {
@@ -1052,7 +1055,7 @@ export default class CourseController {
                             "course_enrolments.student_id":
                                 request.payload.menteeId,
                             "course_enrolments.course_id":
-                                request.params.course_id
+                                request.params.courseId
                         })
                         .then(rows => {
 
@@ -1156,15 +1159,15 @@ export default class CourseController {
                         database("course_relation")
                             .select("*")
                             .where({
-                                course_id: request.params.course_id,
-                                relies_on: request.params.relies_on
+                                course_id: request.params.courseId,
+                                relies_on: request.params.reliesOn
                             })
                             .then(rows => {
                                 if (rows.length > 0) {
                                     database("course_relation")
                                         .where({
-                                            course_id: request.params.course_id,
-                                            relies_on: request.params.relies_on
+                                            course_id: request.params.courseId,
+                                            relies_on: request.params.reliesOn
                                         })
                                         .delete()
                                         .then(() => {
@@ -1212,8 +1215,8 @@ export default class CourseController {
                         database("course_relation")
                             .select("*")
                             .where({
-                                course_id: request.params.course_id,
-                                relies_on: request.params.relies_on
+                                course_id: request.params.courseId,
+                                relies_on: request.params.reliesOn
                             })
                             .then(rows => {
                                 if (rows.length > 0) {
@@ -1238,8 +1241,8 @@ export default class CourseController {
                                 ) {
                                     database("course_relation")
                                         .insert({
-                                            course_id: request.params.course_id,
-                                            relies_on: request.params.relies_on
+                                            course_id: request.params.courseId,
+                                            relies_on: request.params.reliesOn
                                         })
                                         .then(response => {
                                             resolve({

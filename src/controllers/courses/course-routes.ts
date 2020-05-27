@@ -46,12 +46,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/topics',
+        path: '/courses/{courseId}/topics',
         config: {
             description: 'Get complete list of topics in the course',
             validate: {
                 params: {
-                    course_id: Joi.number().required()
+                    courseId: Joi.number().required()
                 }
             },
             response: {
@@ -66,12 +66,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/exercises',
+        path: '/courses/{courseId}/exercises',
         config: {
             description: 'Get complete list of exercises in the course',
             validate: {
                 params: {
-                    course_id: Joi.number().required()
+                    courseId: Joi.number().required()
                 }
             },
             response: {
@@ -90,20 +90,20 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/exercise/getBySlug',
+        path: '/courses/{courseId}/exercise/getBySlug',
         config: {
             description: 'Get complete details of the exercise with the given slug. Does not return child exercises.',
             validate: {
                 params: {
-                    course_id: Joi.number(),
+                    courseId: Joi.number(),
                 },
                 query: {
                     slug: Joi.string().description('write exercise slug here')
                 }
-            },
+            // },
             // response: {
             //     schema: exerciseSchema
-            // },
+            },
             auth: {
                 strategy: 'jwt',
                 mode: 'optional'
@@ -115,12 +115,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{exercise_id}/solution',
+        path: '/courses/{exerciseId}/solution',
         config: {
             description: 'gets the solution by exercies Id.',
             validate: {
                 params: {
-                    exercise_id: Joi.number(),
+                    exerciseId: Joi.number(),
                 }
             },
 
@@ -135,12 +135,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'GET',
-        path: '/courses/{course_id}/notes',
+        path: '/courses/{courseId}/notes',
         config: {
             description: 'Get any additional notes attached with the course.',
             validate: {
                 params: {
-                    course_id: Joi.number()
+                    courseId: Joi.number()
                 }
             },
             response: {
@@ -158,12 +158,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courses/{course_id}/enroll',
+        path: '/courses/{courseId}/enroll',
         config: {
             description: 'Enroll in the course with the given ID.',
             validate: {
                 params: {
-                    course_id: Joi.number()
+                    courseId: Joi.number()
                 }
             },
             response: {
@@ -179,12 +179,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'DELETE',
-        path: '/courses/{course_id}/delete',
+        path: '/courses/{courseId}/delete',
         config: {
             description: 'Delete the course with the given course id.',
             validate: {
                 params: {
-                    course_id: Joi.number()
+                    courseId: Joi.number()
                 }
             },
             response: {
@@ -200,7 +200,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'PUT',
-        path: '/courses/sequence_num',
+        path: '/courses/sequenceNum',
         config: {
             description: 'Updates the sequence number of all the courses.',
             validate: {
@@ -221,14 +221,14 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courseRelation/{course_id}/{relies_on}/add',
+        path: '/courseRelation/{courseId}/{reliesOn}/add',
         config: {
             description: 'Add course relation in the course with the given ID.',
             validate: {
                 params: {
                     // user_id: Joi.number(),
-                    course_id: Joi.number(),
-                    relies_on: Joi.number().description("Id of the course on which course_id relies on."),
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number().description("Id of the course on which course_id relies on."),
                 }
             },
             response: {
@@ -257,8 +257,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 schema: Joi.object({
                     "data": Joi.array().items(Joi.object({
                         id: Joi.number().required(),
-                        course_id: Joi.number(),
-                        relies_on: Joi.number().description("Id of the course on which course_id relies on."),
+                        courseId: Joi.number(),
+                        reliesOn: Joi.number().description("Id of the course on which course_id relies on."),
                     })),
                     "message": Joi.string()
                 })
@@ -271,13 +271,13 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'DELETE',
-        path: '/courseRelation/{course_id}/{relies_on}/delete',
+        path: '/courseRelation/{courseId}/{reliesOn}/delete',
         config: {
             description: 'Delete the courseRelation with the given course id.',
             validate: {
                 params: {
-                    course_id: Joi.number(),
-                    relies_on: Joi.number()
+                    courseId: Joi.number(),
+                    reliesOn: Joi.number()
                 }
             },
             response: {
@@ -293,12 +293,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/courses/{course_id}/complete',
+        path: '/courses/{courseId}/complete',
         config: {
             description: 'Updates the sequence number of all the courses.',
             validate: {
                 params: {
-                    course_id: Joi.number().required(),
+                    courseId: Joi.number().required(),
                 },
                 payload: {
                     menteeId: Joi.number().required(),

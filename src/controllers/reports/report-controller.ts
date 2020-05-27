@@ -46,7 +46,7 @@ export default class ReportController {
     //             .innerJoin('users', 'course_enrolments.student_id', 'users.id')
     //             .where({
     //                 'course_enrolments.batchId': request.params.batchId,
-    //                 'course_enrolments.course_id': request.params.course_id
+    //                 'course_enrolments.course_id': request.params.courseId
     //             })
     //             .then((rows) => {
     //                 usersList = rows;
@@ -55,7 +55,7 @@ export default class ReportController {
     //     let exercisesQuery =
     //         database('exercises')
     //             .select('id', 'parent_exercise_id', 'name', 'slug', 'sequence_num', 'review_type', 'content')
-    //             .where({'course_id': request.params.course_id})
+    //             .where({'course_id': request.params.courseId})
     //             .orderBy('sequence_num', 'asc')
     //             .then((rows) => {
     //                 for (let i = 0; i < rows.length; i++) {
@@ -70,7 +70,7 @@ export default class ReportController {
     //                 'submissions.submitter_notes', 'submissions.files', 'submissions.state',
     //                 'submissions.completed', 'submissions.completed_at')
     //             .innerJoin('exercises', 'submissions.exercise_id', 'exercises.id')
-    //             .where({'exercises.course_id': request.params.course_id})
+    //             .where({'exercises.course_id': request.params.courseId})
     //             .then((rows) => {
     //                 return Promise.resolve(rows);
     //             });
@@ -168,8 +168,8 @@ export default class ReportController {
                     "exercises.id"
                 )
                 .where({
-                    "exercises.course_id": request.params.course_id,
-                    "submissions.user_id": request.params.user_id
+                    "exercises.course_id": request.params.courseId,
+                    "submissions.user_id": request.params.userId
                 })
                 .then(rows => {
                     return Promise.resolve(rows);
@@ -560,7 +560,7 @@ export default class ReportController {
                             "courses.logo as courseLogo",
                             "courses.short_description as courseShortDescription"
                         )
-                        .where({ "courses.id": request.params.course_id })
+                        .where({ "courses.id": request.params.courseId })
                         .then(rows => {
                             // what if the course_id doesn't exist
                             if (rows.length < 1) {
