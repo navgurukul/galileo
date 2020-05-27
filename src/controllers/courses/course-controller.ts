@@ -54,8 +54,8 @@ export default class CourseController {
                         "courses.name",
                         "courses.type",
                         "courses.logo",
-                        "courses.shortDescription",
-                        "courses.sequenceNum"
+                        "courses.short_description",
+                        "courses.sequence_num"
                     )
                     .then(rows => {
                         allAvailableCourses = rows;
@@ -75,14 +75,14 @@ export default class CourseController {
                         "courses.name",
                         "courses.type",
                         "courses.logo",
-                        "courses.daysToComplete",
-                        "courses.shortDescription",
-                        "courses.sequenceNum",
+                        "courses.days_to_complete",
+                        "courses.short_description",
+                        "courses.sequence_num",
                         database.raw(
-                            "MIN(course_enrolments.enrolledAt) as enrolledAt"
+                            "MIN(course_enrolments.enrolled_at) as enrolled_at"
                         ),
                         database.raw(
-                            "COUNT(CASE WHEN exercises.submissionType IS NOT NULL THEN 1 END) as totalExercises"
+                            "COUNT(CASE WHEN exercises.submission_type IS NOT NULL THEN 1 END) as totalExercises"
                         ),
                         database.raw(
                             "COUNT(DISTINCT submissions.id) as completedSubmissions"
@@ -90,32 +90,32 @@ export default class CourseController {
                     )
                     .innerJoin(
                         "courses",
-                        "course_enrolments.courseId",
+                        "course_enrolments.course_id",
                         "=",
                         "courses.id"
                     )
                     .innerJoin("exercises", function () {
-                        // count only those exercises which have submissionType != null
+                        // count only those exercises which have submission_type != null
                         this.on(
-                            "course_enrolments.courseId",
+                            "course_enrolments.course_id",
                             "=",
-                            "exercises.courseId"
+                            "exercises.course_id"
                         );
                     })
                     .leftJoin("submissions", function () {
-                        this.on("submissions.userId", "=", request.userId)
+                        this.on("submissions.user_id", "=", request.user_id)
                             .andOn(
-                                "submissions.exerciseId",
+                                "submissions.exercise_id",
                                 "=",
                                 "exercises.id"
                             )
                             .andOn("submissions.completed", "=", 1);
                     })
                     .where({
-                        "course_enrolments.studentId": request.userId,
-                        "course_enrolments.courseStatus": "enroll"
+                        "course_enrolments.student_id": request.user_id,
+                        "course_enrolments.course_status": "enroll"
                     })
-                    .groupBy("exercises.courseId")
+                    .groupBy("exercises.course_id")
                     .then(rows => {
                         enrolledCourses = rows;
                         let lastSubmissionQueries = [];
@@ -123,7 +123,7 @@ export default class CourseController {
                             let oneDay = 24 * 60 * 60 * 1000;
                             enrolledCourses[i].daysSinceEnrolled =
                                 Math.abs(
-                                    +new Date() - enrolledCourses[i].enrolledAt
+                                    +new Date() - enrolledCourses[i].enrolled_at
                                 ) / oneDay;
 
                             lastSubmissionQueries.push(
@@ -131,25 +131,25 @@ export default class CourseController {
                                     .select(
                                         "exercises.name",
                                         "exercises.slug",
-                                        "submissions.submittedAt",
-                                        "submissions.completedAt"
+                                        "submissions.submitted_at",
+                                        "submissions.completed_at"
                                     )
                                     .innerJoin(
                                         "exercises",
-                                        "submissions.exerciseId",
+                                        "submissions.exercise_id",
                                         "exercises.id"
                                     )
                                     .innerJoin(
                                         "courses",
                                         "courses.id",
-                                        "exercises.courseId"
+                                        "exercises.course_id"
                                     )
                                     .where({
-                                        "exercises.courseId":
+                                        "exercises.course_id":
                                             enrolledCourses[i].id,
-                                        "submissions.userId": request.userId
+                                        "submissions.user_id": request.user_id
                                     })
-                                    .orderBy("submissions.submittedAt", "desc")
+                                    .orderBy("submissions.submitted_at", "desc")
                                     .limit(1)
                                     .then(rows => {
                                         if (rows.length < 1) {
@@ -172,18 +172,18 @@ export default class CourseController {
                         "courses.name",
                         "courses.type",
                         "courses.logo",
-                        "courses.daysToComplete",
-                        "courses.shortDescription",
-                        "courses.sequenceNum",
-                        "course_enrolments.completedAt",
-                        "course_enrolments.enrolledAt"
+                        "courses.days_to_complete",
+                        "courses.short_description",
+                        "courses.sequence_num",
+                        "course_enrolments.completed_at",
+                        "course_enrolments.enrolled_at"
                     )
                     .innerJoin(
                         "courses",
                         "courses.id",
-                        "course_enrolments.courseId"
+                        "course_enrolments.course_id"
                     )
-                    .where({ "course_enrolments.courseStatus": "completed" })
+                    .where({ "course_enrolments.course_status": "completed" })
                     .then(rows => {
                         completedCourses = rows;
                     });
@@ -195,8 +195,8 @@ export default class CourseController {
                         "courses.name",
                         "courses.type",
                         "courses.logo",
-                        "courses.shortDescription",
-                        "courses.sequenceNum"
+                        "courses.short_description",
+                        "courses.sequence_num"
                     )
                     .where(
                         "courses.id",
@@ -208,11 +208,11 @@ export default class CourseController {
                                 this.on(
                                     "courses.id",
                                     "=",
-                                    "course_enrolments.courseId"
+                                    "course_enrolments.course_id"
                                 ).andOn(
-                                    "course_enrolments.studentId",
+                                    "course_enrolments.student_id",
                                     "=",
-                                    request.userId
+                                    request.user_id
                                 );
                             })
                     )
@@ -224,10 +224,10 @@ export default class CourseController {
                 /* **get the list of exercises available in each course** */
                 TotalExercisesPerCourseQ = database("exercises")
                     .select(
-                        "exercises.courseId",
+                        "exercises.course_id",
                         database.raw("COUNT(exercises.id) as totalExercises")
                     )
-                    .groupBy("exercises.courseId")
+                    .groupBy("exercises.course_id")
 
                     .then(rows => {
                         totalExercisesPerCourse = rows;
@@ -237,17 +237,17 @@ export default class CourseController {
                 /* **get the exercises completed in each course by the given user ** */
                 exerciseCompeletedPerCourseQ = database("exercises")
                     .select(database.raw("COUNT(exercises.id) as totalExercisesCompleted"),
-                        "exercises.courseId"
+                        "exercises.course_id"
                     )
                     .where(
                         "exercises.id",
                         "in",
                         database("submissions")
-                            .select("submissions.exerciseId")
+                            .select("submissions.exercise_id")
                             .where({ "submissions.completed": 1 })
-                            .andWhere("submissions.userId", "=", request.userId)
+                            .andWhere("submissions.user_id", "=", request.user_id)
                     )
-                    .groupBy("exercises.courseId")
+                    .groupBy("exercises.course_id")
                     .then(rows => {
                         exerciseCompeletedPerCourse = rows;
                         return Promise.resolve();
@@ -256,8 +256,8 @@ export default class CourseController {
                 /* **get the course dependeny list ** */
                 courseReliesOnQ = database("course_relation")
                     .select(
-                        "course_relation.courseId",
-                        "course_relation.reliesOn"
+                        "course_relation.course_id",
+                        "course_relation.relies_on"
                     )
                     .then(rows => {
                         courseReliesOn = rows;
@@ -294,43 +294,43 @@ export default class CourseController {
     public getCourseTopics(request, h) {
         return new Promise((resolve, reject) => {
             let exercises = [];
-            let courseId = parseInt(request.params.courseId, 10);
+            let course_id = parseInt(request.params.courseId, 10);
 
             let query = database("exercises")
                 .select("exercises.id", "exercises.name")
-                .where({ "exercises.courseId": courseId })
-                .andWhere({ "exercises.parentExerciseId": null })
-                .orderBy("exercises.sequenceNum", "asc");
+                .where({ "exercises.course_id": course_id })
+                .andWhere({ "exercises.parent_exercise_id": null })
+                .orderBy("exercises.sequence_num", "asc");
 
             query.then(rows => {
                 resolve({ data: rows });
             });
         });
 
-        // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id '
-        //     + 'AND userId = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
+        // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id '
+        //     + 'AND user_id = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
 
         // let query = database('exercises')
-        //     .select('exercises.id', 'exercises.parentExerciseId', 'exercises.name', 'exercises.slug', 'exercises.sequenceNum',
-        //         'exercises.reviewType', 'submissions.state as submissionState', 'submissions.id as submissionId',
-        //         'submissions.completedAt as submissionCompleteAt', 'submissions.userId')
+        //     .select('exercises.id', 'exercises.parent_exercise_id', 'exercises.name', 'exercises.slug', 'exercises.sequence_num',
+        //         'exercises.review_type', 'submissions.state as submissionState', 'submissions.id as submissionId',
+        //         'submissions.completed_at as submissionCompleteAt', 'submissions.user_id')
         //     .leftJoin('submissions', function () {
         //         this.on('submissions.id', '=',
         //             knex.raw(xyz)
-        //         ).on('submissions.userId', '=', 1);
+        //         ).on('submissions.user_id', '=', 1);
         //     })
-        //     .where({'exercises.courseId': })
-        //     .orderBy('exercises.sequenceNum', 'asc');
+        //     .where({'exercises.course_id': })
+        //     .orderBy('exercises.sequence_num', 'asc');
 
         // query.then((rows) => {
         //     let exercise = rows[0];
         //     
         //     for (let i = 0; i < rows.length; i++) {
-        //        if (parseInt(exercise.sequenceNum, 10) < 100) {
+        //        if (parseInt(exercise.sequence_num, 10) < 100) {
         //             
         //             exercise = rows[i];
-        //             if (!Number.isInteger(exercise.sequenceNum)) {
-        //                 let parentIndex = parseInt(exercise.sequenceNum, 10) - 1;
+        //             if (!Number.isInteger(exercise.sequence_num)) {
+        //                 let parentIndex = parseInt(exercise.sequence_num, 10) - 1;
         //                 exercises[parentIndex].childExercises.push(exercise);
         //             } else {
         //                 exercise.childExercises = [];
@@ -339,8 +339,8 @@ export default class CourseController {
         //         } else {
         //            exercise = rows[i];
         //            
-        //            if (parseInt(exercise.sequenceNum, 10) %100 > 0) {
-        //               let parentIndex = Math.floor( parseInt(exercise.sequenceNum, 10) / 1000 - 1);
+        //            if (parseInt(exercise.sequence_num, 10) %100 > 0) {
+        //               let parentIndex = Math.floor( parseInt(exercise.sequence_num, 10) / 1000 - 1);
         //               exercises[parentIndex].childExercises.push(exercise);
         //            } else {
         //               exercise.childExercises = [];
@@ -360,56 +360,56 @@ export default class CourseController {
                 query = database("exercises")
                     .select(
                         "exercises.id",
-                        "exercises.parentExerciseId",
+                        "exercises.parent_exercise_id",
                         "exercises.name",
                         "exercises.slug",
-                        "exercises.sequenceNum",
-                        "exercises.reviewType",
-                        "exercises.githubLink",
-                        "exercises.submissionType"
+                        "exercises.sequence_num",
+                        "exercises.review_type",
+                        "exercises.github_link",
+                        "exercises.submission_type"
                     )
-                    .where({ "exercises.courseId": request.params.courseId })
-                    .orderBy("exercises.sequenceNum", "asc");
+                    .where({ "exercises.course_id": request.params.courseId })
+                    .orderBy("exercises.sequence_num", "asc");
             } else {
                 let xyz =
-                    "(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id " +
-                    "AND userId = " +
-                    request.userId +
+                    "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+                    "AND user_id = " +
+                    request.user_id +
                     " ORDER BY state ASC LIMIT 1)";
                 query = database("exercises")
                     .select(
                         "exercises.id",
-                        "exercises.parentExerciseId",
+                        "exercises.parent_exercise_id",
                         "exercises.name",
                         "exercises.slug",
-                        "exercises.sequenceNum",
-                        "exercises.reviewType",
-                        "exercises.githubLink",
-                        "exercises.submissionType",
+                        "exercises.sequence_num",
+                        "exercises.review_type",
+                        "exercises.github_link",
+                        "exercises.submission_type",
                         "submissions.state as submissionState",
                         "submissions.id as submissionId",
-                        "submissions.completedAt as submissionCompleteAt",
-                        "submissions.userId"
+                        "submissions.completed_at as submissionCompleteAt",
+                        "submissions.user_id"
                     )
                     .leftJoin("submissions", function () {
                         this.on("submissions.id", "=", database.raw(xyz)).on(
-                            "submissions.userId",
+                            "submissions.user_id",
                             "=",
-                            request.userId
+                            request.user_id
                         );
                     })
-                    .where({ "exercises.courseId": request.params.courseId })
-                    .orderBy("exercises.sequenceNum", "asc");
+                    .where({ "exercises.course_id": request.params.courseId })
+                    .orderBy("exercises.sequence_num", "asc");
             }
 
             query.then(rows => {
                 let exercise = rows[0];
                 for (let i = 0; i < rows.length; i++) {
-                    if (parseInt(exercise.sequenceNum, 10) < 100) {
+                    if (parseInt(exercise.sequence_num, 10) < 100) {
                         exercise = rows[i];
-                        if (!Number.isInteger(exercise.sequenceNum)) {
+                        if (!Number.isInteger(exercise.sequence_num)) {
                             let parentIndex =
-                                parseInt(exercise.sequenceNum, 10) - 1;
+                                parseInt(exercise.sequence_num, 10) - 1;
                             exercises[parentIndex].childExercises.push(
                                 exercise
                             );
@@ -419,9 +419,9 @@ export default class CourseController {
                         }
                     } else {
                         exercise = rows[i];
-                        if (parseInt(exercise.sequenceNum, 10) % 100 > 0) {
+                        if (parseInt(exercise.sequence_num, 10) % 100 > 0) {
                             let parentIndex = Math.floor(
-                                parseInt(exercise.sequenceNum, 10) / 1000 - 1
+                                parseInt(exercise.sequence_num, 10) / 1000 - 1
                             );
                             exercises[parentIndex].childExercises.push(
                                 exercise
@@ -442,21 +442,21 @@ export default class CourseController {
             database("exercises")
                 .select(
                     "exercises.id",
-                    "exercises.parentExerciseId",
+                    "exercises.parent_exercise_id",
                     "exercises.name",
                     "exercises.slug",
-                    "exercises.sequenceNum",
-                    "exercises.reviewType",
+                    "exercises.sequence_num",
+                    "exercises.review_type",
                     "exercises.content",
-                    "exercises.submissionType",
-                    "exercises.githubLink"
+                    "exercises.submission_type",
+                    "exercises.github_link"
                 )
                 //  'submissions.state as submissionState', 'submissions.id as submissionId',
-                //  'submissions.completedAt as submissionCompleteAt')
+                //  'submissions.completed_at as submissionCompleteAt')
                 // .leftJoin('submissions', function () {
                 //     this.on('submissions.id', '=',
                 //         database.raw('(SELECT max(submissions.id) FROM submissions
-                //             WHERE exerciseId = exercises.id ORDER BY state ASC LIMIT 1)')
+                //             WHERE exercise_id = exercises.id ORDER BY state ASC LIMIT 1)')
                 //     );
                 // })
                 .where({ "exercises.id": request.params.exerciseId })
@@ -480,47 +480,50 @@ export default class CourseController {
 
     public getExerciseBySlug(request, h) {
         return new Promise((resolve, reject) => {
+            
             let exerciseQuery;
             if (request.headers.authorization === undefined) {
                 exerciseQuery = database("exercises")
                     .select(
                         "exercises.id",
-                        "exercises.parentExerciseId",
+                        "exercises.parent_exercise_id",
                         "exercises.name",
                         "exercises.slug",
-                        "exercises.sequenceNum",
-                        "exercises.reviewType",
+                        "exercises.sequence_num",
+                        "exercises.review_type",
                         "exercises.solution",
                         "exercises.content",
-                        "exercises.submissionType",
-                        "exercises.githubLink"
+                        "exercises.submission_type",
+                        "exercises.github_link"
                     )
                     .where({ "exercises.slug": request.query.slug });
                 exerciseQuery.then(rows => {
                     resolve(rows[0]);
+                
+                    
                 });
             } else {
                 let xyz =
-                    "(SELECT max(submissions.id) FROM submissions WHERE exerciseId = exercises.id " +
-                    "AND userId = " +
-                    request.userId +
+                    "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+                    "AND user_id = " +
+                    request.user_id +
                     "  ORDER BY state ASC LIMIT 1)";
 
                 exerciseQuery = database("exercises")
                     .select(
                         "exercises.id",
-                        "exercises.parentExerciseId",
+                        "exercises.parent_exercise_id",
                         "exercises.name",
                         "exercises.slug",
-                        "exercises.sequenceNum",
-                        "exercises.reviewType",
+                        "exercises.sequence_num",
+                        "exercises.review_type",
                         "exercises.solution",
                         "exercises.content",
-                        "exercises.submissionType",
-                        "exercises.githubLink",
+                        "exercises.submission_type",
+                        "exercises.github_link",
                         "submissions.state as submissionState",
                         "submissions.id as submissionId",
-                        "submissions.completedAt as submissionCompleteAt"
+                        "submissions.completed_at as submissionCompleteAt"
                     )
                     .leftJoin("submissions", function () {
                         this.on("submissions.id", "=", database.raw(xyz));
@@ -529,13 +532,13 @@ export default class CourseController {
 
                 database("users")
                     .select("users.center")
-                    .where({ "users.id": request.userId })
+                    .where({ "users.id": request.user_id })
                     .then(rows => {
                         let usersCompletedExerciseQuery = database("users")
                             .select("users.id", "users.name")
                             .innerJoin(
                                 "submissions",
-                                "submissions.userId",
+                                "submissions.user_id",
                                 "=",
                                 "users.id"
                             )
@@ -543,7 +546,7 @@ export default class CourseController {
                                 this.on(
                                     "exercises.id",
                                     "=",
-                                    "submissions.exerciseId"
+                                    "submissions.exercise_id"
                                 );
                             })
                             .where({
@@ -595,13 +598,13 @@ export default class CourseController {
     }
 
     public enrollInCourse(request, h) {
-        //request.userId = 29;
+        //request.user_id = 29;
         return new Promise((resolve, reject) => {
             database("course_enrolments")
                 .select("*")
                 .where({
-                    studentId: request.userId,
-                    courseId: request.params.courseId
+                    student_id: request.user_id,
+                    course_id: request.params.courseId
                 })
                 .then(rows => {
                     if (rows.length > 0) {
@@ -618,12 +621,12 @@ export default class CourseController {
                 .then(response => {
                     if (response.alreadyEnrolled === false) {
                         isStudentEligibleToEnroll(
-                            request.userId,
+                            request.user_id,
                             request.params.courseId
                         ).then(isStudentEligible => {
                             if (isStudentEligible) {
                                 database("courses")
-                                    .select("courses.id as courseId")
+                                    .select("courses.id as course_id")
                                     .where({
                                         "courses.id": request.params.courseId
                                     })
@@ -638,11 +641,11 @@ export default class CourseController {
                                             );
                                         }
                                     })
-                                    .then(({ courseId }) => {
+                                    .then(({ course_id }) => {
                                         database("course_enrolments")
                                             .insert({
-                                                studentId: request.userId,
-                                                courseId: courseId
+                                                student_id: request.user_id,
+                                                course_id: course_id
                                             })
                                             .then(response => {
                                                 resolve({
@@ -664,14 +667,14 @@ export default class CourseController {
     }
     // public enrollInCourse(request, h) {
     //     //
-    //     //this.isStudentEligibleToEnroll(request.userId, request.params.courseId);
+    //     //this.isStudentEligibleToEnroll(request.user_id, request.params.courseId);
     //     //return;
     //     return new Promise((resolve, reject) => {
 
     //         database('course_enrolments').select('*')
     //             .where({
-    //                 'studentId': request.userId,
-    //                 'courseId': request.params.courseId
+    //                 'student_id': request.user_id,
+    //                 'course_id': request.params.courseId
     //             })
     //             .then((rows) => {
     //                 if (rows.length > 0) {
@@ -683,14 +686,14 @@ export default class CourseController {
     //             })
     //             .then((response) => {
     //                 if (response.alreadyEnrolled === false) {
-    //                     // if(this.isStudentEligibleToEnroll(request.userId, request.params.courseId)) {
+    //                     // if(this.isStudentEligibleToEnroll(request.user_id, request.params.courseId)) {
     //                     //     
     //                     //     return Promise.resolve({studentCanBeEnrolled: true});
     //                     // } else {
     //                     //     
     //                     //     reject(Boom.expectationFailed('the course does not atistfy dependency'));
     //                     // }
-    //                     this.isStudentEligibleToEnroll(request.userId, request.params.courseId).then((data) => {
+    //                     this.isStudentEligibleToEnroll(request.user_id, request.params.courseId).then((data) => {
     //                         
     //                         
     //                     });
@@ -699,7 +702,7 @@ export default class CourseController {
     //             .then((response) => {
     //                 if (response.alreadyEnrolled === true) {
     //                     database('courses')
-    //                         .select('courses.id as courseId')
+    //                         .select('courses.id as course_id')
     //                         .where({
     //                             'courses.id':request.params.courseId
     //                         })
@@ -710,10 +713,10 @@ export default class CourseController {
     //                                 reject(Boom.expectationFailed('The course for given id doesn\'t exists.'));
     //                             }
     //                         })
-    //                         .then(({courseId}) => {
+    //                         .then(({course_id}) => {
     //                             database('course_enrolments').insert({
-    //                                 studentId: request.userId,
-    //                                 courseId: courseId
+    //                                 student_id: request.user_id,
+    //                                 course_id: course_id
     //                             })
     //                               .then((response) => {
     //                                 resolve({
@@ -726,13 +729,13 @@ export default class CourseController {
     //     });
     // }
 
-    // Update all courses using default sequenceNum
+    // Update all courses using default sequence_num
     public updateCourseSequence(request, h) {
         return new Promise((resolve, reject) => {
             database("user_roles")
                 .select("user_roles.roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .then(rows => {
                     const isAdmin =
@@ -763,7 +766,7 @@ export default class CourseController {
                             for (let i = 0; i < coursesData.length; i++) {
                                 let courseUpdateQuery = database("courses")
                                     .update({
-                                        sequenceNum: coursesData[i].sequenceNum
+                                        sequence_num: coursesData[i].sequence_num
                                     })
                                     .where({ id: coursesData[i].id })
                                     .then(count => {
@@ -817,7 +820,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .then(rows => {
                     const isAdmin =
@@ -829,16 +832,16 @@ export default class CourseController {
                 .then(isAdmin => {
                     // only admin are allowed to delete the courses
                     if (isAdmin) {
-                        const courseId = request.params.courseId;
+                        const course_id = request.params.courseId;
                         return database("courses")
                             .select("*")
-                            .where({ id: courseId })
+                            .where({ id: course_id })
                             .then(rows => {
                                 // if the course for given id doesn't exist
                                 if (rows.length < 1) {
                                     reject(
                                         Boom.expectationFailed(
-                                            `courseId: ${courseId} doesn't exists.`
+                                            `course_id: ${course_id} doesn't exists.`
                                         )
                                     );
                                     return Promise.reject("Rejected");
@@ -858,7 +861,7 @@ export default class CourseController {
                 .then(course => {
                     // delete all the enrollment of the course
                     return database("course_enrolments")
-                        .where({ courseId: course.id })
+                        .where({ course_id: course.id })
                         .delete()
                         .then(() => {
                             return Promise.resolve(course);
@@ -869,7 +872,7 @@ export default class CourseController {
                     // before deleting the exercises
                     return database("exercises")
                         .select("*")
-                        .where({ courseId: course.id })
+                        .where({ course_id: course.id })
                         .then(rows => {
                             let allSubmissionDeleteQuery = [];
                             for (let i = 0; i < rows.length; i++) {
@@ -877,7 +880,7 @@ export default class CourseController {
                                     "submissions"
                                 )
                                     .select("*")
-                                    .where({ exerciseId: rows[i].id })
+                                    .where({ exercise_id: rows[i].id })
                                     .delete();
 
                                 allSubmissionDeleteQuery.push(
@@ -894,7 +897,7 @@ export default class CourseController {
                 .then(course => {
                     //after deleting the submissions delete the exercise
                     return database("exercises")
-                        .where({ courseId: course.id })
+                        .where({ course_id: course.id })
                         .delete()
                         .then(() => {
                             return Promise.resolve(course);
@@ -917,7 +920,7 @@ export default class CourseController {
     public courseComplete(request, h) {
         // only facilitator of the mentee center or
         // mentor of the mentee can mark the course complete
-        // request.userId = 1;
+        // request.user_id = 1;
         return new Promise((resolve, reject) => {
             // check if the student id exist or not.
             database("users")
@@ -943,7 +946,7 @@ export default class CourseController {
                     return database("mentors")
                         .select("*")
                         .where({
-                            "mentors.mentor": request.userId,
+                            "mentors.mentor": request.user_id,
                             "mentors.mentee": mentee.id
                         })
                         .then(rows => {
@@ -967,12 +970,12 @@ export default class CourseController {
                         return database("user_roles")
                             .select("*")
                             .where({
-                                "user_roles.userId": request.userId,
+                                "user_roles.user_id": request.user_id,
                                 "user_roles.roles": "facilitator",
                                 "user_roles.center": mentee.center
                             })
                             .orWhere({
-                                "user_roles.userId": request.userId,
+                                "user_roles.user_id": request.user_id,
                                 "user_roles.roles": "facilitator",
                                 "user_roles.center": "all"
                             })
@@ -1015,9 +1018,9 @@ export default class CourseController {
                     return database("course_enrolments")
                         .select("*")
                         .where({
-                            "course_enrolments.studentId":
+                            "course_enrolments.student_id":
                                 request.payload.menteeId,
-                            "course_enrolments.courseId":
+                            "course_enrolments.course_id":
                                 request.params.courseId
                         })
                         .then(rows => {
@@ -1028,7 +1031,7 @@ export default class CourseController {
                                     )
                                 );
                                 return Promise.reject("Rejected");
-                            } else if (rows[0].courseStatus === "completed") {
+                            } else if (rows[0].course_status === "completed") {
                                 reject(
                                     Boom.expectationFailed(
                                         "The student have already " +
@@ -1045,13 +1048,13 @@ export default class CourseController {
                     // mark the course complete here.
                     database("course_enrolments")
                         .update({
-                            "course_enrolments.courseStatus": "completed",
-                            "course_enrolments.completedAt": new Date()
+                            "course_enrolments.course_status": "completed",
+                            "course_enrolments.completed_at": new Date()
                         })
                         .where({
-                            "course_enrolments.studentId":
+                            "course_enrolments.student_id":
                                 request.payload.menteeId,
-                            "course_enrolments.courseId":
+                            "course_enrolments.course_id":
                                 request.params.courseId
                         })
                         .then(rows => {
@@ -1077,30 +1080,28 @@ export default class CourseController {
     }
 
     public getCourseRelationList(request, h) {
-        //request.userId = 122;
+        //request.user_id = 122;
         
         
         return new Promise((resolve, reject) => {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 // .whereIn(
                 //     'center', [request.query.centerId, 'all']
                 // )
 
                 .then((rows) => {
-
                     const access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;
                     const isFacilitator = (rows.length > 0 && access.isFacilitator === true) ? true : false;
                     const isTnp = (rows.length > 0 && access.isTnp === true) ? true : false;
                     const userRole = (rows.length > 0 && access.roles !== undefined) ? access.roles : false;
 
-                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole });
-
-
+                    return Promise.resolve({ isAdmin, isFacilitator, isTnp, userRole }); 
+                    
                 }).then(({ isAdmin, isFacilitator, isTnp, userRole }) => {
 
                     // only admin are allowed to delete the courses
@@ -1110,6 +1111,7 @@ export default class CourseController {
                         let query = database("course_relation").select("*");
 
                         query.then(rows => {
+                            
                             if (rows.length > 0) {
                                 resolve({ data: rows });
                             } else {
@@ -1142,7 +1144,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .then(rows => {
                     const isAdmin =
@@ -1157,15 +1159,15 @@ export default class CourseController {
                         database("course_relation")
                             .select("*")
                             .where({
-                                courseId: request.params.courseId,
-                                reliesOn: request.params.reliesOn
+                                course_id: request.params.courseId,
+                                relies_on: request.params.reliesOn
                             })
                             .then(rows => {
                                 if (rows.length > 0) {
                                     database("course_relation")
                                         .where({
-                                            courseId: request.params.courseId,
-                                            reliesOn: request.params.reliesOn
+                                            course_id: request.params.courseId,
+                                            relies_on: request.params.reliesOn
                                         })
                                         .delete()
                                         .then(() => {
@@ -1198,7 +1200,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .then(rows => {
                     const isAdmin =
@@ -1213,8 +1215,8 @@ export default class CourseController {
                         database("course_relation")
                             .select("*")
                             .where({
-                                courseId: request.params.courseId,
-                                reliesOn: request.params.reliesOn
+                                course_id: request.params.courseId,
+                                relies_on: request.params.reliesOn
                             })
                             .then(rows => {
                                 if (rows.length > 0) {
@@ -1239,8 +1241,8 @@ export default class CourseController {
                                 ) {
                                     database("course_relation")
                                         .insert({
-                                            courseId: request.params.courseId,
-                                            reliesOn: request.params.reliesOn
+                                            course_id: request.params.courseId,
+                                            relies_on: request.params.reliesOn
                                         })
                                         .then(response => {
                                             resolve({
@@ -1271,7 +1273,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .whereIn(
                     'center', [request.query.centerId, 'all']
@@ -1303,12 +1305,12 @@ export default class CourseController {
 
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .leftJoin(
                                 "mentors",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "mentors.mentee"
                             )
                             .where({
@@ -1358,7 +1360,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .whereIn(
                     'center', [request.query.centerId, 'all']
@@ -1389,12 +1391,12 @@ export default class CourseController {
 
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .leftJoin(
                                 "mentors",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "mentors.mentee"
                             )
                             .where({
@@ -1444,7 +1446,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
                 .whereIn(
                     'center', [request.query.centerId, 'all']
@@ -1487,7 +1489,7 @@ export default class CourseController {
                                 "users.email"
                             )
                             // .select('mentors.mentor as mentorId', 'users.name', 'users.center', 'users.email')
-                            // .innerJoin('user_roles', 'user_roles.userId', 'users.id')
+                            // .innerJoin('user_roles', 'user_roles.user_id', 'users.id')
                             .innerJoin("mentors", "users.id", "mentors.mentor")
                             // .where({
                             //     'user_roles.roles': 2,
@@ -1539,12 +1541,12 @@ export default class CourseController {
 
                             .innerJoin(
                                 "user_roles",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "users.id"
                             )
                             .innerJoin(
                                 "mentors",
-                                "user_roles.userId",
+                                "user_roles.user_id",
                                 "mentors.mentee"
                             )
                             // .where({
@@ -1611,7 +1613,7 @@ export default class CourseController {
             database("user_roles")
                 .select("roles")
                 .where({
-                    userId: request.userId
+                    user_id: request.user_id
                 })
 
 
@@ -1761,7 +1763,7 @@ export default class CourseController {
 
             database('user_roles').select('roles', 'center')
                 .where({
-                    'userId': request.userId
+                    'user_id': request.user_id
                 }).then((rows) => {
                     let access = getUserRoles(rows);
                     const isAdmin = (rows.length > 0 && access.isAdmin === true) ? true : false;

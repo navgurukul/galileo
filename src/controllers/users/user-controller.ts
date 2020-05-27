@@ -1,4 +1,5 @@
 import * as GoogleAuth from "google-auth-library";
+
 import * as Hapi from "hapi";
 import database from "../../";
 import { IServerConfigurations } from "../../configurations";
@@ -48,22 +49,29 @@ export default class UserController {
                 let googleAuthPayload = login.getPayload();
 
                 let isFacilitator = this.configs.facilitatorEmails.indexOf(googleAuthPayload['email']) > -1;
+                
+                
                 let isAdmin = false,
                     isAlumni = false;
 
                 let userObj = {
                     email: googleAuthPayload['email'],
                     name: googleAuthPayload['name'],
-                    profilePicture: googleAuthPayload['picture'],
-                    googleUserId: googleAuthPayload['sub'],
+                    profile_picture: googleAuthPayload['picture'],
+                    google_user_id: googleAuthPayload['sub'],
                 };
+                
 
                 this.userModel.upsert(userObj, { 'email': userObj['email'] }, true)
                     .then((user) => {
+                        
                         return database('user_roles').select('*')
-                            .where({ 'user_roles.userId': user.id })
+                            .where({ 'user_roles.user_id': user.id })
                             .then((rows) => {
+                                
                                 if (rows.length < 1) {
+                                    // console.log(rows.length);
+                                    
                                     return Promise.resolve({
                                         shouldCreateRole: true,
                                         user
@@ -77,13 +85,16 @@ export default class UserController {
                             });
                     })
                     .then((response) => {
+                        
                         const { shouldCreateRole, user } = response;
+                        
 
                         if (shouldCreateRole === true) {
+                            
                             // when the user signup for the first time or
                             // didn't have any user_roles
                             let userRoles = {
-                                userId: user.id
+                                user_id: user.id
                             };
                             // if he/she is a facilitator
                             if (isFacilitator) {
@@ -106,11 +117,12 @@ export default class UserController {
                             let shouldCreateFacilitatorRole =
                                 database('user_roles').select('*')
                                     .where({
-                                        'user_roles.userId': user.id,
+                                        'user_roles.user_id': user.id,
                                         'user_roles.roles': 'facilitator',
                                         'user_roles.center': 'all'
                                     })
                                     .then((rows) => {
+                                        
                                         // if user had been added as facilitator after joining SARAL
                                         if (rows.length < 1 && isFacilitator) {
                                             return Promise.resolve({ createFacilitatorRole: true });
@@ -119,7 +131,7 @@ export default class UserController {
                                             // config file but is still a facilitator in the DB
                                             return database('user_roles').where({
                                                 'user_roles.roles': 'facilitator',
-                                                'user_roles.userId': user.id,
+                                                'user_roles.user_id': user.id,
                                                 'user_roles.center': 'all'
                                             })
                                                 .delete()
@@ -138,7 +150,7 @@ export default class UserController {
                                         // in the platform but have been added as facilitator in config file.
                                         return database('user_roles')
                                             .insert({
-                                                'user_roles.userId': user.id,
+                                                'user_roles.user_id': user.id,
                                                 'user_roles.roles': 'facilitator',
                                                 'user_roles.center': 'all',
                                             })
@@ -154,7 +166,7 @@ export default class UserController {
                                     return database('user_roles')
                                         .select('*')
                                         .where({
-                                            'user_roles.userId': user.id,
+                                            'user_roles.user_id': user.id,
                                         });
                                 })
                                 .then((rows) => {
@@ -179,11 +191,14 @@ export default class UserController {
                         }
                     })
                     .then((user) => {
+                        
                         resolve({
                             'user': user,
                             'jwt': this.userModel.getJWTToken(user)
                         });
+                        
                     });
+                    
             });
         });
     }
@@ -192,6 +207,7 @@ export default class UserController {
         let id = request.params.userId;
         return new Promise((resolve, reject) => {
             this.userModel.findOne({ id: id }).then(obj => {
+                
                 resolve(obj);
             });
         });
@@ -204,10 +220,10 @@ export default class UserController {
      */
     public updateUserInfo(request, h) {
         let userDeatils = {
-            githubLink: request.payload.githubLink,
-            linkedinLink: request.payload.linkedinLink,
-            mediumLink: request.payload.mediumLink,
-            profilePicture: null
+            github_link: request.payload.github_link,
+            linkedin_link: request.payload.linkedin_link,
+            medium_link: request.payload.medium_link,
+            profile_picture: null
         };
 
         let that = this;
@@ -232,7 +248,7 @@ export default class UserController {
             );
 
             var imagepath =
-                "img/avatar/avatar_" + request.userId + "." + extension;
+                "img/avatar/avatar_" + request.user_id + "." + extension;
 
             fs.writeFile(imagepath, base64Data, "base64", function (err) {
                 if (err) {
@@ -281,14 +297,14 @@ export default class UserController {
                         } else {
                             //
 
-                            userDeatils.profilePicture =
+                            userDeatils.profile_picture =
                                 "https://s3.ap-south-1.amazonaws.com/saralng/" +
                                 imagepath;
                             //
                             that.userModel
                                 .upsert(
                                     userDeatils,
-                                    { id: request.params.userId },
+                                    { id: request.params.user_id },
                                     true
                                 )
                                 .then(user => {
@@ -305,7 +321,7 @@ export default class UserController {
         let note = {
             student: request.params.userId,
             text: request.payload.text,
-            facilitator: request.userId
+            facilitator: request.user_id
         };
         return new Promise((resolve, reject) => {
             this.notesModel.insert(note).then(status => {

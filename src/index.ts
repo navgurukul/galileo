@@ -59,7 +59,7 @@ const server = Server.init(serverConfigs, databaseConfig)
                     }
                     let additionalData = {
                         url: request.url.path,
-                        logedinId: request.userId,
+                        logedinId: request.user_id,
                         requestType: request.method,
                         requestParam: request.params,
                         requestQuery: request.query,

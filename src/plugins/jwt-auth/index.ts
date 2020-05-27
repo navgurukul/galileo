@@ -13,7 +13,7 @@ export default (): IPlugin => {
                 .then(() => {
                     //
                     const validateUser = (decoded, request) => {
-                        request.userId = decoded.id;
+                        request.user_id = decoded.id;
                         
                         // 
                         // return cb(null, true);

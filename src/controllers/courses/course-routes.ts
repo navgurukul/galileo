@@ -100,10 +100,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 query: {
                     slug: Joi.string().description('write exercise slug here')
                 }
-            },
+            // },
             // response: {
             //     schema: exerciseSchema
-            // },
+            },
             auth: {
                 strategy: 'jwt',
                 mode: 'optional'
@@ -226,9 +226,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             description: 'Add course relation in the course with the given ID.',
             validate: {
                 params: {
-                    // userId: Joi.number(),
+                    // user_id: Joi.number(),
                     courseId: Joi.number(),
-                    reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
+                    reliesOn: Joi.number().description("Id of the course on which course_id relies on."),
                 }
             },
             response: {
@@ -258,7 +258,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "data": Joi.array().items(Joi.object({
                         id: Joi.number().required(),
                         courseId: Joi.number(),
-                        reliesOn: Joi.number().description("Id of the course on which courseId relies on."),
+                        reliesOn: Joi.number().description("Id of the course on which course_id relies on."),
                     })),
                     "message": Joi.string()
                 })

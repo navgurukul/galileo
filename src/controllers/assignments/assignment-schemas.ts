@@ -2,15 +2,15 @@ import * as Joi from "joi";
 
 export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
     id: Joi.number(),
-    exerciseId: Joi.number(),
-    userId: Joi.number(),
-    submittedAt: Joi.date(),
-    submitterNotes: Joi.string().allow(null),
+    exercise_id: Joi.number(),
+    user_id: Joi.number(),
+    submitted_at: Joi.date(),
+    submitter_notes: Joi.string().allow(null),
     files: Joi.array().items(Joi.string().uri()).allow(null),
-    notesReviewer: Joi.string().allow(null),
+    notes_reviewer: Joi.string().allow(null),
     state: Joi.string(),
     completed: Joi.bool(),
-    completedAt: Joi.date().allow(null),
+    completed_at: Joi.date().allow(null),
     // Reviewer Details
     reviewerName: Joi.string().allow(null),
     reviewerId: Joi.number().allow(null),
@@ -25,12 +25,12 @@ export const exerciseSubmission:Joi.ObjectSchema = Joi.object({
 
 export const peerReviewSubmission:Joi.ObjectSchema = exerciseSubmission.keys({
     exerciseContent: Joi.string(),
-    parentExerciseId: Joi.number().allow(null),
-    courseId: Joi.number(),
+    parent_exercise_id: Joi.number().allow(null),
+    course_id: Joi.number(),
     exerciseName: Joi.string(),
     exerciseSlug: Joi.string(),
     exerciseSequenceNum: Joi.number(),
-    reviewType: Joi.string(),
+    review_type: Joi.string(),
 });
 
 export const postSubmission:Joi.ObjectSchema = exerciseSubmission.keys({

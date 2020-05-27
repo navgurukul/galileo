@@ -53,7 +53,7 @@ let p = validateCourseDirParam()
         
         // Get a list of files and validate their sequence numbers
         //all the code related to info.md goes here.
-        globals.sequenceNumbers = getSequenceNumbers(globals.courseDir);
+        globals.sequence_numbers = getSequenceNumbers(globals.courseDir);
         globals.exercises = getCurriculumExerciseFiles(globals.courseDir);
         // validateSequenceNumber(globals.exercises);
         // Get the exercise content from the files
@@ -77,15 +77,15 @@ let p = validateCourseDirParam()
         // Add or update the course
         return addOrUpdateCourse();
     })
-    .then(courseId => {
+    .then(course_id => {
         // delete any exercises if they exist in the DB and not in the curriculum
-        deleteExercises(courseId);
-        return Promise.resolve(courseId);
+        deleteExercises(course_id);
+        return Promise.resolve(course_id);
     })
-    .then(courseId => {
+    .then(course_id => {
         // 
         // add or update the exercises in the DB
-        let promises = addOrUpdateExercises(globals.exercises, courseId);
+        let promises = addOrUpdateExercises(globals.exercises, course_id);
         Promise.all(promises);
     })
     .then(() => {

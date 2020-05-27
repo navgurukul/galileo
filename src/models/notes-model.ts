@@ -10,12 +10,12 @@ export class NotesModel extends DBTable {
         this.configs = configs;
     }
 
-    public getUserNotes(userId) {
-        return this.database.select('notes.id', 'notes.text', 'notes.createdAt', 'users.name')
+    public getUserNotes(user_id) {
+        return this.database.select('notes.id', 'notes.text', 'notes.created_at', 'users.name')
             .from(this.tableName)
             .join('users', 'notes.facilitator', 'users.id')
             .where({
-                'notes.student': userId
+                'notes.student': user_id
             })
             .then((rows) => {
                 return rows;

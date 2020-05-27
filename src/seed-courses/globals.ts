@@ -3,10 +3,10 @@ var courseDir, // Path of the course directory relative to this file
     courseData = {}, // Course data which will be put into the DB eventually
     exercises = [], // All exercises
     allSlugs = [], // All slugs will be stored here
-    sequenceNumbers = {},
+    sequence_numbers = {},
     revSeqNumbers = {},
     toReadFiles = [],
-    courseId,
+    course_id,
     defaultCourseLogo = "http://navgurukul.org/img/sqlogo.jpg";
 
 export {
@@ -14,9 +14,9 @@ export {
   courseData,
   exercises,
   allSlugs,
-  sequenceNumbers,
+  sequence_numbers,
   revSeqNumbers,
   toReadFiles,
-  courseId,
+  course_id,
   defaultCourseLogo
 }

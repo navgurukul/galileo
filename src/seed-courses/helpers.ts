@@ -83,14 +83,14 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
     let isSolutionFile ;
     for (const i of Object.keys(globals.revSeqNumbers)) {
         let mFile = globals.revSeqNumbers[i]["name"];
-        let sequenceNum = globals.sequenceNumbers[mFile];
+        let sequence_num = globals.sequence_numbers[mFile];
         mFile = dir + "/" + mFile;
         if (!globals.revSeqNumbers[i]["children"]) {
             isSolutionFile = globals.revSeqNumbers[i]["isSolutionFile"];
             exercises.push({
                 type: 'exercise',
                 path: mFile,
-                sequenceNum: Number(sequenceNum),
+                sequence_num: Number(sequence_num),
                 isSolutionFile: isSolutionFile,
                 childExercises: []
             });
@@ -99,12 +99,12 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
             for (const j of Object.keys(globals.revSeqNumbers[i]["children"])) {
                 let file = globals.revSeqNumbers[i]["children"][j]["name"];
                 isSolutionFile = globals.revSeqNumbers[i]["children"][j]["isSolutionFile"];
-                sequenceNum = globals.sequenceNumbers[globals.revSeqNumbers[i]["name"]+"/"+file];
+                sequence_num = globals.sequence_numbers[globals.revSeqNumbers[i]["name"]+"/"+file];
                 childExercises.push({
                     type: 'exercise',
                     path: mFile+"/"+file,
                     isSolutionFile: isSolutionFile,
-                    sequenceNum: Number(sequenceNum),
+                    sequence_num: Number(sequence_num),
                     childExercises: []
                 });
             }
@@ -112,13 +112,13 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
                 type: 'exercise',
                 path: mFile+"/"+ globals.revSeqNumbers[i]["children"][0]["name"],
                 isSolutionFile: globals.revSeqNumbers[i]["children"][0]["isSolutionFile"],
-                sequenceNum: Number(sequenceNum),
+                sequence_num: Number(sequence_num),
                 childExercises: childExercises
             });
         }
     }
     exercises.sort(function(a, b) {
-        return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
+        return parseFloat(a.sequence_num) - parseFloat(b.sequence_num);
     });
 
     return exercises;
@@ -132,8 +132,8 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
 ```ngMeta
 name: Become a HTML/CSS Ninja
 type: html
-daysToComplete: 20
-shortDescription: Build any web page under the sun after taking up this course :)
+days_to_complete: 20
+short_description: Build any web page under the sun after taking up this course :)
 ```
 */
 // This assumes that every line under the triple tilde (```) will be a valid key/value pair.
@@ -182,7 +182,7 @@ const _getFileName = (path) => {
 };
 
 // Validate and return the content and meta information of an exercise on the given path
-let _getExerciseInfo = function(path, sequenceNum, isSolutionFile) {
+let _getExerciseInfo = function(path, sequence_num, isSolutionFile) {
     let exInfo = {};
     let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
@@ -212,11 +212,11 @@ let _getExerciseInfo = function(path, sequenceNum, isSolutionFile) {
     }
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
     exInfo['slug'] = path.replace('curriculum/','').replace('/', '__').replace('.md', '');
-    exInfo['sequenceNum'] = sequenceNum;
+    exInfo['sequence_num'] = sequence_num;
     exInfo['path'] = path;
     exInfo['isSolutionFile'] = isSolutionFile;
     exInfo['content'] = data;
-    exInfo['githubLink'] = newtonGithubUrl + gitFile;
+    exInfo['github_link'] = newtonGithubUrl + gitFile;
     return exInfo;
 };
 
@@ -224,7 +224,7 @@ let _getExerciseInfo = function(path, sequenceNum, isSolutionFile) {
 export const getAllExercises = function(exercises) {
     let exerciseInfos = [];
     for (let i = 0; i < exercises.length; i++) {
-        let info = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum, exercises[i].isSolutionFile);
+        let info = _getExerciseInfo(exercises[i].path, exercises[i].sequence_num, exercises[i].isSolutionFile);
         if (exercises[i].childExercises.length > 0) {
             let childExercisesInfo = getAllExercises(exercises[i].childExercises);
             info['childExercises'] = childExercisesInfo;
@@ -240,14 +240,14 @@ let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
     let images = exercise['content'].match(/!\[(.*?)\]\((.*?)\)/g);
     if (images!=null) {
         for (let j = 0; j < images.length; j++) {
-        let sequenceNum;
+        let sequence_num;
         if (parentSequenceNum){
-            sequenceNum = parentSequenceNum + '/' + exercise['sequenceNum'];
+            sequence_num = parentSequenceNum + '/' + exercise['sequence_num'];
         }
         else{
-            sequenceNum = exercise['sequenceNum'];
+            sequence_num = exercise['sequence_num'];
         }
-        let img =  parseAndUploadImage(images[j], sequenceNum, exercise['path'], iIndex, jIndex);
+        let img =  parseAndUploadImage(images[j], sequence_num, exercise['path'], iIndex, jIndex);
 
         uploadPromises.push( img );
         }
@@ -274,7 +274,7 @@ export const uploadImagesAndUpdateContent = () => {
         if (childExercises){
         for (var j = 0; j < childExercises.length; j++){
 
-            exChildPromises.push( _uploadContentImages(childExercises[j], i, exercise['sequenceNum'], j).then( ( uploadedImages ) => {
+            exChildPromises.push( _uploadContentImages(childExercises[j], i, exercise['sequence_num'], j).then( ( uploadedImages ) => {
             if(uploadedImages.length){
                 let iIndex, jIndex, content;
                 iIndex = uploadedImages[0].iIndex;

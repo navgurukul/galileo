@@ -1,14 +1,14 @@
 // import * as Database from "../src/database";
 
 
-// export function createTaskDummy(userId?: string, name?: string, description?: string) {
+// export function createTaskDummy(user_id?: string, name?: string, description?: string) {
 //     var user = {
 //         name: name || "dummy task",
 //         description: description || "I'm a dummy task!"
 //     };
 
-//     if (userId) {
-//         user["userId"] = userId;
+//     if (user_id) {
+//         user["user_id"] = user_id;
 //     }
 
 //     return user;

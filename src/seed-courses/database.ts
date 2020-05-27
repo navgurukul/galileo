@@ -12,24 +12,24 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     .then( (rows) => {
         // a exercise with same slug exists
         if (rows.length > 0) {
-            let dbReviewType = rows[0].reviewType;
+            let dbReviewType = rows[0].review_type;
             return database('exercises')
             .where({ 'id': rows[0].id })
             .update(exerciseInfo)
             .then( () => {
                 return Promise.resolve(rows[0].id);
             })
-            .then( (exerciseId) => {
+            .then( (exercise_id) => {
                 // if the review type has changed then we will need to delete the submissions too
-                if(dbReviewType !== exerciseInfo['reviewType']) {
+                if(dbReviewType !== exerciseInfo['review_type']) {
                     return database('submissions')
-                        .where({'exerciseId': rows[0].id})
+                        .where({'exercise_id': rows[0].id})
                         .delete()
                         .then( () => {
-                            return Promise.resolve(exerciseId);
+                            return Promise.resolve(exercise_id);
                         });
                 } else {
-                    return Promise.resolve(exerciseId);
+                    return Promise.resolve(exercise_id);
                 }
             });
         }
@@ -87,7 +87,7 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
 //         });
 // };
 
-export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
+export const addOrUpdateExercises = function(exercises, course_id, promiseObj?) {
     let exInsertQs = [];
     let solution;
     for (let i = 0; i < exercises.length; i++) {
@@ -97,30 +97,30 @@ export const addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
                 solution = exercises[i+1]["content"];
             }
             let exerciseObj = {
-                courseId: courseId,
+                course_id: course_id,
                 name: exercises[i]['name'],
                 slug: exercises[i]['slug'],
-                sequenceNum: exercises[i]['sequenceNum'],
-                reviewType: 'peer',//exercises[i]['completionMethod'],
+                sequence_num: exercises[i]['sequence_num'],
+                review_type: 'peer',//exercises[i]['completionMethod'],
                 content: exercises[i]['content'],
                 solution: solution,
-                submissionType: exercises[i]['submissionType'],
-                githubLink: exercises[i]['githubLink']
+                submission_type: exercises[i]['submission_type'],
+                github_link: exercises[i]['github_link']
             };
 
             let query;
             if (!promiseObj) {
                 query = _generateExerciseAddOrUpdateQuery(exerciseObj);
             } else {
-                promiseObj.then( (exerciseId) => {
-                    exerciseObj['parentExerciseId'] = exerciseId;
+                promiseObj.then( (exercise_id) => {
+                    exerciseObj['parent_exercise_id'] = exercise_id;
                     query = _generateExerciseAddOrUpdateQuery(exerciseObj);
                     return query;
                 });
             }
     
             if (exercises[i].childExercises && exercises[i].childExercises.length > 0){
-                addOrUpdateExercises(exercises[i].childExercises, courseId, query);
+                addOrUpdateExercises(exercises[i].childExercises, course_id, query);
             }
     
             exInsertQs.push(query);
@@ -140,9 +140,9 @@ export const addOrUpdateCourse = function() {
             return Promise.resolve(null);
         }
     }).then( (row) => {
-        return database('courses').select(database.raw('MAX(sequenceNum) as sequenceNum'))
+        return database('courses').select(database.raw('MAX(sequence_num) as sequence_num'))
             .then((rows)=>{
-                let newSequenceNum = rows[0].sequenceNum || 0;
+                let newSequenceNum = rows[0].sequence_num || 0;
                 newSequenceNum++;
                 return Promise.resolve(newSequenceNum);
             }).then( (newSequenceNum) => {
@@ -151,40 +151,40 @@ export const addOrUpdateCourse = function() {
                         'type': globals.courseData['info']['type'],
                         'name': globals.courseData['info']['name'],
                         'logo': globals.courseData['info']['logo'],
-                        'shortDescription': globals.courseData['info']['shortDescription'],
-                        'daysToComplete': globals.courseData['info']['daysToComplete'],
-                        'sequenceNum': newSequenceNum,
+                        'short_description': globals.courseData['info']['short_description'],
+                        'days_to_complete': globals.courseData['info']['days_to_complete'],
+                        'sequence_num': newSequenceNum,
                         // 'notes': globals.courseData['notes'],
                     })
                     .then( (rows) => {
                         return Promise.resolve(rows[0]);
                     });
                 } else {
-                    const { id:courseId, sequenceNum } = row;
+                    const { id:course_id, sequence_num } = row;
 
                     return database('courses')
                             .where({ 'name': globals.courseData['info']['name'] })
                             .update({
                                 // Not updating `type` and `name` as assuming they won't change
                                 'logo': globals.courseData['info']['logo'],
-                                'shortDescription': globals.courseData['info']['shortDescription'],
-                                'daysToComplete': globals.courseData['info']['daysToComplete'],
-                                // Updating course sequenceNum as maximum of existing sequenceNum+1
+                                'short_description': globals.courseData['info']['short_description'],
+                                'days_to_complete': globals.courseData['info']['days_to_complete'],
+                                // Updating course sequence_num as maximum of existing sequence_num+1
                                 // when it is null or else just leave it.
-                                'sequenceNum': sequenceNum? sequenceNum:newSequenceNum,
+                                'sequence_num': sequence_num? sequence_num:newSequenceNum,
                             })
                             .then( () => {
-                                return Promise.resolve(courseId);
+                                return Promise.resolve(course_id);
                             });
                 }
             });
     });
 };
 
-export const deleteExercises = function(courseId) {
+export const deleteExercises = function(course_id) {
     database('exercises')
     .select('slug')
-    .where({ 'courseId': courseId })
+    .where({ 'course_id': course_id })
     .then( (rows) => {
         let slugs = [];
         for (let i=0; i<rows.length; i++) {
@@ -206,7 +206,7 @@ export const deleteExercises = function(courseId) {
                 .then( (rows) => {
                     let exId = rows[0].id;
                     return database('submissions')
-                    .where({'exerciseId': exId})
+                    .where({'exercise_id': exId})
                     .delete()
                     .then( () => {
                         return database('exercises')

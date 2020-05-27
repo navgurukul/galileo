@@ -26,12 +26,12 @@ export const manipulateResultSet = function(
     let courseCompletionPecentage;
     let coursesNotCompletedWithDependency = [];
     const noDuplicate = arr => [...new Set(arr)];
-    const allIds = mergedArrs.map(ele => ele.courseId);
+    const allIds = mergedArrs.map(ele => ele.course_id);
     const ids = noDuplicate(allIds);
     /* **result array contains total number of exercises in each course and the exercises completed per course** */
     const result = ids.map(id =>
         mergedArrs.reduce((self, item) => {
-            return item.courseId === id ? { ...self, ...item } : self;
+            return item.course_id === id ? { ...self, ...item } : self;
         }, {})
     );
     /* **Calculate the percentage completion for each course and check whether the completion criteria is met** */
@@ -57,19 +57,19 @@ export const manipulateResultSet = function(
         return course;
     });
     let id;
-    let coursesWithDependecncy = _.uniq(_.pluck(courseReliesOn, "courseId"));
-    let groupListBycourseId = _.groupBy(courseReliesOn, "courseId");
+    let coursesWithDependecncy = _.uniq(_.pluck(courseReliesOn, "course_id"));
+    let groupListBycourse_id = _.groupBy(courseReliesOn, "course_id");
 
-    coursesWithDependecncy.map(courseId => {
-        id = courseId.toString();
+    coursesWithDependecncy.map(course_id => {
+        id = course_id.toString();
         if (
             !isCourseCompleteWithDependency(
-                groupListBycourseId[id],
+                groupListBycourse_id[id],
                 courseExerciseDetails,
-                courseId
+                course_id
             )
         ) {
-            coursesNotCompletedWithDependency.push(courseId);
+            coursesNotCompletedWithDependency.push(course_id);
         }
     });
     return _.reject(availableCourses, function(course) {
@@ -86,7 +86,7 @@ function isCourseCompleteWithDependency(
     for (let i = 0; i < courseCompletedArray.length; i++) {
         let isDepedencyCourseComplete = getIsCourseCompletionCriteriaMet(
             courseExerciseDetails,
-            courseCompletedArray[i].reliesOn
+            courseCompletedArray[i].relies_on
         );
         if (!isDepedencyCourseComplete) {
             isCourseCompleteWithDependency = false;
@@ -97,7 +97,7 @@ function isCourseCompleteWithDependency(
 }
 
 function getIsCourseCompletionCriteriaMet(courseExerciseDetails, id) {
-    let course = _.where(courseExerciseDetails, { courseId: id });
+    let course = _.where(courseExerciseDetails, { course_id: id });
     return course[0].isCompletionCriteriaMet;
 }
 export const listToTree = function(list) {
@@ -131,7 +131,7 @@ export const listToTree = function(list) {
     return roots;
 }
 
-export const isStudentEligibleToEnroll = async function(studentId, courseId) {
+export const isStudentEligibleToEnroll = async function(student_id, course_id) {
     let TotalExercisesPerCourseQ;
     let exerciseCompeletedPerCourseQ;
     let courseReliesOnQ;
@@ -139,10 +139,10 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
     let courseConfig = Configs.getCourseConfigs();
     TotalExercisesPerCourseQ = database("exercises")
         .select(
-            "exercises.courseId",
+            "exercises.course_id",
             database.raw("COUNT(exercises.id) as totalExercises")
         )
-        .groupBy("exercises.courseId")
+        .groupBy("exercises.course_id")
         .then(rows => {
             return Promise.resolve(rows);
         });
@@ -150,23 +150,23 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
     exerciseCompeletedPerCourseQ = database("exercises")
         .select(
             database.raw("COUNT(exercises.id) as totalExercisesCompleted"),
-            "exercises.courseId"
+            "exercises.course_id"
         )
         .where(
             "exercises.id",
             "in",
             database("submissions")
-                .select("submissions.exerciseId")
+                .select("submissions.exercise_id")
                 .where({ "submissions.completed": 1 })
-                .andWhere("submissions.userId", "=", studentId)
+                .andWhere("submissions.user_id", "=", student_id)
         )
-        .groupBy("exercises.courseId")
+        .groupBy("exercises.course_id")
         .then(rows => {
             return Promise.resolve(rows);
         });
 
     courseReliesOnQ = database("course_relation")
-        .select("course_relation.courseId", "course_relation.reliesOn")
+        .select("course_relation.course_id", "course_relation.relies_on")
         .then(rows => {
             return Promise.resolve(rows);
         });
@@ -177,8 +177,8 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
             "courses.name",
             "courses.type",
             "courses.logo",
-            "courses.shortDescription",
-            "courses.sequenceNum"
+            "courses.short_description",
+            "courses.sequence_num"
         )
         .where(
             "courses.id",
@@ -190,8 +190,8 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
                     this.on(
                         "courses.id",
                         "=",
-                        "course_enrolments.courseId"
-                    ).andOn("course_enrolments.studentId", "=", studentId);
+                        "course_enrolments.course_id"
+                    ).andOn("course_enrolments.student_id", "=", student_id);
                 })
         )
         .then(rows => {
@@ -218,7 +218,7 @@ export const isStudentEligibleToEnroll = async function(studentId, courseId) {
         // 
         // 
         // 
-        return _.where(coursesEligibleToEnrollIn, { id: courseId }).length > 0
+        return _.where(coursesEligibleToEnrollIn, { id: course_id }).length > 0
             ? true
             : false;
     });
