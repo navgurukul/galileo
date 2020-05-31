@@ -4,6 +4,7 @@ import database from '../index';
 import DBTable from './dbtable';
 import * as Jwt from "jsonwebtoken";
 import {IServerConfigurations} from "../configurations/index";
+import { userInfo } from 'os';
 
 export interface IUser {
     name: string;
@@ -29,6 +30,9 @@ export class UserModel extends DBTable {
             this.configs.jwtSecret,
             {expiresIn: this.configs.jwtExpiration}
         );
+        // console.log(token);
         return token;
+        
     }
 }
+

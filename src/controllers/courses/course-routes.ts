@@ -52,6 +52,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             validate: {
                 params: {
                     courseId: Joi.number().required()
+                    
                 }
             },
             response: {
@@ -124,10 +125,10 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                 }
             },
 
-            // auth: {
-            //     strategy: 'jwt',
-            //     mode: 'optional'
-            // },
+            auth: {
+                strategy: 'jwt',
+                mode: 'optional'
+            },
             tags: ['api'],
             handler: courseController.getSolutionByExerciseId
         }

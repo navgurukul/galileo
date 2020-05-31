@@ -46,7 +46,7 @@ const Sentry = Configs.getSentryConfig();
 
 let p = validateCourseDirParam()
     .then(() => {
-        // Check if the details/info.md file is correct
+        // Check if the /info.md file is correct
         return validateCourseInfo();
     })
     .then(() => {

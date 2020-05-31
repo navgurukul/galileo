@@ -22,6 +22,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                         .description("Short lived access token provided by google web-sign in.")
                         .default("aaa.bbb.ccc")
                 })
+                                
             },
             response: {
                 schema: Joi.object({
@@ -30,7 +31,12 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                         .default("xxx.yyy.zzz")
                         .description("Will authenticate all the future requests.")
                 })
+                            
+                
             },
+        
+
+            
             plugins: {
                 'hapi-swagger': {
                     responses: {
@@ -43,7 +49,9 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                         '401': {
                             'description': 'Auth failiure. Wrong ID token.'
                         }
+                        
                     }
+                    
                 }
             },
             tags: ['api'],

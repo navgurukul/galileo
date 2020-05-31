@@ -1,11 +1,11 @@
 {
    "database": {
-      "client": "mysql",
+      "client": "pg",
       "connection": {
-         "database": "dbname",
-         "host": "localhost_or_some_server_url",
-         "user": "dbuser",
-         "password": "dbpass",
+         "database": "db_saral",
+         "host": "localhost",
+         "user": "rohit",
+         "password": "rohit0909",
          "requestTimeout": 90000,
          "connectionTimeout": 30000,
          "acquireConnectionTimeout": 30000

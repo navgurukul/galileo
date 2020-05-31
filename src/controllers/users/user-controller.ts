@@ -57,12 +57,16 @@ export default class UserController {
                     profilePicture: googleAuthPayload['picture'],
                     googleUserId: googleAuthPayload['sub'],
                 };
+                // console.log(userObj);
+                
 
                 this.userModel.upsert(userObj, { 'email': userObj['email'] }, true)
                     .then((user) => {
+                        // console.log(user)
                         return database('user_roles').select('*')
                             .where({ 'user_roles.userId': user.id })
                             .then((rows) => {
+                                // console.log("rohit")
                                 if (rows.length < 1) {
                                     return Promise.resolve({
                                         shouldCreateRole: true,
@@ -85,6 +89,7 @@ export default class UserController {
                             let userRoles = {
                                 userId: user.id
                             };
+                            // console.log(userRoles)
                             // if he/she is a facilitator
                             if (isFacilitator) {
                                 userRoles['roles'] = 'facilitator';
@@ -179,6 +184,7 @@ export default class UserController {
                         }
                     })
                     .then((user) => {
+                        console.log(user);
                         resolve({
                             'user': user,
                             'jwt': this.userModel.getJWTToken(user)

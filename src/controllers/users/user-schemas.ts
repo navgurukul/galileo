@@ -35,3 +35,4 @@ export const userRoleSchema: Joi.ObjectSchema = Joi.object({
     mentor: Joi.allow(null),
     mentee: Joi.number().allow(null),
 });
+

@@ -360,7 +360,7 @@ let validateCourseDirParam = function() {
 // Validate and return the course info
 
 let validateCourseInfo = function() {
-    let courseInfoFile = courseDir + '/details/info.md';
+    let courseInfoFile = courseDir + '/info.md';
     return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
@@ -370,7 +370,7 @@ let validateCourseInfo = function() {
         courseData['info'] = courseInfo;
         return Promise.resolve();
     }).catch( (err) => {
-        showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
+        showErrorAndExit("`info.md` has some problem. Check the above error to understand it better.");
     });
 };
 
@@ -578,7 +578,7 @@ function updateContentWithImageLinks(images: any[], content: string): string {
 
 validateCourseDirParam()
 .then( () => {
-    // Check if the details/info.md file is correct
+    // Check if the /info.md file is correct
     return validateCourseInfo();
 }).then( () => {
     // Get a list of files and validate their sequence numbers
