@@ -37,17 +37,17 @@ let courseDir, // Path of the course directory relative to this file
     courseData = {}, // Course data which will be put into the DB eventually
     exercises = [], // All exercises
     allSlugs = [], // All slugs will be stored here
-    sequenceNumbers = {},
+    sequence_numbers = {},
     revSeqNumbers = {},
     toReadFiles = [],
-    courseId;
+    course_id;
 
 // Joi Schemas
 let courseInfoSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().allow('html', 'js', 'python').required(),
-    daysToComplete: Joi.number().required().strict(false),
-    shortDescription: Joi.string().required(),
+    days_to_complete: Joi.number().required().strict(false),
+    short_description: Joi.string().required(),
     logo: Joi.string(),
 });
 
@@ -70,7 +70,7 @@ function generateUID() {
 
 // Given the markdown of an image this returns the path of the image on Google Cloud Storage
 
-function parseAndUploadImage(imageText: string, sequenceNum: string, path: string) {
+function parseAndUploadImage(imageText: string, sequence_num: string,path: string) {
 
     // get relative image path and image name
     let temp1 = imageText.split(']')[1];
@@ -91,7 +91,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     var myBucket = 'saralng';
 
     let localReadStream = fs.createReadStream(completePath);
-    let dir = courseData['info']['name' ] + '/' + sequenceNum;
+    let dir = courseData['info']['name' ] + '/' + sequence_num;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
     filePath = filePath.replace(/ /g, "__");
@@ -139,7 +139,7 @@ function parseAndUploadImage(imageText: string, sequenceNum: string, path: strin
     // upload image
     let bucket = gcs.bucket('ng-curriculum-images');
     let localReadStream = fs.createReadStream(completePath);
-    let dir = courseData['info']['name' ] + '/' + sequenceNum;
+    let dir = courseData['info']['name' ] + '/' + sequence_num;
     let name = generateUID() + '.' + imageName;
     let filePath = dir + '/' + name;
     filePath = filePath.replace(/ /g, "__");
@@ -204,24 +204,24 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
     // let exercises = [];
     for (const i of Object.keys(revSeqNumbers)) {
         let mFile = revSeqNumbers[i]["name"];
-        let sequenceNum = sequenceNumbers[mFile];
+        let sequence_num = sequence_numbers[mFile];
         mFile = dir + "/" + mFile;
         if (!revSeqNumbers[i]["children"]) {
             exercises.push({
                 type: 'exercise',
                 path: mFile,
-                sequenceNum: Number(sequenceNum),
+                sequence_num: Number(sequence_num),
                 childExercises: []
             });
         } else {
             let childExercises = [];
             for (const j of Object.keys(revSeqNumbers[i]["children"])) {
                 let file = revSeqNumbers[i]["children"][j]["name"];
-                sequenceNum = sequenceNumbers[revSeqNumbers[i]["name"]+"/"+file];
+                sequence_num = sequence_numbers[revSeqNumbers[i]["name"]+"/"+file];
                 childExercises.push({
                     type: 'exercise',
                     path: mFile+"/"+file,
-                    sequenceNum: Number(sequenceNum),
+                    sequence_num: Number(sequence_num),
                     childExercises: []
                 });
             }
@@ -229,13 +229,13 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
             exercises.push({
                 type: 'exercise',
                 path: mFile+"/"+ revSeqNumbers[i]["children"][0]["name"],
-                sequenceNum: Number(sequenceNum),
+                sequence_num: Number(sequence_num),
                 childExercises: childExercises
             });
         }
     }
     exercises.sort(function(a, b) {
-        return parseFloat(a.sequenceNum) - parseFloat(b.sequenceNum);
+        return parseFloat(a.sequence_num) - parseFloat(b.sequence_num);
     });
 
     return exercises;
@@ -246,8 +246,8 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
 // Eg. if 1.2 is given this will give 1.3.
 //     if 1 is given this will give 2
 
-let _nextSeqNum = function (sequenceNum) {
-    let num = String(sequenceNum);
+let _nextSeqNum = function (sequence_num) {
+    let num = String(sequence_num);
     let tokens = num.split('.');
     if (tokens.length === 1) {
         return Number(num) + 1;
@@ -269,15 +269,15 @@ let validateSequenceNumber = function(exercises, depthLevel?) {
         if  (!exercises[i+1]) {
             continue;
         }
-        if (exercises[i+1].sequenceNum !== _nextSeqNum(exercises[i].sequenceNum)) {
-            let msg = exercises[i].sequenceNum + " and " + _nextSeqNum(exercises[i].sequenceNum) +
+        if (exercises[i+1].sequence_num !== _nextSeqNum(exercises[i].sequence_num)) {
+            let msg = exercises[i].sequence_num + " and " + _nextSeqNum(exercises[i].sequence_num) +
                 " don't have sequential sequence numbers.";
             showErrorAndExit(msg);
         }
         if (exercises[i].childExercises.length > 0) {
             let childExsValidated = validateSequenceNumber(exercises[i], depthLevel+1);
             if (!childExsValidated) {
-                showErrorAndExit("Child exercises of Sequence Number " + exercises[i].sequenceNum + " are not in the sequential order.");
+                showErrorAndExit("Child exercises of Sequence Number " + exercises[i].sequence_num + " are not in the sequential order.");
             }
         }
     }
@@ -291,8 +291,8 @@ let validateSequenceNumber = function(exercises, depthLevel?) {
 ```ngMeta
 name: Become a HTML/CSS Ninja
 type: html
-daysToComplete: 20
-shortDescription: Build any web page under the sun after taking up this course :)
+days_to_complete: 20
+short_description: Build any web page under the sun after taking up this course :)
 ```
 */
 // This assumes that every line under the triple tilde (```) will be a valid key/value pair.
@@ -376,7 +376,7 @@ let validateCourseInfo = function() {
 
 // Validate and return the content and meta information of an exercise on the given path
 
-let _getExerciseInfo = function(path, sequenceNum) {
+let _getExerciseInfo = function(path, sequence_num) {
     let exInfo = {};
     let data = fs.readFileSync(path, 'utf-8');
     let tokens = marked.lexer(data);
@@ -389,7 +389,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
     exInfo  = parseNgMetaText(tokens[0]['text']);
     exInfo  = Joi.attempt(exInfo, exerciseInfoSchema);
     exInfo['slug'] = path.replace('curriculum/','').replace('/', '__').replace('.md', '');
-    exInfo['sequenceNum'] = sequenceNum;
+    exInfo['sequence_num'] = sequence_num;
     exInfo['path'] = path;
     exInfo['content'] = data;
     return exInfo;
@@ -398,7 +398,7 @@ let _getExerciseInfo = function(path, sequenceNum) {
 let getAllExercises = function(exercises) {
     let exerciseInfos = [];
     for (let i = 0; i < exercises.length; i++) {
-        let info = _getExerciseInfo(exercises[i].path, exercises[i].sequenceNum);
+        let info = _getExerciseInfo(exercises[i].path, exercises[i].sequence_num);
         if (exercises[i].childExercises.length > 0) {
             let childExercisesInfo = getAllExercises(exercises[i].childExercises);
             info['childExercises'] = childExercisesInfo;
@@ -415,24 +415,24 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     .then( (rows) => {
         // a exercise with same slug exists
         if (rows.length > 0) {
-            let dbReviewType = rows[0].reviewType;
+            let dbReviewType = rows[0].review_type;
             return database('exercises')
             .where({ 'id': rows[0].id })
             .update(exerciseInfo)
             .then( () => {
                 return Promise.resolve(rows[0].id);
             })
-            .then( (exerciseId) => {
+            .then( (exercise_id) => {
                 // if the review type has changed then we will need to delete the submissions too
-                if(dbReviewType !== exerciseInfo['reviewType']) {
+                if(dbReviewType !== exerciseInfo['review_type']) {
                     return database('submissions')
-                        .where({'exerciseId': rows[0].id})
+                        .where({'exercise_id': rows[0].id})
                         .delete()
                         .then( () => {
-                            return Promise.resolve(exerciseId);
+                            return Promise.resolve(exercise_id);
                         });
                 } else {
-                    return Promise.resolve(exerciseId);
+                    return Promise.resolve(exercise_id);
                 }
             });
         }
@@ -448,15 +448,15 @@ let _generateExerciseAddOrUpdateQuery = function(exerciseInfo) {
     return query;
 };
 
-let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
+let addOrUpdateExercises = function(exercises, course_id, promiseObj?) {
     let exInsertQs = [];
     for (let i = 0; i < exercises.length; i++) {
         let exerciseObj = {
-            courseId: courseId,
+            course_id: course_id,
             name: exercises[i]['name'],
             slug: exercises[i]['slug'],
-            sequenceNum: exercises[i]['sequenceNum'],
-            reviewType: exercises[i]['completionMethod'],
+            sequence_num: exercises[i]['sequence_num'],
+            review_type: exercises[i]['completionMethod'],
             content: exercises[i]['content']
         };
 
@@ -464,15 +464,15 @@ let addOrUpdateExercises = function(exercises, courseId, promiseObj?) {
         if (!promiseObj) {
             query = _generateExerciseAddOrUpdateQuery(exerciseObj);
         } else {
-            promiseObj.then( (exerciseId) => {
-                exerciseObj['parentExerciseId'] = exerciseId;
+            promiseObj.then( (exercise_id) => {
+                exerciseObj['parent_exercise_id'] = exercise_id;
                 query = _generateExerciseAddOrUpdateQuery(exerciseObj);
                 return query;
             });
         }
 
         if (exercises[i].childExercises && exercises[i].childExercises.length > 0){
-            addOrUpdateExercises(exercises[i].childExercises, courseId, query);
+            addOrUpdateExercises(exercises[i].childExercises, course_id, query);
         }
 
         exInsertQs.push(query);
@@ -491,15 +491,15 @@ let addOrUpdateCourse = function() {
         } else {
             return Promise.resolve(null);
         }
-    }).then( (courseId) => {
-        if (courseId == null) {
+    }).then( (course_id) => {
+        if (course_id == null) {
             return database('courses')
             .insert({
                 'type': courseData['info']['type'],
                 'name': courseData['info']['name'],
                 'logo': courseData['info']['logo'],
-                'shortDescription': courseData['info']['shortDescription'],
-                'daysToComplete': courseData['info']['daysToComplete'],
+                'short_description': courseData['info']['short_description'],
+                'days_to_complete': courseData['info']['days_to_complete'],
                 // 'notes': courseData['notes'],
             })
             .then( (rows) => {
@@ -510,20 +510,20 @@ let addOrUpdateCourse = function() {
             .where({ 'name': courseData['info']['name'] })
             .update({ // Not updating `type` and `name` as assuming they won't change
                 'logo': courseData['info']['logo'],
-                'shortDescription': courseData['info']['shortDescription'],
-                'daysToComplete': courseData['info']['daysToComplete'],
+                'short_description': courseData['info']['short_description'],
+                'days_to_complete': courseData['info']['days_to_complete'],
             })
             .then( () => {
-                return Promise.resolve(courseId);
+                return Promise.resolve(course_id);
             });
         }
     });
 };
 
-let deleteExercises = function(courseId) {
+let deleteExercises = function(course_id) {
     database('exercises')
     .select('slug')
-    .where({ 'courseId': courseId })
+    .where({ 'course_id': course_id })
     .then( (rows) => {
         let slugs = [];
         for (let i=0; i<rows.length; i++) {
@@ -545,7 +545,7 @@ let deleteExercises = function(courseId) {
                 .then( (rows) => {
                     let exId = rows[0].id;
                     return database('submissions')
-                    .where({'exerciseId': exId})
+                    .where({'exercise_id': exId})
                     .delete()
                     .then( () => {
                         return database('exercises')
@@ -582,7 +582,7 @@ validateCourseDirParam()
     return validateCourseInfo();
 }).then( () => {
     // Get a list of files and validate their sequence numbers
-    sequenceNumbers = getSequenceNumbers(courseDir);
+    sequence_numbers = getSequenceNumbers(courseDir);
     exercises = getCurriculumExerciseFiles(courseDir);
     // validateSequenceNumber(exercises);
     // Get the exercise content from the files
@@ -602,7 +602,7 @@ validateCourseDirParam()
         let images = exInfo['content'].match(/!\[(.*?)\]\((.*?)\)/g);
         if (images!=null) {
             for (let j = 0; j < images.length; j++) {
-                uploadPromises.push( parseAndUploadImage(images[j], exInfo['sequenceNum'], exInfo['path']) );
+                uploadPromises.push( parseAndUploadImage(images[j], exInfo['sequence_num'], exInfo['path']) );
             }
         }
 
@@ -617,7 +617,7 @@ validateCourseDirParam()
                 let images = exInfoChild['content'].match(/!\[(.*?)\]\((.*?)\)/g);
                 if (images!=null) {
                     for (let h = 0; h < images.length; h++) {
-                        let img = parseAndUploadImage(images[h], exInfo['sequenceNum'] + '/' + exInfoChild['sequenceNum'], exInfo['path']);
+                        let img = parseAndUploadImage(images[h], exInfo['sequence_num'] + '/' + exInfoChild['sequence_num'], exInfo['path']);
                         uploadChildPromises.push( img );
                     }
                     exChildPromises.push( Promise.all(uploadChildPromises).then( (uploadedImages) => {
@@ -638,13 +638,13 @@ validateCourseDirParam()
 }).then(() => {
     // Add or update the course
     return addOrUpdateCourse();
-} ).then((courseId) => {
+} ).then((course_id) => {
     // delete any exercises if they exist in the DB and not in the curriculum
-    deleteExercises(courseId);
-    return Promise.resolve(courseId);
-}).then((courseId) => {
+    deleteExercises(course_id);
+    return Promise.resolve(course_id);
+}).then((course_id) => {
     // add or update the exercises in the DB
-    let promises = addOrUpdateExercises(exercises, courseId);
+    let promises = addOrUpdateExercises(exercises, course_id);
     Promise.all(promises);
 }).then(() => {
     // say your goodbyes :)

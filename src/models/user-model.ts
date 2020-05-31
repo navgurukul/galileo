@@ -10,7 +10,7 @@ export interface IUser {
     name: string;
     email: string;
     password: string;
-    createdAt: Date;
+    created_at: Date;
     updateAt: Date;
 
     validatePassword(requestPassword): boolean;

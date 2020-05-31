@@ -8,7 +8,7 @@ var globals = require("./globals");
 // Given the markdown of imageTextan image this returns the path of the image on Google Cloud Storage
 export function parseAndUploadImage(
     imageText: string,
-    sequenceNum: string,
+    sequence_num: string,
     path: string,
     iIndex,
     jIndex?
@@ -32,7 +32,7 @@ export function parseAndUploadImage(
     var myBucket = "saralng";
 
     // let localReadStream = fs.createReadStream(completePath);
-    let dir = globals.courseData["info"]["name"] + "/" + sequenceNum;
+    let dir = globals.courseData["info"]["name"] + "/" + sequence_num;
     let name = generateUID() + "." + imageName;
     let filePath = dir + "/" + name;
     filePath = filePath.replace(/ /g, "__");

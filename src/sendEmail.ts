@@ -70,7 +70,7 @@ interface SubmissionDetail {
 }
 
 interface ExerciseDetail {
-  courseId: number;
+  course_id: number;
   slug: string;
   name: string;
 }
@@ -113,7 +113,7 @@ export const sendAssignmentReviewCompleteEmail = (student: User, reviewer: User,
         <h5>
           Hi ${student.name}, Apka assignment check hogya ha. <br />
           Aap apna assignment ka feedback
-          <a href="${baseUrl}/course?id=${exerciseDetail.courseId}&slug=${exerciseDetail.slug}">
+          <a href="${baseUrl}/course?id=${exerciseDetail.course_id}&slug=${exerciseDetail.slug}">
             yahan
           </a>
           dekh sakte ho.

@@ -9,7 +9,7 @@ const menteeProgressSchema: Joi.ObjectSchema = Joi.object({
 });
 
 export const courseReportSchema: Joi.ObjectSchema = Joi.object({
-    courseId: Joi.number(),
+    course_id: Joi.number(),
     courseName: Joi.string(),
     totalExercises: Joi.number(),
     studentEnrolled: Joi.array().items(menteeProgressSchema)
@@ -24,7 +24,7 @@ export const menteeSchema: Joi.ObjectSchema = Joi.object({
 
 const submissionSchema: Joi.ObjectSchema = Joi.object({
     submissionId: Joi.number(),
-    submitterNotes: Joi.string(),
+    submitter_notes: Joi.string(),
     submissionState: Joi.string().allow('completed', 'rejected', 'pending'),
     submissionCompleted: Joi.bool(),
     menteeId: Joi.number(),
@@ -33,7 +33,7 @@ const submissionSchema: Joi.ObjectSchema = Joi.object({
 });
 
 export const exerciseReportSchema: Joi.ObjectSchema = Joi.object({
-    exerciseId: Joi.number(),
+    exercise_id: Joi.number(),
     exerciseSlug: Joi.string(),
     exerciseSequenceNum: Joi.number(),
     exerciseName: Joi.string(),

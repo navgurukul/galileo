@@ -6,7 +6,7 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
 
     return database("submissions")
         .count('submissions.id as itemCounts')
-        .innerJoin('users', 'users.id', 'submissions.userId')
+        .innerJoin('users', 'users.id', 'submissions.user_id')
         .where({
 
             "submissions.state": 'pending'
@@ -23,7 +23,7 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
                 case "yesterday": {
                     //statements; 
                     this.whereRaw(
-                        "date(submittedAt) = date(DATE_SUB(NOW(), INTERVAL 1 day))"
+                        "date(submitted_at) = date(DATE_SUB(NOW(), INTERVAL 1 day))"
                     );
 
                     break;
@@ -31,7 +31,7 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
                 case "lastWeek": {
                     //statements; 
                     this.whereRaw(
-                        "date(submittedAt) >= date(DATE_SUB(NOW(), INTERVAL 1 week))"
+                        "date(submitted_at) >= date(DATE_SUB(NOW(), INTERVAL 1 week))"
                     );
 
                     break;
@@ -39,7 +39,7 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
                 case "lastMonth": {
                     //statements; 
                     this.whereRaw(
-                        "date(submittedAt) >= date(DATE_SUB(NOW(), INTERVAL 1 month))"
+                        "date(submitted_at) >= date(DATE_SUB(NOW(), INTERVAL 1 month))"
                     );
 
                     break;
@@ -47,7 +47,7 @@ export const getforIndivisualTimePeriod = function (centerId: string, date: stri
                 case "today": {
                     //statements; 
                     this.whereRaw(
-                        "date(submissions.submittedAt) = date(NOW())"
+                        "date(submissions.submitted_at) = date(NOW())"
                     );
 
                     break;
@@ -74,7 +74,7 @@ export const getNumberOfAssignmentSubmittedPerUser = function (centerId: string)
     return database("submissions")
         .select("users.name")
         .count('submissions.id as numberOfAssignmentSubmitted')
-        .innerJoin('users', 'users.id', 'submissions.userId')
+        .innerJoin('users', 'users.id', 'submissions.user_id')
         .where({
 
             "submissions.state": 'pending'
