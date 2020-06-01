@@ -102,6 +102,7 @@ When the code is running, documentation is accessible at `localhost:5000/docs`.
 - `npx db-migrate down` to downgrade migrations
 - create database.json in the root folder with following the configurations
 ```js
+
 {
     "dev": {
             "host": "host",

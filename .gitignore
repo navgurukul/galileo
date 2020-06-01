@@ -125,7 +125,7 @@ typings/
 .env
 
 
-database.json
+# database.json
 sqlScripts/
 # !migrations/migration_1.sql
 
