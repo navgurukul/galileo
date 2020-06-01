@@ -64,10 +64,10 @@ module.exports = {
         "sentryDsn": process.env.SENTRY_DSN
     },
     "scheduleConfig": {
-        "timeInSecond": process.env.TIME_IN_SECOND,
+        "timeInSecond": process.env.TIME_IN_SECONDS,
         "receiverEmail": process.env.RECEIVER_EMAIL
     },
     "cliqConfig": {
-        "authtoken": process.env.AUTH_TOKEN
+        "authtoken": process.env.CLIQ_AUTH_TOKEN
     }
 }
