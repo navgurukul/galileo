@@ -14,6 +14,7 @@ dbConfigs.connection.typeCast = (field, next) => {
     }
     return next();
 };
+
 const databaseConfig = Database.init(dbConfigs);
 export default databaseConfig;
 

@@ -8,7 +8,7 @@ const shell = require('gulp-shell');
 const env = require('gulp-env');
 const nodemon = require('gulp-nodemon');
 /**
- * Remove build directory.
+ * Remove build directory. 
  */
 // Cleaning/deleting files no longer being used in dist folder
 const clean = () => {

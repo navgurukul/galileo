@@ -2,6 +2,7 @@ import * as Boom from "boom";
 import * as Hapi from "hapi";
 // import * as knex from "knex";
 
+
 import database from "../../";
 import {
     getIsSolutionAvailable,
@@ -40,26 +41,26 @@ export default class CourseController {
                 completedCourses = [];
 
             let availableQ = database("courses")
-                    .select(
-                        "courses.id",
-                        "courses.name",
-                        "courses.type",
-                        "courses.logo",
-                        "courses.short_description",
-                        "courses.sequence_num"
-                    )
-                    .then(rows => {
-                        allAvailableCourses = rows;
-                        return Promise.resolve();
-                    });
-
-                availableQ.then(() => {
-                    resolve({
-                        enrolledCourses: [],
-                        availableCourses: allAvailableCourses,
-                        completedCourses: []
-                    });
+                .select(
+                    "courses.id",
+                    "courses.name",
+                    "courses.type",
+                    "courses.logo",
+                    "courses.short_description",
+                    "courses.sequence_num"
+                )
+                .then(rows => {
+                    allAvailableCourses = rows;
+                    return Promise.resolve();
                 });
+
+            availableQ.then(() => {
+                resolve({
+                    enrolledCourses: [],
+                    availableCourses: allAvailableCourses,
+                    completedCourses: []
+                });
+            });
         });
     }
 
@@ -78,7 +79,7 @@ export default class CourseController {
                 resolve({ data: rows });
             });
         });
-
+        
         // let xyz = '(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id '
         //     + 'AND user_id = ' + 1 + ' ORDER BY state ASC LIMIT 1)';
 
@@ -701,6 +702,7 @@ export default class CourseController {
                     "users.id": request.payload.menteeId
                 })
                 .then(rows => {
+                    
                     if (rows.length < 1) {
                         reject(
                             Boom.expectationFailed(
@@ -714,6 +716,7 @@ export default class CourseController {
                     }
                 })
                 .then(mentee => {
+                    
                     // check if the is the mentor for the menteeId?
                     return database("mentors")
                         .select("*")

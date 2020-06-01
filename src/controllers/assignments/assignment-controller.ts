@@ -470,9 +470,9 @@ export default class AssignmentController {
                     "submissions.completed",
                     "submissions.completed_at",
                     // Reviewer details
-                    "reviewUsers.name as reviewerName",
-                    "reviewUsers.id as reviewerId",
-                    "reviewUsers.profile_picture as reviewerProfilePicture",
+                    // "reviewUsers.name as reviewerName",
+                    // "reviewUsers.id as reviewerId",
+                    // "reviewUsers.profile_picture as reviewerProfilePicture",
                     // 'reviewUsers.facilitator as isReviewerFacilitator',
                     // Submitter Details
                     "users.name as submitterName",
@@ -480,11 +480,11 @@ export default class AssignmentController {
                     "users.profile_picture as submitterProfilePicture"
                     // 'users.facilitator as isSubmitterFacilitator'
                 )
-                .leftJoin(
-                    database.raw("users reviewUsers"),
-                    "submissions.peer_reviewer_id",
-                    "reviewUsers.id"
-                )
+                // .leftJoin(
+                //     database.raw("users reviewUsers"),
+                //     "submissions.peer_reviewer_id",
+                //     "reviewUsers.id"
+                // )
                 .leftJoin("users", "submissions.user_id", "users.id");
 
             // Clauses to search the exercisesId
@@ -504,6 +504,7 @@ export default class AssignmentController {
             }
 
             submissionQuery.where(whereClause).then(rows => {
+                console.log(rows, "Pral")
                 // parsing the files
                 let submissions = [];
                 for (let i = 0; i < rows.length; i++) {
@@ -666,6 +667,7 @@ export default class AssignmentController {
                 .innerJoin("users", "submissions.user_id", "users.id")
                 .where({ "submissions.id": request.params.submissionId })
                 .then(rows => {
+                    
                     // validate the submissionId
                     if (rows.length < 1) {
                         reject(

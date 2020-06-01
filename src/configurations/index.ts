@@ -1,19 +1,21 @@
-import * as nconf from "nconf";
-import * as path from "path";
-
+// import * as nconf from "nconf";
+// import * as path from "path";
 // error logging using sentry.
+
 const Sentry = require('@sentry/node');
 
+const configs=require("../../../src/constant")
 
-//Read Configurations
-const configs = new nconf.Provider({
-  env: true,
-  argv: true,
-  store: {
-    type: 'file',
-      file: path.join(__dirname, `./config.${process.env.GALILEO_ENV}.json`)
-  }
-});
+
+// Read Configurations
+// const configs = new nconf.Provider({
+//   env: true,
+//   argv: true,
+//   store: {
+//     type: 'file',
+//       file: path.join(__dirname, `./config.${process.env.GALILEO_ENV}.json`)
+//   }
+// });
 
 export interface IServerConfigurations {
     port: number;
@@ -62,7 +64,7 @@ export interface CliqConfigurations {
 }
 
 export function checkConfigEnvironment(): void {
-    if (!!configs.get("database") === false) {
+    if (!!configs["database"] === false) {
         console.error('Check GALILEO_ENV variable');
         process.exit();
     }
@@ -71,32 +73,32 @@ export function checkConfigEnvironment(): void {
 export function getDatabaseConfig(): IDataConfiguration {
     checkConfigEnvironment();
     //
-    return configs.get("database");
+    return configs["database"];
 }
 
 export function getServerConfigs(): IServerConfigurations {
     checkConfigEnvironment();
-    return configs.get("server");
+    return configs["server"];
 }
 
 export function getCourseConfigs(): CouseConfigurations {
     checkConfigEnvironment();
-    return configs.get("courseConfig");
+    return configs["courseConfig"];
 }
 
 export function getScheduleConfigs(): ScheduleConfigurations {
     checkConfigEnvironment();
-    return  configs.get("scheduleConfig");  
+    return  configs["scheduleConfig"];  
 }
 
 export function getSentryConfig(){
     checkConfigEnvironment();
-    let sentryConfig = configs.get("sentryConfig");
+    let sentryConfig = configs["sentryConfig"];
     Sentry.init({ dsn: sentryConfig.sentryDsn });
     return Sentry;
 }
 
 export function getCliqConfig():CliqConfigurations{
     checkConfigEnvironment()
-    return configs.get("cliqConfig");
+    return configs["cliqConfig"]
 }
