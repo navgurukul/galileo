@@ -3,7 +3,6 @@ import * as GoogleAuth from "google-auth-library";
 import * as Hapi from "hapi";
 import database from "../../";
 import { IServerConfigurations } from "../../configurations";
-import { NotesModel } from "../../models/notes-model";
 import { UserModel } from "../../models/user-model";
 
 import * as fs from "fs";
@@ -27,13 +26,11 @@ export default class UserController {
     private configs: IServerConfigurations;
     private database: any;
     private userModel: UserModel;
-    private notesModel: NotesModel;
 
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
         this.userModel = new UserModel(this.configs);
-        this.notesModel = new NotesModel(this.configs);
     }
 
     public loginUser(request, h) {
@@ -331,34 +328,6 @@ export default class UserController {
         });
     }
 
-    public postUserNotes(request, h) {
-        let note = {
-            student: request.params.userId,
-            text: request.payload.text,
-            facilitator: request.user_id
-        };
-        return new Promise((resolve, reject) => {
-            this.notesModel.insert(note).then(status => {
-                resolve({ status: status });
-            });
-        });
-    }
-
-    public getUserNotes(request, h) {
-        return new Promise((resolve, reject) => {
-            this.notesModel.getUserNotes(request.params.userId).then(rows => {
-                resolve({ data: rows });
-            });
-        });
-    }
-
-    public deleteUserNoteById(request: Hapi.Request, reply: Hapi.IReply) {
-        return new Promise((resolve, reject) => {
-            this.notesModel.del(request.params.noteId).then(status => {
-                resolve({ status: status });
-            });
-        });
-    }
 
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;
