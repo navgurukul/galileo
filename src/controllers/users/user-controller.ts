@@ -30,12 +30,12 @@ export default class UserController {
     private userModel: UserModel;
     // private notesModel: NotesModel;
 
-
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
         this.userModel = new UserModel(this.configs);
         // this.notesModel = new NotesModel(this.configs);
+
 
     }
 
@@ -333,7 +333,6 @@ export default class UserController {
             });
         });
     }
-
     // public postUserNotes(request, h) {
     //     let note = {
     //         student: request.params.userId,
@@ -362,6 +361,7 @@ export default class UserController {
     //         });
     //     });
     // }
+
 
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;

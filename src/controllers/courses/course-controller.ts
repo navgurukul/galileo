@@ -356,8 +356,6 @@ export default class CourseController {
                     });
             }
         });
-    }
-
     // public getCourseNotes(request, reply) {
     //     return new Promise((resolve, reject) => {
     //         database("courses")
@@ -369,7 +367,6 @@ export default class CourseController {
     //             });
     //     });
     // }
-
 
     public enrollInCourse(request, h) {
         //request.user_id = 29;
