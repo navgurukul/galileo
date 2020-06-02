@@ -61,7 +61,7 @@ module.exports = {
     "sentryConfig": {
         "sentryDsn": process.env.SENTRY_DSN
     },
-    "scheduleConfig": {
+    "scheduleConfigs": {
         "timeInSecond": process.env.TIME_IN_SECONDS,
         "receiverEmail": process.env.RECEIVER_EMAIL
     },
