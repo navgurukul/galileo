@@ -4,7 +4,7 @@
 
 const Sentry = require('@sentry/node');
 
-const configs=require("../../src/constant")
+const configs=require("../constant")
 
 
 // Read Configurations
