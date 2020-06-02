@@ -3,9 +3,7 @@ const Dotenv = require("dotenv")
 // Pull .env into process.env
 Dotenv.config({ path: `${__dirname}/../.env` });
 
-
 module.exports = {
-
     "database": {
         "client": "pg",
         "connection": {
