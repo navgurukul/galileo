@@ -358,17 +358,6 @@ export default class CourseController {
         });
     }
 
-    public getCourseNotes(request, reply) {
-        return new Promise((resolve, reject) => {
-            database("courses")
-                .select("notes")
-                .where("id", request.params.courseId)
-                .then(function (rows) {
-                    let notes = rows[0].notes;
-                    resolve({ notes: notes });
-                });
-        });
-    }
 
     public enrollInCourse(request, h) {
         //request.user_id = 29;
