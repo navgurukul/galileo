@@ -88,7 +88,7 @@ export function getCourseConfigs(): CouseConfigurations {
 
 export function getScheduleConfigs(): ScheduleConfigurations {
     checkConfigEnvironment();
-    return  configs["scheduleConfig"];  
+    return  configs["scheduleConfigs"];
 }
 
 export function getSentryConfig(){
