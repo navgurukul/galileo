@@ -90,7 +90,7 @@ export const validateCourseDirParam = function() {
 // Validate and return the course info
 
 export const validateCourseInfo = function() {
-    let courseInfoFile = globals.courseDir + '/details/info.md';
+    let courseInfoFile = globals.courseDir + '/info.md';
     return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
         let tokens = marked.lexer(data);
         let ngMetaBlock = tokens[0];
@@ -104,6 +104,6 @@ export const validateCourseInfo = function() {
 
     }).catch( (err) => {
         console.log(err);
-        showErrorAndExit("`details/info.md` has some problem. Check the above error to understand it better.");
+        showErrorAndExit("`info.md` has some problem. Check the above error to understand it better.");
     });
 };

@@ -133,28 +133,30 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
-    server.route({
-        method: 'GET',
-        path: '/courses/{courseId}/notes',
-        config: {
-            description: 'Get any additional notes attached with the course.',
-            validate: {
-                params: {
-                    courseId: Joi.number()
-                }
-            },
-            response: {
-                schema: Joi.object({
-                    "notes": Joi.string()
-                        .default("# Notes Title ## Not sub-title Some content. \n More.")
-                        .description("Notes in markdown.")
-                })
-            },
-            auth: 'jwt',
-            tags: ['api'],
-            handler: courseController.getCourseNotes
-        }
-    });
+   
+
+    // server.route({
+    //     method: 'GET',
+    //     path: '/courses/{courseId}/notes',
+    //     config: {
+    //         description: 'Get any additional notes attached with the course.',
+    //         validate: {
+    //             params: {
+    //                 courseId: Joi.number()
+    //             }
+    //         },
+    //         response: {
+    //             schema: Joi.object({
+    //                 "notes": Joi.string()
+    //                     .default("# Notes Title ## Not sub-title Some content. \n More.")
+    //                     .description("Notes in markdown.")
+    //             })
+    //         },
+    //         auth: 'jwt',
+    //         tags: ['api'],
+    //         handler: courseController.getCourseNotes
+    //     }
+    // });
 
     server.route({
         method: 'POST',

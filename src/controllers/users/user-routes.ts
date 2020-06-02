@@ -141,82 +141,81 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
         }
     });
 
+    // server.route({
+    //     method: 'POST',
+    //     path: '/users/{userId}/notes',
+    //     config: {
+    //         description: 'Will be used by the facilitator to create a new note against a user.',
+    //         auth: 'jwt',
+    //         validate: {
+    //             params: {
+    //                 userId: Joi.number().required(),
+    //             },
+    //             payload: Joi.object({
+    //                 text: Joi.string().required()
+    //             })
+    //         },
+    //         response: {
+    //             schema: {
+    //                 status: Joi.bool().required()
+    //             }
+    //         },
+    //         plugins: {
+    //             'hapi-swagger': {
+    //                 responses: {
+    //                     '201': {
+    //                         'description': 'Note created successfully.'
+    //                     }
+    //                 }
+    //             }
+    //         },
+    //         tags: ['api'],
+    //         handler: userController.postUserNotes
+    //     }
+    // });
 
-    server.route({
-        method: 'POST',
-        path: '/users/{userId}/notes',
-        config: {
-            description: 'Will be used by the facilitator to create a new note against a user.',
-            auth: 'jwt',
-            validate: {
-                params: {
-                    userId: Joi.number().required(),
-                },
-                payload: Joi.object({
-                    text: Joi.string().required()
-                })
-            },
-            response: {
-                schema: {
-                    status: Joi.bool().required()
-                }
-            },
-            plugins: {
-                'hapi-swagger': {
-                    responses: {
-                        '201': {
-                            'description': 'Note created successfully.'
-                        }
-                    }
-                }
-            },
-            tags: ['api'],
-            handler: userController.postUserNotes
-        }
-    });
+    // server.route({
+    //     method: 'GET',
+    //     path: '/users/{userId}/notes',
+    //     config: {
+    //         description: 'Get a list of notes (reverse chronologically sorted) of the user.',
+    //         auth: 'jwt',
+    //         validate: {
+    //             params: {
+    //                 userId: Joi.number().required(),
+    //             }
+    //         },
+    //         response: {
+    //             schema: Joi.object({
+    //                 data: Joi.array().items(noteSchema)
+    //             })
+    //         },
+    //         tags: ['api'],
+    //         handler: userController.getUserNotes
+    //     }
+    // });
 
-    server.route({
-        method: 'GET',
-        path: '/users/{userId}/notes',
-        config: {
-            description: 'Get a list of notes (reverse chronologically sorted) of the user.',
-            auth: 'jwt',
-            validate: {
-                params: {
-                    userId: Joi.number().required(),
-                }
-            },
-            response: {
-                schema: Joi.object({
-                    data: Joi.array().items(noteSchema)
-                })
-            },
-            tags: ['api'],
-            handler: userController.getUserNotes
-        }
-    });
-
-    server.route({
-        method: 'DELETE',
-        path: '/users/{userId}/notes/{noteId}',
-        config: {
-            description: 'Delete a note of the user with a given ID',
-            auth: 'jwt',
-            validate: {
-                params: {
-                    userId: Joi.number().required(),
-                    noteId: Joi.number().required(),
-                }
-            },
-            response: {
-                schema: Joi.object({
-                    status: Joi.bool().required()
-                })
-            },
-            tags: ['api'],
-            handler: userController.deleteUserNoteById
-        }
-    });
+    // server.route({
+    //     method: 'DELETE',
+    //     path: '/users/{userId}/notes/{noteId}',
+    //     config: {
+    //         description: 'Delete a note of the user with a given ID',
+    //         auth: 'jwt',
+    //         validate: {
+    //             params: {
+    //                 userId: Joi.number().required(),
+    //                 noteId: Joi.number().required(),
+    //             }
+    //         },
+    //         response: {
+    //             schema: Joi.object({
+    //                 status: Joi.bool().required()
+    //             })
+    //         },
+    //         tags: ['api'],
+    //         handler: userController.deleteUserNoteById
+    //     }
+    // });
 
     server.route({
         method: 'GET',
