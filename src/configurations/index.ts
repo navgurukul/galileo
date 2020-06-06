@@ -4,7 +4,7 @@
 
 const Sentry = require('@sentry/node');
 
-const configs=require("../../../src/constant")
+const configs=require("../constant")
 
 
 // Read Configurations
@@ -88,7 +88,7 @@ export function getCourseConfigs(): CouseConfigurations {
 
 export function getScheduleConfigs(): ScheduleConfigurations {
     checkConfigEnvironment();
-    return  configs["scheduleConfig"];  
+    return  configs["scheduleConfigs"];
 }
 
 export function getSentryConfig(){

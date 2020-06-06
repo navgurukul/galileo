@@ -3,9 +3,7 @@ const Dotenv = require("dotenv")
 // Pull .env into process.env
 Dotenv.config({ path: `${__dirname}/../.env` });
 
-
 module.exports = {
-
     "database": {
         "client": "pg",
         "connection": {
@@ -63,7 +61,7 @@ module.exports = {
     "sentryConfig": {
         "sentryDsn": process.env.SENTRY_DSN
     },
-    "scheduleConfig": {
+    "scheduleConfigs": {
         "timeInSecond": process.env.TIME_IN_SECONDS,
         "receiverEmail": process.env.RECEIVER_EMAIL
     }
