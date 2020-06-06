@@ -66,8 +66,8 @@ module.exports = {
     "scheduleConfig": {
         "timeInSecond": process.env.TIME_IN_SECONDS,
         "receiverEmail": process.env.RECEIVER_EMAIL
-    },
-    "cliqConfig": {
-        "authtoken": process.env.CLIQ_AUTH_TOKEN
     }
+    // "cliqConfig": {
+    //     "authtoken": process.env.CLIQ_AUTH_TOKEN
+    // }
 }

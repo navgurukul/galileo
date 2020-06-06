@@ -16,9 +16,9 @@ import { manipulateResultSet } from "../../helpers/courseHelper";
 import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
-import {
-    sendCliqIntimation
-} from "../../cliq";
+// import {
+//     sendCliqIntimation
+// } from "../../cliq";
 
 
 
