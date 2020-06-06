@@ -16,15 +16,10 @@ import { manipulateResultSet } from "../../helpers/courseHelper";
 import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
-<<<<<<< HEAD
 // import {
 //     sendCliqIntimation
 // } from "../../cliq";
-=======
-import {
-  sendCliqIntimation
-} from "../../cliq";
->>>>>>> 4d96425befb048d0f5063f35ffac9e0f6db2ed2d
+
 
 
 
