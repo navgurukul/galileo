@@ -59,9 +59,9 @@ export interface ScheduleConfigurations {
     receiverEmail: string;
 }
 
-export interface CliqConfigurations {
-    authtoken:  string;
-}
+// export interface CliqConfigurations {
+//     authtoken:  string;
+// }
 
 export function checkConfigEnvironment(): void {
     if (!!configs["database"] === false) {
@@ -98,7 +98,7 @@ export function getSentryConfig(){
     return Sentry;
 }
 
-export function getCliqConfig():CliqConfigurations{
-    checkConfigEnvironment()
-    return configs["cliqConfig"]
-}
+// export function getCliqConfig():CliqConfigurations{
+//     checkConfigEnvironment()
+//     return configs["cliqConfig"]
+// }

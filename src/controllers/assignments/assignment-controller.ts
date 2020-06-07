@@ -14,9 +14,9 @@ import {
     sendAssignmentReviewCompleteEmail,
     sendCoursesUnlockedForUserEmail
 } from "../../sendEmail";
-import {
-    sendCliqIntimation
-} from "../../cliq";
+// import {
+//     sendCliqIntimation
+// } from "../../cliq";
 
 var _ = require("underscore");
 
@@ -405,12 +405,12 @@ export default class AssignmentController {
                                         }
 
 
-                                        sendCliqIntimation(reviewerObject).then(result => {
+                                        // sendCliqIntimation(reviewerObject).then(result => {
                                             
-                                        })
-                                        sendCliqIntimation(studentObject).then(result => {
+                                        // })
+                                        // sendCliqIntimation(studentObject).then(result => {
                                             
-                                        })
+                                        // })
 
                                         resolve(rows[0]);
                                     });
@@ -915,9 +915,9 @@ export default class AssignmentController {
                                                                                 //     reviewer,
                                                                                 //     rows[0]
                                                                                 // );
-                                                                                return sendCliqIntimation(studentObject).then(result => {
+                                                                                // return sendCliqIntimation(studentObject).then(result => {
                                                                                     
-                                                                                })
+                                                                                // })
 
                                                                             }
                                                                         );
@@ -1002,9 +1002,9 @@ export default class AssignmentController {
                                                                                     `App ushe ish link par dekh sakte ho http://saral.navgurukul.org/course?id=${rows[0].course_id}&slug=${rows[0].slug}`
                                                                     }
 
-                                                                    return sendCliqIntimation(studentObject).then(result => {
+                                                                    // return sendCliqIntimation(studentObject).then(result => {
                                                                         
-                                                                    })
+                                                                    // })
                                                                 //     return sendAssignmentReviewCompleteEmail(
                                                                 //         student,
                                                                 //         reviewer,
@@ -1220,9 +1220,9 @@ export default class AssignmentController {
             }
 
 
-            sendCliqIntimation(studentObject).then(result => {
+            // sendCliqIntimation(studentObject).then(result => {
                 
-            })
+            // })
             // sendCoursesUnlockedForUserEmail(student, coursesName);
         });
     }
