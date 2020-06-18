@@ -514,6 +514,83 @@ export default class CourseController {
     });
   }
 
+  public updateCourses(request, h) {
+    return new Promise((resolve, reject) => {
+      database("user_roles")
+        .select("user_roles.roles")
+        .where({
+          user_id: request.user_id
+        })
+        .then((rows) => {
+          // here we getting the role of user 
+          const isAdmin =
+            rows.length > 0 && getUserRoles(rows).isAdmin === true
+              ? true
+              : false;
+          if (isAdmin === false) {
+            reject(
+              Boom.expectationFailed(
+                "only admin allowed to update course."
+              )
+            );
+            return Promise.resolve({ isAdmin: false });
+          } else {
+            return Promise.resolve({ isAdmin: true });
+          }
+
+        })
+        .then((response) => {
+          if (response.isAdmin === true) {
+            database('courses')
+              .select('*')
+              .where({ 'name': request.params['name'] })
+              .then((course) => {
+                if (course.length > 0) {
+                  return Promise.resolve(course[0]);
+                } else {
+                  return Promise.resolve(null);
+                }
+              })
+              .then((rows) => {
+                console.log(rows);
+                if (rows == null) {
+                  reject(
+                    Boom.expectationFailed(
+                      "this course is not exists in saral"
+                    )
+                  );
+                  return Promise.reject("Rejected");
+
+                }
+                else {
+                  return database('courses')
+                    .where({ 'name': request.params['name'] })
+                    .update(request.payload)
+                    .then(() => {
+                      resolve({
+                        update: true
+                      });
+
+                    })
+                }
+
+              })
+
+          }
+          else {
+            reject(
+              Boom.expectationFailed(
+                "only admin allowed to update course"
+              )
+            )
+          }
+
+        })
+    })
+  }
+
+
+
   public deleteCourse(request, h) {
     return new Promise((resolve, reject) => {
       database("user_roles")

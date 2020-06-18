@@ -45,6 +45,31 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
     });
 
     server.route({
+        method: 'PUT',
+        path: '/updateCourses{name}',
+        config: {
+            description: 'update the courses by Courses name',
+            validate: {
+                payload: {
+                    type: Joi.string().allow('html', 'js', 'python').required(),
+                    days_to_complete: Joi.number().required().strict(false),
+                    short_description: Joi.string().required(),
+                    logo: Joi.string(),
+                }
+            },
+            response: {
+                schema: {
+                    "update": Joi.bool()
+                }
+            },
+            auth: 'jwt',
+            tags: ['api'],
+            handler: courseController.updateCourses
+        }
+    });
+
+
+    server.route({
         method: 'GET',
         path: '/courses/{courseId}/topics',
         config: {
