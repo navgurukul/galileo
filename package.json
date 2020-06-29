@@ -64,6 +64,7 @@
     "mysql": "^2.16.0",
     "natives": "1.1.6",
     "nconf": "0.8.4",
+    "newman": "^5.1.0",
     "node-cron": "^2.0.3",
     "node-uuid": "1.4.8",
     "path": "0.12.7",

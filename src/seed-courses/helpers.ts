@@ -16,6 +16,8 @@ var globals = require('./globals');
 let newtonGithubUrl = 'https://github.com/navgurukul/newton/tree/master/';
 
 export const getSequenceNumbers = function(dir: string, callType?: string) {
+    
+    
     let fileName = "index.md";
     let data = fs.readFileSync(dir + "/index.md");
     let tokens = marked.lexer(data.toString());
@@ -72,19 +74,24 @@ export const getSequenceNumbers = function(dir: string, callType?: string) {
             inside=false;
         }
     }
-    // 
+
+
     return seqNumbers;
 };
 
 // Get the nested list of all the exercises
 export const getCurriculumExerciseFiles = function(dir: string, callType?: string){
+    // console.log(dir, 'sdijij');
+    
     let files = [];
     let exercises = [];
     let isSolutionFile ;
     for (const i of Object.keys(globals.revSeqNumbers)) {
-        let mFile = globals.revSeqNumbers[i]["name"];
+
+        
+        let mFile = globals.revSeqNumbers[i]["name"]; 
         let sequence_num = globals.sequence_numbers[mFile];
-        mFile = dir + "/" + mFile;
+        mFile = dir + "/" + mFile;        
         if (!globals.revSeqNumbers[i]["children"]) {
             isSolutionFile = globals.revSeqNumbers[i]["isSolutionFile"];
             exercises.push({
@@ -120,7 +127,8 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
     exercises.sort(function(a, b) {
         return parseFloat(a.sequence_num) - parseFloat(b.sequence_num);
     });
-
+    
+    
     return exercises;
 };
 
@@ -148,13 +156,19 @@ export const parseNgMetaText = function(text: string) {
             return;
         }
         let tokens = line.split(':');
+        // console.log(tokens, "dfghjkjhg");
+        
         if (tokens.length < 2) {
             // parsed = null;
             return;
         }
         let lineKey = tokens[0].trim();
+        
         let lineValue = tokens.slice(1).join(':').trim();
+        ;
+        
         parsed[ lineKey ] = lineValue;
+
     });
     return parsed;
 };
@@ -221,7 +235,7 @@ let _getExerciseInfo = function(path, sequence_num, isSolutionFile) {
 };
 
 
-export const getAllExercises = function(exercises) {
+export const getAllExercises = function(exercises) {    
     let exerciseInfos = [];
     for (let i = 0; i < exercises.length; i++) {
         let info = _getExerciseInfo(exercises[i].path, exercises[i].sequence_num, exercises[i].isSolutionFile);
@@ -232,6 +246,8 @@ export const getAllExercises = function(exercises) {
         exerciseInfos.push(info);
         globals.allSlugs.push(info['slug']);
     }
+ 
+    
     return exerciseInfos;
 };
 
@@ -259,8 +275,11 @@ let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
 export const uploadImagesAndUpdateContent = () => {
     let exPromises = [];
     let exChildPromises = [];
+    
     for (var i = 0; i < globals.exercises.length; i++){
         let exercise = globals.exercises[i];
+       
+
         exPromises.push( _uploadContentImages(exercise, i).then( ( uploadedImages ) => {
         if(uploadedImages.length){
 

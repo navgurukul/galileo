@@ -28,7 +28,7 @@ import * as process from 'process';
 
 let showErrorAndExit = function(message:string) {
     console.log( colors.red.bold(message) );
-    console.log( colors.red("Fix the above error and re-run this script.") );
+    // console.log( colors.red("Fix the above error and re-run this script.") );
     process.exit();
 };
 
@@ -69,7 +69,7 @@ function generateUID() {
 }
 
 // Given the markdown of an image this returns the path of the image on Google Cloud Storage
-
+                                                                                                                                                                                                                                
 function parseAndUploadImage(imageText: string, sequence_num: string,path: string) {
 
     // get relative image path and image name
@@ -331,7 +331,7 @@ let validateCourseDirParam = function() {
         }
     }
     if (courseDir === undefined) {
-        showErrorAndExit("Course directory is not specified using the --courseDir parameter");
+        showErrorAndExit("Course directory is not specified using the --courseDir parameter, cheking");
     }
     courseDir = 'curriculum/' + courseDir;
 
@@ -340,7 +340,7 @@ let validateCourseDirParam = function() {
         return Promise.resolve();
     })
     .catch( (err) => {
-        showErrorAndExit("Course directory you have specified does not exist.");
+       return showErrorAndExit("Course directory you have specified does not exist.");
     });
 
 };

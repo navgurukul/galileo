@@ -26,7 +26,7 @@ let _nextSeqNum = (sequence_num) => {
     let tokens = num.split('.');
     if (tokens.length === 1) {
         return Number(num) + 1;
-    } else  {
+    } else {
         let numToSum = Number(Array(tokens[0].length).join('0') + '1');
         return Number(num) + numToSum;
     }
@@ -34,24 +34,24 @@ let _nextSeqNum = (sequence_num) => {
 // Validate if sequence numbers are in a proper sequence.
 // If they are not this will automatically end the script and show the error.
 
-export const validateSequenceNumber = function(exercises, depthLevel?) {
+export const validateSequenceNumber = function (exercises, depthLevel?) {
     if (!depthLevel) {
         depthLevel = 0;
     }
     let i = 0;
-    for(let i = 0; i < exercises.length; i++) {
-        if  (!exercises[i+1]) {
+    for (let i = 0; i < exercises.length; i++) {
+        if (!exercises[i + 1]) {
             continue;
         }
-        if (exercises[i+1].sequence_num !== _nextSeqNum(exercises[i].sequence_num)) {
+        if (exercises[i + 1].sequence_num !== _nextSeqNum(exercises[i].sequence_num)) {
             let msg = exercises[i].sequence_num + " and " + _nextSeqNum(exercises[i].sequence_num) +
                 " don't have sequential sequence numbers.";
             showErrorAndExit(msg);
         }
         if (exercises[i].childExercises.length > 0) {
-            let childExsValidated = validateSequenceNumber(exercises[i], depthLevel+1);
+            let childExsValidated = validateSequenceNumber(exercises[i], depthLevel + 1);
             if (!childExsValidated) {
-                showErrorAndExit("Child ecourseDirxercises of Sequence Number "
+                showErrorAndExit("Child courseDirxercises of Sequence Number "
                     + exercises[i].sequence_num + " are not in the sequential order.");
             }
         }
@@ -63,47 +63,44 @@ export const validateSequenceNumber = function(exercises, depthLevel?) {
 
 // Validate the course directory given in the parameters
 
-export const validateCourseDirParam = function() {
-
-    // Parse the process to look for `courseDir`
-    for (let i = 0; i < process.argv.length; i++){
-        if (process.argv[i] === '--courseDir') {
-            globals.courseDir = process.argv[i+1];
-        }
-    }
+export const validateCourseDirParam = function () {
     if (globals.courseDir === undefined) {
         showErrorAndExit("Course directory is not specified using the --courseDir parameter");
     }
     globals.courseDir = 'curriculum/' + globals.courseDir;
 
     // Check if `courseDir` is actually a directory
-    return fs.stat(globals.courseDir).then( (stat) => {
+    return fs.stat(globals.courseDir).then((stat) => {
         return Promise.resolve();
     })
-    .catch( (err) => {
-        showErrorAndExit("Course directory you have specified does not exist.");
-    });
+        .catch((err) => {
+           return showErrorAndExit("Course directory you have specified does not exist.");
+        });
 
 };
 
 
 // Validate and return the course info
 
-export const validateCourseInfo = function() {
+export const validateCourseInfo = function () {
     let courseInfoFile = globals.courseDir + '/info.md';
-    return fs.readFile(courseInfoFile, 'utf-8').then( (data) => {
+    
+    return fs.readFile(courseInfoFile, 'utf-8').then((data) => {
         let tokens = marked.lexer(data);
+       
+        
         let ngMetaBlock = tokens[0];
-        let courseInfo = parseNgMetaText(tokens[0]['text']);
+        let courseInfo = parseNgMetaText(tokens[0]['text']); 
+        
+        
         courseInfo['logo'] = courseInfo['logo'] ? courseInfo['logo'] : globals.defaultCourseLogo;
 
         courseInfo = Joi.attempt(courseInfo, courseInfoSchema);
         globals.courseData['info'] = courseInfo;
-
+     
         return Promise.resolve();
 
-    }).catch( (err) => {
-        console.log(err);
+    }).catch((err) => {
         showErrorAndExit("`info.md` has some problem. Check the above error to understand it better.");
     });
 };
