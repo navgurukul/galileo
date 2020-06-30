@@ -46,6 +46,7 @@ module.exports = {
         "facilitatorEmails": [
             "r@navgurukul.org",
             "a@navgurukul.org",
+            "komal@navgurukul.org",
             "rishabh@navgurukul.org"
         ],
         "defaultBatchId": 1,
