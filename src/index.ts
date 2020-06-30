@@ -116,7 +116,8 @@ const server = Server.init(serverConfigs, databaseConfig)
 
 
             console.log("Running server from parent :)");
-        } else {
+        } 
+        else {
             console.log("Not running the `server because it is not run through parent module.");
         }
     });

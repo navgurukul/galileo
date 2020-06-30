@@ -44,19 +44,20 @@ const Sentry = Configs.getSentryConfig();
 // 
 // Check if the --courseDir parameter is correct
 
-let p = validateCourseDirParam()
+export const p = validateCourseDirParam()
     .then(() => {
         // Check if the info.md file is correct
         return validateCourseInfo();
     })
-    .then(() => {
-        
+    .then(() => {            
         // Get a list of files and validate their sequence numbers
         //all the code related to info.md goes here.
         globals.sequence_numbers = getSequenceNumbers(globals.courseDir);
         globals.exercises = getCurriculumExerciseFiles(globals.courseDir);
         // validateSequenceNumber(globals.exercises);
         // Get the exercise content from the files
+        
+        
         globals.exercises = getAllExercises(globals.exercises);
         return Promise.resolve(globals.exercises);
     })
@@ -104,3 +105,4 @@ let p = validateCourseDirParam()
     });
 
 export default null;
+

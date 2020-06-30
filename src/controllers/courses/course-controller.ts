@@ -2,7 +2,8 @@ import * as Boom from "boom";
 import * as Hapi from "hapi";
 // import * as knex from "knex";
 
-
+// require newman in your project
+import * as newman from "newman"
 import database from "../../";
 import {
   getIsSolutionAvailable,
@@ -12,7 +13,6 @@ import {
   getUserRoles
 } from "../../helpers/courseHelper";
 import { manipulateResultSet } from "../../helpers/courseHelper";
-
 import { IServerConfigurations } from "../../configurations/index";
 import * as Configs from "../../configurations";
 var _ = require("underscore");
@@ -21,8 +21,9 @@ var _ = require("underscore");
 // } from "../../cliq";
 
 
+// import {courseDir} from "../../seed-courses/globals"
 
-
+var globals = require('../../seed-courses/globals')
 
 export default class CourseController {
   private configs: IServerConfigurations;
@@ -513,6 +514,69 @@ export default class CourseController {
         });
     });
   }
+  // update by admin from curriculum ....
+  public updateCourses(request, h) {
+    var course_name = (request.params.name);
+    return new Promise((resolve, reject) => {
+      database("user_roles")
+        .select("user_roles.roles")
+        .where({
+          user_id: request.user_id
+        })
+        .then((rows) => {
+          // here we getting the role of user 
+          const isAdmin =
+            rows.length > 0 && getUserRoles(rows).isAdmin === true
+              ? true
+              : false;
+          if (isAdmin === false) {
+            reject(
+              Boom.expectationFailed(
+                "only admin allowed to update course."
+              )
+            );
+            return Promise.resolve({ isAdmin: false });
+          } else {
+            return Promise.resolve({ isAdmin: true });
+          }
+
+        })
+        .then((response) => {
+          if (response.isAdmin === true) {
+            globals.courseDir = course_name
+            // call newman.run to pass `options` object and wait for callback
+            newman.run({
+              collection: require('../../seed-courses/index')
+            }, function (err) {
+              if (!err) {
+                resolve({
+                  update: true
+                });
+              }
+              else {
+                reject(
+                  Boom.expectationFailed(
+                    "Course directory you have specified does not exist."
+                  )
+                )
+              }
+
+            });
+
+          }
+          else {
+            reject(
+              Boom.expectationFailed(
+                "only admin allowed to update course"
+              )
+            )
+          }
+
+        })
+    })
+  }
+
+
 
   public deleteCourse(request, h) {
     return new Promise((resolve, reject) => {

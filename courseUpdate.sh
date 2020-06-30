@@ -1,4 +1,3 @@
-# TO BE RUN FROM ROOT DIRECTORY
 
 echo "COURSE : "$1" UPDATED"
 echo "(Unless Error Message is attached here.)"
