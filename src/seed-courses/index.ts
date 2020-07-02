@@ -10,6 +10,11 @@ import database from "../index";
 import * as process from "process";
 import * as Configs from "../configurations";
 
+const program = require('commander');
+program.option('-c, --courseDir <courseDir>', 'course directory')
+
+program.parse(process.argv);
+
 var globals = require("./globals");
 
 import {
@@ -43,6 +48,8 @@ import { resolve } from "dns";
 const Sentry = Configs.getSentryConfig();
 // 
 // Check if the --courseDir parameter is correct
+
+globals.courseDir = program.courseDir;
 
 export const p = validateCourseDirParam()
     .then(() => {
