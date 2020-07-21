@@ -526,7 +526,7 @@ export default class CourseController {
         .then((rows) => {
           // here we getting the role of user 
           const isAdmin =
-            rows.length > 0 && getUserRoles(rows).isAdmin === true
+            rows.length > 0 && (getUserRoles(rows).isAdmin === true || getUserRoles(rows).isFacilitator === true)
               ? true
               : false;
           if (isAdmin === false) {

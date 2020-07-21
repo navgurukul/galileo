@@ -49,7 +49,7 @@ const Sentry = Configs.getSentryConfig();
 // 
 // Check if the --courseDir parameter is correct
 
-globals.courseDir = program.courseDir;
+// globals.courseDir = program.courseDir; // their is no need of this line.
 
 export const p = validateCourseDirParam()
     .then(() => {
