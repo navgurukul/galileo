@@ -3,7 +3,7 @@ import * as Joi from "joi";
 import { IServerConfigurations } from "../../configurations";
 
 import UserController from "./user-controller";
-import { noteSchema, userSchema } from "./user-schemas";
+import { noteSchema, userSchema, languagePreferenceSchema } from "./user-schemas";
 import * as Boom from 'boom';
 
 export default function (server: Hapi.Server, serverConfigs: IServerConfigurations, database: any) {
@@ -288,6 +288,56 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             },
             tags: ['api'],
             handler: userController.getGitHubAccessUrl,
+        }
+    });
+
+    server.route({
+        method: 'POST',
+        path: '/users/{userId}/selected_language',
+        config: {
+            description: 'Select language according to the user preference.',
+            validate: {
+                params: {
+                    userId: Joi.number().required(),
+                },
+                payload: Joi.object({
+                    selected_language: Joi.string().required()
+                })
+            },
+            response: {
+                schema: {
+                    status: Joi.bool().required()
+                }
+            },
+            plugins: {
+                'hapi-swagger': {
+                    responses: {
+                        '201': {
+                            'description': 'successfully added selected language as prefered language.'
+                        }
+                    }
+                }
+            },
+            tags: ['api'],
+            handler: userController.addUpdatePreferedLanguage
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/users/{userId}/selected_language',
+        config: {
+            description: 'Get users prefred language by user Id.',
+            validate: {
+                params: {
+                    userId: Joi.number().required(),
+                }
+            },
+            response: {
+                schema: languagePreferenceSchema
+            },
+            tags: ['api'],
+            handler: userController.getPreferedLnaguageInfo,
         }
     });
 }

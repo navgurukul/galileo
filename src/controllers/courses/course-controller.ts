@@ -526,9 +526,7 @@ export default class CourseController {
         .then((rows) => {
           // here we getting the role of user 
           const isAdmin =
-            rows.length > 0 && getUserRoles(rows).isAdmin === true
-              ? true
-              : false;
+            rows.length > 0 && getUserRoles(rows).isAdmin === true ? true: false;
           if (isAdmin === false) {
             reject(
               Boom.expectationFailed(

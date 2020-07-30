@@ -48,8 +48,9 @@ import { resolve } from "dns";
 const Sentry = Configs.getSentryConfig();
 // 
 // Check if the --courseDir parameter is correct
-
-globals.courseDir = program.courseDir;
+if (program.courseDir) {
+    globals.courseDir = program.courseDir;
+}
 
 export const p = validateCourseDirParam()
     .then(() => {

@@ -35,3 +35,9 @@ export const userRoleSchema: Joi.ObjectSchema = Joi.object({
     mentor: Joi.allow(null),
     mentee: Joi.number().allow(null),
 });
+
+export const languagePreferenceSchema: Joi.ObjectSchema = Joi.object({
+    id: Joi.number(),
+    user_id: Joi.number(),
+    selected_language: Joi.string()
+});
