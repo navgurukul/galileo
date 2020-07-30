@@ -6,7 +6,7 @@ import { IServerConfigurations } from "../../configurations";
 // import { NotesModel } from "../../models/notes-model";
 
 import { UserModel } from "../../models/user-model";
-
+import { SelectLanguageModel } from "../../models/select-language-model";
 import * as fs from "fs";
 import * as Boom from "boom";   
 import * as nconf from "nconf";
@@ -28,12 +28,14 @@ export default class UserController {
     private configs: IServerConfigurations;
     private database: any;
     private userModel: UserModel;
+    private selectLanguageModel: SelectLanguageModel;
     // private notesModel: NotesModel;
 
     constructor(configs: IServerConfigurations, database: any) {
         this.database = database;
         this.configs = configs;
         this.userModel = new UserModel(this.configs);
+        this.selectLanguageModel = new SelectLanguageModel(this.configs);
         // this.notesModel = new NotesModel(this.configs);
 
 
@@ -362,7 +364,37 @@ export default class UserController {
     //     });
     // }
 
+    // Add or update users prefered language.
+    public addUpdatePreferedLanguage(request, h) {
+        const selectedLanguageObj = {
+            user_id: request.params.userId,
+            selected_language: request.payload.selected_language
+        }
+        
+        return new Promise((resolve, rejects) => {
+            this.selectLanguageModel.upsert(selectedLanguageObj, { 'user_id': selectedLanguageObj['user_id'] }, true)
+            .then(() => {
+                resolve({
+                    'status': true 
+                });
+            }).catch(() => {
+                resolve({
+                    'status': false
+                });
+            });
+        });
+    }
 
+    // get users prefered language.
+    public getPreferedLnaguageInfo(request, h) {
+        let user_id = request.params.userId;
+        return new Promise((resolve, reject) => {
+            this.selectLanguageModel.findOne({ user_id: user_id }).then(obj => {
+                resolve(obj);
+            });
+        });
+    }
+    
     public getGitHubAccessUrl(request, h) {
         const email = request.params.email;
         const githubAccessKey = serverConfigs.githubAccess;

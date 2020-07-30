@@ -7,7 +7,7 @@ var courseDir, // Path of the course directory relative to this file
     revSeqNumbers = {},
     toReadFiles = [],
     course_id,
-    multi_languge = ["hi","en"],
+    multi_languge = ["hi", "en", "te", "ta"],
     defaultCourseLogo = "http://navgurukul.org/img/sqlogo.jpg";
 
 export {

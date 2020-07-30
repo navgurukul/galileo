@@ -199,51 +199,58 @@ let _getExerciseInfo = function (path, sequence_num, isSolutionFile) {
     let exInfo = {};
     let content_data = {};
     let github_url = {};
+    let Path = path;
     _.each(globals.multi_languge, (lang) => {
         if (lang !== "hi") {
-            path = path.replace('.md', `.${lang}.md`)
+            path = Path.replace('.md', `.${lang}.md`) 
         }
 
-        let data = fs.readFileSync(path, 'utf-8');
-        let tokens = marked.lexer(data);
-        let gitFile = path.replace('curriculum/', '');
-        
-        if (tokens.length < 1) {
-            showErrorAndExit("No proper markdown content found in " + path);
-        }
-
-        if (lang === "hi") {
-            let fileName = _getFileName(path);
-
-            if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
-                exInfo['name'] = fileName;
-                exInfo['completionMethod'] = 'manual';
+        if(!fs.existsSync(path)) { 
+            content_data[`${lang}_text`] = null;
+            github_url[`${lang}_text`] = null;
+        } else {
+            let data = fs.readFileSync(path, 'utf-8');
+            let tokens = marked.lexer(data);
+            let gitFile = path.replace('curriculum/', '');
+            
+            if (tokens.length < 1) {
+                showErrorAndExit("No proper markdown content found in " + path);
             }
-            else {
-                exInfo = parseNgMetaText(tokens[0]['text']);
-                try {
-                    if (exInfo['name'] === null || exInfo['name'] === undefined) {
-                        exInfo['name'] = fileName;
+    
+            if (lang === "hi") {
+                let fileName = _getFileName(path);
+    
+                if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
+                    exInfo['name'] = fileName;
+                    exInfo['completionMethod'] = 'manual';
+                }
+                else {
+                    exInfo = parseNgMetaText(tokens[0]['text']);
+                    try {
+                        if (exInfo['name'] === null || exInfo['name'] === undefined) {
+                            exInfo['name'] = fileName;
+                        }
+                    } catch {
+                        showErrorAndExit(`There is some error in ${path}`);
                     }
-                } catch {
-                    showErrorAndExit(`There is some error in ${path}`);
+    
+                    if (!exInfo['completionMethod']) {
+                        exInfo['completionMethod'] = 'peer';
+                    }
                 }
-
-                if (!exInfo['completionMethod']) {
-                    exInfo['completionMethod'] = 'peer';
-                }
+                exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
+                exInfo['slug'] = path.replace('curriculum/', '').replace('/', '__').replace('.md', '');
+                exInfo['sequence_num'] = sequence_num;
+                exInfo['path'] = path;
+                exInfo['isSolutionFile'] = isSolutionFile;
             }
-            exInfo = Joi.attempt(exInfo, exerciseInfoSchema);
-            exInfo['slug'] = path.replace('curriculum/', '').replace('/', '__').replace('.md', '');
-            exInfo['sequence_num'] = sequence_num;
-            exInfo['path'] = path;
-            exInfo['isSolutionFile'] = isSolutionFile;
+            content_data[`${lang}_text`] = data;
+            github_url[`${lang}_text`] = newtonGithubUrl + gitFile;
         }
-        content_data[`${lang}_text`] = data;
-        github_url[`${lang}_text`] = newtonGithubUrl + gitFile;
     });
     exInfo['content'] = content_data;
     exInfo['github_link'] = github_url;
+    Path = path;
     return exInfo;
 };
 
