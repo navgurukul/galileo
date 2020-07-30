@@ -81,7 +81,7 @@ export const getSequenceNumbers = function (dir: string, callType?: string) {
 
 // Get the nested list of all the exercises
 export const getCurriculumExerciseFiles = function (dir: string, callType?: string) {
-    // console.log(dir, 'sdijij');
+  
 
     let files = [];
     let exercises = [];
