@@ -147,7 +147,7 @@ export default class CourseController {
           .orderBy("exercises.sequence_num", "asc");
       } else {
         let xyz =
-          "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+          "(SELECT id FROM submissions WHERE exercise_id = exercises.id " +
           "AND user_id = " +
           request.user_id +
           " ORDER BY state ASC LIMIT 1)";
@@ -208,8 +208,11 @@ export default class CourseController {
           }
         }
         resolve({ data: exercises });
-      });
+      }).catch((err) => {
+        console.log(err)
+      })
     });
+
   }
 
   public getExerciseById(request, h) {
@@ -279,7 +282,7 @@ export default class CourseController {
         });
       } else {
         let xyz =
-          "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+          "(SELECT id FROM submissions WHERE exercise_id = exercises.id " +
           "AND user_id = " +
           request.user_id +
           "  ORDER BY state ASC LIMIT 1)";
@@ -529,7 +532,7 @@ export default class CourseController {
             rows.length > 0 && getUserRoles(rows).isAdmin === true
               ? true
               : false;
-          if (isAdmin === false) {
+              if (isAdmin === false) {
             reject(
               Boom.expectationFailed(
                 "only admin allowed to update course."
