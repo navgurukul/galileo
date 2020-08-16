@@ -147,7 +147,7 @@ export default class CourseController {
           .orderBy("exercises.sequence_num", "asc");
       } else {
         let xyz =
-          "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+          "(SELECT id FROM submissions WHERE exercise_id = exercises.id " +
           "AND user_id = " +
           request.user_id +
           " ORDER BY state ASC LIMIT 1)";
@@ -176,7 +176,6 @@ export default class CourseController {
           .where({ "exercises.course_id": request.params.courseId })
           .orderBy("exercises.sequence_num", "asc");
       }
-
       query.then(rows => {
         let exercise = rows[0];
         for (let i = 0; i < rows.length; i++) {
@@ -208,7 +207,9 @@ export default class CourseController {
           }
         }
         resolve({ data: exercises });
-      });
+      }).catch((err) => {
+        console.log(err)
+      })
     });
   }
 
@@ -273,13 +274,12 @@ export default class CourseController {
           )
           .where({ "exercises.slug": request.query.slug });
         exerciseQuery.then(rows => {
+          rows[0].content = rows[0].content.match(/hi_text/g) ? JSON.parse(rows[0].content): rows[0].content;
           resolve(rows[0]);
-
-
         });
       } else {
         let xyz =
-          "(SELECT max(submissions.id) FROM submissions WHERE exercise_id = exercises.id " +
+          "(SELECT id FROM submissions WHERE exercise_id = exercises.id " +
           "AND user_id = " +
           request.user_id +
           "  ORDER BY state ASC LIMIT 1)";
@@ -526,7 +526,7 @@ export default class CourseController {
         .then((rows) => {
           // here we getting the role of user 
           const isAdmin =
-            rows.length > 0 && getUserRoles(rows).isAdmin === true ? true: false;
+            rows.length > 0 && getUserRoles(rows).isAdmin === true ? true : false;
           if (isAdmin === false) {
             reject(
               Boom.expectationFailed(

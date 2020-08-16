@@ -208,15 +208,24 @@ export default class UserController {
                                 });
                         }
                     })
-                    .then((user) => {
-
+                    .then( async (user) => {
+                        
+                        const selected_language =  await database('language_preference')
+                            .select("*")
+                            .where({'user_id': user.id})
+                        return {
+                            user,
+                            selected_language
+                        }
+                    })
+                    .then((userDetails) => {
+                        const { selected_language, user } = userDetails;
                         resolve({
                             'user': user,
-                            'jwt': this.userModel.getJWTToken(user)
+                            'jwt': this.userModel.getJWTToken(user),
+                            'selected_language': selected_language.length ? selected_language[0].selected_language : 'hi' 
                         });
-
-
-                    });
+                    })
 
             });
         });

@@ -46,7 +46,7 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
 
     server.route({
         method: 'POST',
-        path: '/updateCourses{name}',
+        path: '/updateCourses/{name}',
         config: {
             description: 'update the courses by Courses name',
             validate: {

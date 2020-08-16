@@ -30,7 +30,8 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
                     "user": userSchema,
                     "jwt": Joi.string().required()
                         .default("xxx.yyy.zzz")
-                        .description("Will authenticate all the future requests.")
+                        .description("Will authenticate all the future requests."),
+                    "selected_language": Joi.string()
                 })
             },
             plugins: {

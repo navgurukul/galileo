@@ -81,7 +81,7 @@ export const getSequenceNumbers = function (dir: string, callType?: string) {
 
 // Get the nested list of all the exercises
 export const getCurriculumExerciseFiles = function (dir: string, callType?: string) {
-  
+
 
     let files = [];
     let exercises = [];
@@ -202,24 +202,24 @@ let _getExerciseInfo = function (path, sequence_num, isSolutionFile) {
     let Path = path;
     _.each(globals.multi_languge, (lang) => {
         if (lang !== "hi") {
-            path = Path.replace('.md', `.${lang}.md`) 
+            path = Path.replace('.md', `.${lang}.md`)
         }
 
-        if(!fs.existsSync(path)) { 
+        if (!fs.existsSync(path)) {
             content_data[`${lang}_text`] = null;
             github_url[`${lang}_text`] = null;
         } else {
             let data = fs.readFileSync(path, 'utf-8');
             let tokens = marked.lexer(data);
             let gitFile = path.replace('curriculum/', '');
-            
+
             if (tokens.length < 1) {
                 showErrorAndExit("No proper markdown content found in " + path);
             }
-    
+
             if (lang === "hi") {
                 let fileName = _getFileName(path);
-    
+
                 if (tokens[0].type !== 'code' || tokens[0].lang !== 'ngMeta') {
                     exInfo['name'] = fileName;
                     exInfo['completionMethod'] = 'manual';
@@ -233,7 +233,7 @@ let _getExerciseInfo = function (path, sequence_num, isSolutionFile) {
                     } catch {
                         showErrorAndExit(`There is some error in ${path}`);
                     }
-    
+
                     if (!exInfo['completionMethod']) {
                         exInfo['completionMethod'] = 'peer';
                     }
@@ -273,19 +273,21 @@ export const getAllExercises = function (exercises) {
 
 let _uploadContentImages = (exercise, iIndex, parentSequenceNum?, jIndex?) => {
     let uploadPromises = [];
-    let images = exercise['content']['hi_text'].match(/!\[(.*?)\]\((.*?)\)/g);
-    if (images != null) {
-        for (let j = 0; j < images.length; j++) {
-            let sequence_num;
-            if (parentSequenceNum) {
-                sequence_num = parentSequenceNum + '/' + exercise['sequence_num'];
-            }
-            else {
-                sequence_num = exercise['sequence_num'];
-            }
-            let img = parseAndUploadImage(images[j], sequence_num, exercise['path'], iIndex, jIndex);
+    if (exercise['content']['hi_text']) {
+        let images = exercise['content']['hi_text'].match(/!\[(.*?)\]\((.*?)\)/g);
+        if (images != null) {
+            for (let j = 0; j < images.length; j++) {
+                let sequence_num;
+                if (parentSequenceNum) {
+                    sequence_num = parentSequenceNum + '/' + exercise['sequence_num'];
+                }
+                else {
+                    sequence_num = exercise['sequence_num'];
+                }
+                let img = parseAndUploadImage(images[j], sequence_num, exercise['path'], iIndex, jIndex);
 
-            uploadPromises.push(img);
+                uploadPromises.push(img);
+            }
         }
     }
     return Promise.all(uploadPromises);
@@ -320,7 +322,7 @@ export const uploadImagesAndUpdateContent = () => {
                         let iIndex, jIndex, content;
                         iIndex = uploadedImages[0].iIndex;
                         jIndex = uploadedImages[0].jIndex;
-                        for(let exContent in childExercises[jIndex]['content']) {
+                        for (let exContent in childExercises[jIndex]['content']) {
                             content = childExercises[jIndex]['content'][exContent];
                             globals.exercises[iIndex]['childExercises'][jIndex]['content'][exContent] = updateContentWithImageLinks(uploadedImages, content);
                         }
