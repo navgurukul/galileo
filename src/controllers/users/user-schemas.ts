@@ -10,17 +10,10 @@ export const userSchema: Joi.ObjectSchema = Joi.object({
     isAdmin: Joi.bool(),
     isAlumni: Joi.bool().allow(null).default(false),
     center: Joi.string().allow(null),
+    created_at: Joi.date().allow(null),
     github_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?github.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
     linkedin_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?linkedin.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri(),
     medium_link: Joi.string().regex(/(ftp|http|https):\/\/?(?:www\.)?medium.com(\w+:{0,1}\w*@)?(\S+)(:([0-9])+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/).allow(null).uri()
-});
-
-export const noteSchema: Joi.ObjectSchema = Joi.object({
-    id: Joi.number().required(),
-    text: Joi.string().required(),
-    created_at: Joi.date().required(),
-    name: Joi.string().required(),
-  
 });
 
 
