@@ -246,44 +246,6 @@ let getCurriculumExerciseFiles = function(dir: string, callType?: string){
 // Eg. if 1.2 is given this will give 1.3.
 //     if 1 is given this will give 2
 
-let _nextSeqNum = function (sequence_num) {
-    let num = String(sequence_num);
-    let tokens = num.split('.');
-    if (tokens.length === 1) {
-        return Number(num) + 1;
-    } else  {
-        let numToSum = Number(Array(tokens[0].length).join('0') + '1');
-        return Number(num) + numToSum;
-    }
-};
-
-// Validate if sequence numbers are in a proper sequence.
-// If they are not this will automatically end the script and show the error.
-
-let validateSequenceNumber = function(exercises, depthLevel?) {
-    if (!depthLevel) {
-        depthLevel = 0;
-    }
-    let i = 0;
-    for(let i = 0; i < exercises.length; i++) {
-        if  (!exercises[i+1]) {
-            continue;
-        }
-        if (exercises[i+1].sequence_num !== _nextSeqNum(exercises[i].sequence_num)) {
-            let msg = exercises[i].sequence_num + " and " + _nextSeqNum(exercises[i].sequence_num) +
-                " don't have sequential sequence numbers.";
-            showErrorAndExit(msg);
-        }
-        if (exercises[i].childExercises.length > 0) {
-            let childExsValidated = validateSequenceNumber(exercises[i], depthLevel+1);
-            if (!childExsValidated) {
-                showErrorAndExit("Child exercises of Sequence Number " + exercises[i].sequence_num + " are not in the sequential order.");
-            }
-        }
-    }
-    return true;
-};
-
 // Method to parse a text block which is assumed to have ky value pairs like we decided in the ngMeta code block
 // These ngMeta text blocks will be used to store some semantic meta information about a mark down curriculum.
 // It will look something like this:
@@ -584,7 +546,6 @@ validateCourseDirParam()
     // Get a list of files and validate their sequence numbers
     sequence_numbers = getSequenceNumbers(courseDir);
     exercises = getCurriculumExerciseFiles(courseDir);
-    // validateSequenceNumber(exercises);
     // Get the exercise content from the files
     exercises = getAllExercises(exercises);
     return Promise.resolve(exercises);

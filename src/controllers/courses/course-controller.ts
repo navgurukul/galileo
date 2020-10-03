@@ -49,7 +49,6 @@ export default class CourseController {
           "courses.type",
           "courses.logo",
           "courses.short_description",
-          "courses.sequence_num"
         )
         .then(rows => {
           allAvailableCourses = rows;

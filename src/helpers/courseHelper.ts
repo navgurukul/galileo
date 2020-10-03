@@ -178,7 +178,6 @@ export const isStudentEligibleToEnroll = async function(student_id, course_id) {
             "courses.type",
             "courses.logo",
             "courses.short_description",
-            "courses.sequence_num"
         )
         .where(
             "courses.id",

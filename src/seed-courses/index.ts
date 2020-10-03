@@ -61,7 +61,6 @@ export const p = validateCourseDirParam()
         //all the code related to info.md goes here.
         globals.sequence_numbers = getSequenceNumbers(globals.courseDir);
         globals.exercises = getCurriculumExerciseFiles(globals.courseDir);
-        // validateSequenceNumber(globals.exercises);
         // Get the exercise content from the files
         
         
