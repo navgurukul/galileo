@@ -6,7 +6,6 @@ export const courseSchema: Joi.ObjectSchema = Joi.object({
     type: Joi.string(),
     logo: Joi.string(),
     short_description: Joi.string(),
-    sequence_num: Joi.number().allow(null)
 });
 
 export const topicSchema: Joi.ObjectSchema = Joi.object({
@@ -63,8 +62,3 @@ let _exerciseSchema: Joi.ObjectSchema = Joi.object({
 }).unknown();
 
 export const exerciseSchema = _exerciseSchema.keys({childExercises: Joi.array().items(_exerciseSchema)});
-
-export const courseSequenceSchema: Joi.ObjectSchema = Joi.object({
-    id: Joi.number().required(),
-    sequence_num: Joi.number().required(),
-});

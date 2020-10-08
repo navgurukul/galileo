@@ -4,7 +4,6 @@ import * as Joi from "joi";
 export const courseInfoSchema:Joi.ObjectSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().allow('html', 'js', 'python').required(),
-    days_to_complete: Joi.number().required().strict(false),
     short_description: Joi.string().required(),
     logo: Joi.string(),
 });

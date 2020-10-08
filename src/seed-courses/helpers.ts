@@ -140,7 +140,6 @@ export const getCurriculumExerciseFiles = function(dir: string, callType?: strin
 ```ngMeta
 name: Become a HTML/CSS Ninja
 type: html
-days_to_complete: 20
 short_description: Build any web page under the sun after taking up this course :)
 ```
 */

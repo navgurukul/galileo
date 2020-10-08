@@ -140,27 +140,19 @@ export const addOrUpdateCourse = function() {
             return Promise.resolve(null);
         }
     }).then( (row) => {
-        return database('courses').select(database.raw('MAX(sequence_num) as sequence_num'))
-            .then((rows)=>{
-                let newSequenceNum = rows[0].sequence_num || 0;
-                newSequenceNum++;
-                return Promise.resolve(newSequenceNum);
-            }).then( (newSequenceNum) => {
                 if (row == null) {
                     return database('courses').insert({
                         'type': globals.courseData['info']['type'],
                         'name': globals.courseData['info']['name'],
                         'logo': globals.courseData['info']['logo'],
                         'short_description': globals.courseData['info']['short_description'],
-                        'days_to_complete': globals.courseData['info']['days_to_complete'],
-                        'sequence_num': newSequenceNum,
                         // 'notes': globals.courseData['notes'],
                     })
                     .then( (rows) => {
                         return Promise.resolve(rows[0]);
                     });
                 } else {
-                    const { id:course_id, sequence_num } = row;
+                    const { id:course_id } = row;
 
                     return database('courses')
                             .where({ 'name': globals.courseData['info']['name'] })
@@ -168,16 +160,11 @@ export const addOrUpdateCourse = function() {
                                 // Not updating `type` and `name` as assuming they won't change
                                 'logo': globals.courseData['info']['logo'],
                                 'short_description': globals.courseData['info']['short_description'],
-                                'days_to_complete': globals.courseData['info']['days_to_complete'],
-                                // Updating course sequence_num as maximum of existing sequence_num+1
-                                // when it is null or else just leave it.
-                                'sequence_num': sequence_num? sequence_num:newSequenceNum,
                             })
                             .then( () => {
                                 return Promise.resolve(course_id);
                             });
                 }
-            });
     });
 };
 
