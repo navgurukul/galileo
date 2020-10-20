@@ -12,7 +12,7 @@ deploy:
   cleanup: false
   keep_history: true
   strategy: git
-  local_dir: out
+  local_dir: build
   on:
     branch: master
   edge: true
