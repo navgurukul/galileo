@@ -50,6 +50,7 @@ export default class CourseController {
           "courses.logo",
           "courses.short_description",
         )
+        .where("courses.name", "not like", "%tars%")
         .then(rows => {
           allAvailableCourses = rows;
           return Promise.resolve();
