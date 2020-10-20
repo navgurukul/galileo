@@ -24,6 +24,7 @@ class CourseController {
             let enrolledCourses = [], allAvailableCourses = [], completedCourses = [];
             let availableQ = __1.default("courses")
                 .select("courses.id", "courses.name", "courses.type", "courses.logo", "courses.short_description")
+                .where("courses.name", "not like", "%tars%")
                 .then(rows => {
                 allAvailableCourses = rows;
                 return Promise.resolve();
