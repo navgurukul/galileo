@@ -16,7 +16,7 @@
   "scripts": {
     "tsc": "tsc",
     "tsc-watch": "tsc -w",
-    "build": "NODE_ENV=production gulp build && cp .env build/",
+    "build": "NODE_ENV=production gulp build",
     "start": "node build/src/index.js",
     "setup": "npm install & typings install",
     "watch": "nodemon --watch build/src build/src/index.js"
