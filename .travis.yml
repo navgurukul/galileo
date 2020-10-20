@@ -1,0 +1,18 @@
+language: node_js
+os: linux
+dist: bionic
+node_js:
+  12
+env:
+  global:
+    secure: ZFqIY6D0nY5wJ5RxAi9zpGGp1cD9aSmpTNNwmqy0/8imUKBaDKmFgRJ+NqRFdI9Xz4aZ89HssGqpLjQkvubhFIwSpBD+4c6zSZs/6CLohd1iSK7Nv255DSlRI8Wwmn3n8sJ2j6mSNn/Wqdg5LdJVZUQezcE3YX/t1Z6dM+o0WrQ1lxbGnkUC2XYYq2ZwuX0LENkoMrPLLSZY4Qx2C1/NSoLsgw1OnCLx8z82fKmNLXsiellGsgsnUxgOvDIg7U5TzSRgBiIu2JVQJlV7l5DgHWvl4x/p+LV3IQL1Q/TA1toTB6E0wDknpFMvVsgOumq40yEMSSK9TeTb/BP/YlKN4G7/+EuVALnjSHLRtbz22j5diq7/pe7tSr+FwbtonIsT2q/L9dnIOohS18mdeaUF1h0rD+9AnalWOcov6hqOPK9LzgPUn/WSTXCksn7gDpkLg1EdChFk8IzUCsE+g0D4FSoLO/jaSztAuEYK5Hx894ek87oWM7wXlOUC8NnhsYolWRUDwVomLrziJ9EqARsxYMV2H0otdNj99lj0jKBRMV5WQmxzGEwjSqUJvQt2pKFnVSbuLMcRINAgGqHTKpjeQp1uZ8nXCPJpSZy9oUc3Q6MXfgX++lScWdoQ3y4O9k4qBVQJpufoZS8FluwLhAnCFrJLOxhWFomkRWzYOPI36ro=
+script: npm run build
+deploy:
+  provider: pages
+  cleanup: false
+  keep_history: true
+  strategy: git
+  local_dir: build
+  on:
+    branch: master
+  edge: true
