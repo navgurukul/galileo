@@ -56,6 +56,6 @@ export const validateCourseInfo = function () {
         return Promise.resolve();
 
     }).catch((err) => {
-        showErrorAndExit("`info.md` has some problem. Check the above error to understand it better.");
+        showErrorAndExit("`info.md` has some problem. Check the above error to understand it better."+err);
     });
 };

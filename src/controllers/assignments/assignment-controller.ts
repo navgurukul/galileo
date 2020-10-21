@@ -1044,8 +1044,7 @@ export default class AssignmentController {
                     "courses.name",
                     "courses.type",
                     "courses.logo",
-                    "courses.short_description",
-                    "courses.sequence_num"
+                    "courses.short_description"
                 )
                 .where(
                     "courses.id",

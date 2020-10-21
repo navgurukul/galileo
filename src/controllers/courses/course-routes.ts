@@ -8,8 +8,7 @@ import {
     enrolledCourseSchema,
     completedCoursesSchema,
     exerciseSchema,
-    topicSchema,
-    courseSequenceSchema,
+    topicSchema
 } from "./course-schemas";
 
 import { userRoleSchema } from "../users/user-schemas";
@@ -217,27 +216,6 @@ export default function (server: Hapi.Server, serverConfigs: IServerConfiguratio
             auth: 'jwt',
             tags: ['api'],
             handler: courseController.deleteCourse
-        }
-    });
-
-    server.route({
-        method: 'PUT',
-        path: '/courses/sequenceNum',
-        config: {
-            description: 'Updates the sequence number of all the courses.',
-            validate: {
-                payload: {
-                    courses: Joi.array().items(courseSequenceSchema)
-                }
-            },
-            response: {
-                schema: {
-                    "success": Joi.bool()
-                }
-            },
-            auth: 'jwt',
-            tags: ['api'],
-            handler: courseController.updateCourseSequence
         }
     });
 
